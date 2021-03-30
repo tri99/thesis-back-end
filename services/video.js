@@ -61,6 +61,16 @@ function saveVideo(newVideoDocument){
         });
     })
 }
+function findOneByName(nameVideo) {
+  return new Promise((resolve, reject) => {
+    return Video.findOne({ name: nameVideo })
+      .select("_id")
+      .exec((error, videoDocument) => {
+        if (error) return reject(error);
+        return resolve(videoDocument);
+      });
+  });
+}
 
 module.exports = {
   insertMany: insertMany,
@@ -68,4 +78,5 @@ module.exports = {
   getManyByArrayId: getManyByArrayId,
   createModel: createModel,
   saveVideo: saveVideo,
+  findOneByName: findOneByName,
 };

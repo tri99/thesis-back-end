@@ -22,6 +22,14 @@ module.exports = {
     TOKEN_NOT_FOUND: "TOKEN_NOT_FOUND",
     NOT_PERMISSION: "NOT_PERMISSION",
   },
+  response_message: {
+    the_video_has_been_uploaded_before_please_check_back:
+      "The video has been uploaded before, please check back",
+  },
+  upload_folder: "./../upload/",
+  video_folder: "videos/",
+  image_folder: "images/"
+  ,
   jwtKey: "NhetCaiKeyVoDay",
   algorithm: "HS512",
 };

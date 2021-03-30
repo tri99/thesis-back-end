@@ -8,8 +8,8 @@ const socketio = require("./socket");
 const IO = require("socket.io")(server);
 
 
-socketio.setIO(IO);
-socketio.connection();
+// socketio.setIO(IO);
+// socketio.connection();
 
 app.use(cors({credentials: true, origin: true}));
 
@@ -23,6 +23,7 @@ const mongo = require("./db/mongo");
 mongo.connectMongo();
 app.use(express.static('public'));
 
+app.use("/api/zones", require("./routes/zone")());
 
 server.listen(config.port, config.host, () => {
   console.log(1, `SERVER ON LISTENING: ${config.host}:${config.port}`);

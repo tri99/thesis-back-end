@@ -3,14 +3,19 @@ const zoneService = require("./../services/zone");
 
 async function insert(req, res){
     try {
-        const {name, videoArray, playlistArray, deviceArray, videoVolume} = req.body;
+        const {name} = req.body;
+        const videoArray = []
+        const playlistArray = [] 
+        const deviceArray = []
+        const videoVolume = 0
         const newZoneDocument = zoneService.createModel(
-          name,
           videoArray,
           playlistArray,
           deviceArray,
+          name,
           videoVolume
         );
+        console.log(newZoneDocument);
         await zoneService.insert(newZoneDocument);
         return res
           .status(config.status_code.OK)

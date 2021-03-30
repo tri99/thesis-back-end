@@ -2,6 +2,8 @@ const  videoService = require("./../services/video")
 
 const config = require("./../config/config");
 const audio_module = require("./../exports/audio-io");
+
+const handle = require("./../services/handle")
 async function insert(req, res){
     try {
         const {name, path, size, duration, tag} = req.body;
@@ -113,6 +115,54 @@ async function getInforVideo(req, res){
       .send({ message: error });
   }
 }
+
+async function upload(req,res){
+  try {
+    const duration = Number.parseInt(req.body.duration);
+    const video = req.file;
+    const nameVideo = handle.spliceExtention(video.originalname);
+    const videoDocument = await videoService.findOneByName(nameVideo);
+    if (videoDocument) {
+      await handle.removeFile(video.path);
+      return res.status(400).send({
+        message:
+          config.response_message
+            .the_video_has_been_uploaded_before_please_check_back,
+      });
+    }
+
+    let urlVideoGlobal = null;
+
+    const typeVideo = handle.getTypeFile(video.mimetype);
+    const signatureName = handle.getSignatureName();
+    const nameVideoInPath = signatureName + "." + typeVideo;
+    const pathVideoStorage = `${config.upload_folder}${video_folder}${nameVideoInPath}`;
+    await handle.moveFile(video.path, pathVideoStorage);
+
+    urlVideoGlobal = `${config.host}:${config.port}/${video_folder}${nameVideoInPath}`;
+    const newVideo = videoService.createModel(
+      nameVideo,
+      duration,
+      videoSize,
+      urlVideoGlobal,
+      []
+    );
+    await videoService.saveVideo(newVideo);
+
+    return res.status(200).send({
+      name: nameVideo,
+      path: urlVideoGlobal,
+      _id: newVideo._id,
+      duration: duration,
+    });
+  } catch (error) {
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
+
+
+
 
 module.exports = {
     insert: insert,

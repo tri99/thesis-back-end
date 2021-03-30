@@ -25,6 +25,6 @@ const zoneSchema = new Schema({
     }
 })
 
-const Zone = mongoose.Model("zone", zoneSchema);
+const Zone = mongoose.model("zone", zoneSchema);
 
 module.exports = Zone;

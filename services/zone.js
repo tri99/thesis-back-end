@@ -1,12 +1,12 @@
 const Zone = require("./../collections/zone");
 
-function createModel(videoArray, playlistArray, deviceArray, Name, videoVolume){
+function createModel(videoArray, playlistArray, deviceArray, name, videoVolume){
     let newZoneModel = new Zone({
       videoArray: videoArray,
       playlistArray: playlistArray,
       deviceArray: deviceArray,
-      Name: Name,
-      videoVolume: videoVolume
+      name: name,
+      videoVolume: videoVolume,
     });
     return newZoneModel;
 }
