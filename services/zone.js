@@ -22,11 +22,22 @@ function insert(newZoneDocument){
 
 function getById(_id){
     return new Promise ((resolve, reject) => {
-        Zone.find({_id:_id}).select().exec((error, zoneDocument) => {
+        Zone.findById(_id).select().exec((error, zoneDocument) => {
             if(error) return reject(error);
             return resolve(zoneDocument);
         })
     })
+}
+
+function getAll() {
+  return new Promise((resolve, reject) => {
+    Zone.find()
+      .select()
+      .exec((error, zoneDocument) => {
+        if (error) return reject(error);
+        return resolve(zoneDocument);
+      });
+  });
 }
 
 function deleteById(_id){
@@ -40,7 +51,7 @@ function deleteById(_id){
 
 function updateById(_id, videoArray, playlistArray, deviceArray, name){
     return new Promise((resolve, reject) => {
-        Zone.UpdateOne({_id: _id}, {name: name, videoArray: videoArray, playlistArray: playlistArray, deviceArray: deviceArray}).exec(error => {
+        Zone.updateOne({_id: _id}, {name: name, videoArray: videoArray, playlistArray: playlistArray, deviceArray: deviceArray}).exec(error => {
             if(error) reject(error);
             return resolve(error);
         })
@@ -55,10 +66,13 @@ function updateById(_id, videoArray, playlistArray, deviceArray, name){
  */
 function addVideoArray(audioZoneId, newVideos){
     return new Promise((resolve, reject) => {
-        Zone.UpdateOne({_id: audioZoneId}, {$addToSet: {videoArray: {$each: newVideos}}}).exec(error => {
-            if(error) reject(error);
-            return resolve(true);
-        })
+        Zone.updateOne(
+          { _id: audioZoneId },
+          { $addToSet: { videoArray: { $each: newVideos } } }
+        ).exec((error) => {
+          if (error) reject(error);
+          return resolve(true);
+        });
     })
 }
 
@@ -104,6 +118,7 @@ module.exports = {
   createModel: createModel,
   insert: insert,
   getById: getById,
+  getAll: getAll,
   updateById: updateById,
   deleteById: deleteById,
   addVideoArray: addVideoArray,

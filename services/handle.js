@@ -1,14 +1,18 @@
-const mm = require("music-metadata");
+// const mm = require("music-metadata");
 const fs = require("fs");
 const path = require("path");
 const config = require("./../config/config");
-const mongoose = require("mongoose");
-const sharp = require("sharp");
-const FormData = require("form-data");
-const request = require("request");
+// const mongoose = require("mongoose");
+// const sharp = require("sharp");
+// const FormData = require("form-data");
+// const request = require("request");
 const uuid = require("uuid");
 const jwt = require("./../utils/jwt");
 
+function spliceExtention(name) {
+  var fileName = path.parse(name).name;
+  return fileName;
+}
 
 function removeFile(path) {
   return new Promise((resolve, reject) => {
@@ -29,10 +33,11 @@ function moveFile(oldPath, newPath) {
 }
 
 function getTypeFile(typeFile) {
+  console.log(typeFile);
   const strings = typeFile.split("/");
 
-  if (strings[1] == "mpeg") {
-    strings[1] = "mp3";
+  if (strings[1] == "mp4") {
+    strings[1] = "mp4";
   } else if (strings[1] == "wave") {
     strings[1] = "wav";
   } else if (strings[1] == "x-flac") {
@@ -52,4 +57,5 @@ module.exports = {
   moveFile: moveFile,
   getTypeFile: getTypeFile,
   getSignatureName: getSignatureName,
+  spliceExtention: spliceExtention,
 };

@@ -53,9 +53,20 @@ async function getAll(req, res){
     }
 }
 
+async function getById(req, res) {
+  try {
+    const { deviceId } = req.body;
+    const deviceDocument = await deviceDocument.getById(deviceId);
+    return res.status(config.status_code.OK).send({ deviceId: deviceDocument });
+  } catch (error) {
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
 module.exports = {
   insert: insert,
   updateZoneDevice: updateZoneDevice,
-  deleteDevice: deviceService,
+  deleteDevice: deleteDevice,
   getAll: getAll,
+  getById: getById,
 };

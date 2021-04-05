@@ -136,10 +136,11 @@ async function upload(req,res){
     const typeVideo = handle.getTypeFile(video.mimetype);
     const signatureName = handle.getSignatureName();
     const nameVideoInPath = signatureName + "." + typeVideo;
-    const pathVideoStorage = `${config.upload_folder}${video_folder}${nameVideoInPath}`;
+    const pathVideoStorage = `${config.upload_folder}${config.video_folder}${nameVideoInPath}`;
+    const videoSize = video.size;
     await handle.moveFile(video.path, pathVideoStorage);
 
-    urlVideoGlobal = `${config.host}:${config.port}/${video_folder}${nameVideoInPath}`;
+    urlVideoGlobal = `${config.host}:${config.port}/${nameVideoInPath}`;
     const newVideo = videoService.createModel(
       nameVideo,
       duration,
@@ -156,6 +157,7 @@ async function upload(req,res){
       duration: duration,
     });
   } catch (error) {
+    console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }
 }
@@ -165,7 +167,11 @@ async function upload(req,res){
 
 
 module.exports = {
-    insert: insert,
-    deleteById: deleteById,
-    getManyByArrayId: getManyByArrayId
-}
+  insert: insert,
+  deleteById: deleteById,
+  getManyByArrayId: getManyByArrayId,
+  getInforVideo: getInforVideo,
+  playVideo: playVideo,
+  pauseVideo: pauseVideo,
+  upload: upload,
+};

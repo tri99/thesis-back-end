@@ -22,8 +22,12 @@ const config = require("./config/config");
 const mongo = require("./db/mongo");
 mongo.connectMongo();
 app.use(express.static('public'));
-
+app.use(express.static("upload/videos"));
 app.use("/api/zones", require("./routes/zone")());
+app.use("/api/videos", require("./routes/video")());
+// app.use("/api/devices", require("./routes/device")());
+// app.use("/api/playlists", require("./routes/playlist")());
+
 
 server.listen(config.port, config.host, () => {
   console.log(1, `SERVER ON LISTENING: ${config.host}:${config.port}`);

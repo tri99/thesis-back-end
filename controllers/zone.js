@@ -30,7 +30,8 @@ async function insert(req, res){
 
 async function updateById(req, res){
     try {
-        const { _id, videoArray, playlistArray, deviceArray, name } = req.body;
+        const {_id} = req.query;
+        const { videoArray, playlistArray, deviceArray, name } = req.body;
         await zoneService.updateById(
           _id,
           videoArray,
@@ -42,6 +43,7 @@ async function updateById(req, res){
             .status(config.status_code.OK)
             .send({ zone: true });
     } catch (error) {
+      console.log(error);
         return res
           .status(config.status_code.SERVER_ERROR)
           .send({ message: error });
@@ -50,7 +52,7 @@ async function updateById(req, res){
 
 async function deleteById(req, res) {
   try {
-    const { _id } = req.body;
+    const { _id } = req.query;
     await zoneService.deleteById(_id);
     return res.status(config.status_code.OK).send({ zone: true });
   } catch (error) {
@@ -60,8 +62,18 @@ async function deleteById(req, res) {
 
 async function getById(req, res) {
   try {
-    const { _id } = req.body;
+    const { _id } = req.query;
     const newZoneDocument = await zoneService.getById(_id);
+    return res.status(config.status_code.OK).send({ zone: newZoneDocument });
+  } catch (error) {
+    console.log(error);
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
+async function getAll(req, res) {
+  try {
+    const newZoneDocument = await zoneService.getAll();
     return res.status(config.status_code.OK).send({ zone: newZoneDocument });
   } catch (error) {
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
@@ -71,6 +83,7 @@ async function getById(req, res) {
 module.exports = {
   insert: insert,
   getById: getById,
+  getAll: getAll,
   deleteById: deleteById,
   updateById: updateById
 }

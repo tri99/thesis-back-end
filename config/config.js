@@ -26,7 +26,7 @@ module.exports = {
     the_video_has_been_uploaded_before_please_check_back:
       "The video has been uploaded before, please check back",
   },
-  upload_folder: "./../upload/",
+  upload_folder: "./upload/",
   video_folder: "videos/",
   image_folder: "images/"
   ,
