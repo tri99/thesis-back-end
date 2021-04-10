@@ -52,10 +52,18 @@ function getSignatureName() {
   return uuid.v4();
 }
 
+function getPathInURL(url, without) {
+  const lengthWithout = without.length;
+  const lengthURL = url.length;
+  const path = url.substr(lengthWithout, lengthURL).trim();
+  return path;
+}
+
 module.exports = {
   removeFile: removeFile,
   moveFile: moveFile,
   getTypeFile: getTypeFile,
   getSignatureName: getSignatureName,
   spliceExtention: spliceExtention,
+  getPathInURL: getPathInURL,
 };

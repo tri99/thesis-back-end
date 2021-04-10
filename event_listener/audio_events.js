@@ -88,10 +88,7 @@ function infor_video(event_name, socket) {
     try {
       infor["deviceId"] = socket.device_id;
       const zoneId = infor["zoneId"]
-      SocketService.getIO().emit(
-        `/recive/update/${zoneId}/infor-picture`,
-        infor
-      );
+      socketService.getIO().emit(`/recive/update/${zoneId}/infor-video`, infor);
       return;
     } catch (error) {
       return;

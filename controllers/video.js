@@ -21,15 +21,7 @@ async function insert(req, res){
     }
 }
 
-async function deleteById(req, res){
-    try {
-        const {videoId} = req.body
-        await videoService.deleteDocument(videoId);
-        return res.status(status_code.OK).send({video: true});
-    } catch (error) {
-        return res.status(status_code.SERVER_ERROR).send({message: error})
-    }
-}
+
 
 async function getManyByArrayId(req, res){
     try {
@@ -39,65 +31,6 @@ async function getManyByArrayId(req, res){
     } catch (error) {
         return res.status(config.status_code.SERVER_ERROR).send({message: error})
     }
-}
-
-function playVideo(req, res) {
-  try {
-    const { zoneId, videoId, deviceArray } = req.body;
-    const data_to_send = {
-      to: zoneId,
-      videoId: videoId,
-    };
-    for (let index = 0; index < deviceArray.length; index++) {
-      audio_module
-        .get_audio_io()
-        .to(deviceArray[index])
-        .emit("play-video", data_to_send);
-    }
-    return res.status(200).send({ result: 0 });
-  } catch (error) {
-    return res.status(400).send({ result: 1 });
-  }
-}
-
-function pauseVideo(req, res) {
-  try {
-    const { zoneId, videoId, deviceArray } = req.body;
-    const data_to_send = {
-      to: zoneId,
-      videoId: videoId,
-    };
-    for (let index = 0; index < deviceArray.length; index++) {
-      audio_module
-        .get_audio_io()
-        .to(deviceArray[index])
-        .emit("pause-video", data_to_send);
-    }
-    return res.status(200).send({ result: 0 });
-  } catch (error) {
-    return res.status(400).send({ result: 1 });
-  }
-}
-
-function volumeVideo(req, res) {
-  try {
-    const { zoneId, videoId, deviceArray, volume } = req.body;
-    const data_to_send = {
-      to: zoneId,
-      videoId: videoId,
-      volume: Number.parseInt(volume),
-    };
-    for (let index = 0; index < deviceArray.length; index++) {
-      audio_module
-        .get_audio_io()
-        .to(deviceArray[index])
-        .emit("volume-video", data_to_send);
-    }
-    // audio_module.get_audio_io().to(data_to_send.to).emit("volume-video", data_to_send);
-    return res.status(200).send({ result: 0 });
-  } catch (error) {
-    return res.status(400).send({ result: 1 });
-  }
 }
 
 async function getInforVideo(req, res){
@@ -119,6 +52,7 @@ async function getInforVideo(req, res){
 async function upload(req,res){
   try {
     const duration = Number.parseInt(req.body.duration);
+    const tags = req.body.tags;
     const video = req.file;
     const nameVideo = handle.spliceExtention(video.originalname);
     const videoDocument = await videoService.findOneByName(nameVideo);
@@ -146,7 +80,7 @@ async function upload(req,res){
       duration,
       videoSize,
       urlVideoGlobal,
-      []
+      tags
     );
     await videoService.saveVideo(newVideo);
 
@@ -162,7 +96,28 @@ async function upload(req,res){
   }
 }
 
-
+async function deleteById(req, res) {
+  try {
+    const videoId = req.params.id;
+    const videoDocument = await videoService.findOneById(videoId);
+    if(!videoDocument){
+      return res
+        .status(403)
+        .send({
+          message:
+            config.status_message.SOMETHING_WRONG
+        });
+    }
+    const withoutUri = `${config.host}:${config.port}/`;
+    const pathVideoInURL = handle.getPathInURL(videoDocument.path, withoutUri);
+    const pathVideoStorage = `${config.upload_folder}${config.video_folder}${pathVideoInURL}`;
+    await handle.removeFile(pathVideoStorage);
+    await videoService.deleteDocument(videoId);
+    return res.status(config.status_code.OK).send({ video: true });
+  } catch (error) {
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
 
 
 
@@ -171,7 +126,5 @@ module.exports = {
   deleteById: deleteById,
   getManyByArrayId: getManyByArrayId,
   getInforVideo: getInforVideo,
-  playVideo: playVideo,
-  pauseVideo: pauseVideo,
   upload: upload,
 };

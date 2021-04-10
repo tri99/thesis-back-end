@@ -21,6 +21,7 @@ module.exports = {
     NOT_FOUND: "NOT_FOUND",
     TOKEN_NOT_FOUND: "TOKEN_NOT_FOUND",
     NOT_PERMISSION: "NOT_PERMISSION",
+    SOMETHING_WRONG: "SOMETHING_WRONG"
   },
   response_message: {
     the_video_has_been_uploaded_before_please_check_back:

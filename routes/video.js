@@ -6,8 +6,6 @@ module.exports = () => {
     // router.post("/insert-video", videoController.insert);
     router.post("/upload-video",fileUpload.catchErrorVideo(), videoController.upload)
     router.get("/get-many-by-ids", videoController.getManyByArrayId);
-    router.delete("/delete-by-id", videoController.deleteById);
-    router.post("/play-video", videoController.playVideo);
-    router.post("/pause-video", videoController.pauseVideo);
+    router.delete("/:id", videoController.deleteById);
     return router
 }
