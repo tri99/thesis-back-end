@@ -33,6 +33,15 @@ async function getManyByArrayId(req, res){
     }
 }
 
+async function getAll(req, res){
+  try {
+    const videoDocument = await videoService.findAll();
+    return res.status(config.status_code.OK).send({ video: videoDocument });
+  } catch (error) {
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
 async function getInforVideo(req, res){
   try {
     const {zoneId} = req.body;
@@ -127,4 +136,5 @@ module.exports = {
   getManyByArrayId: getManyByArrayId,
   getInforVideo: getInforVideo,
   upload: upload,
+  getAll: getAll,
 };

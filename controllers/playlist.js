@@ -44,6 +44,16 @@ async function getManyByArrayId(req, res){
     }
 }
 
+// async function getManyByArrayZoneId(req, res) {
+//   try {
+//     const { zoneId } = req.query;
+//     const playlistArrayIds = await playlistService.getManyByArrayId(playListIds);
+//     return res.status(config.status_code.OK).send({ playlist: playlistArray });
+//   } catch (error) {
+//     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+//   }
+// }
+
 async function updateById(req, res) {
   try {
     const { playlistId, mediaArray } = req.body;
@@ -53,6 +63,7 @@ async function updateById(req, res) {
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }
 }
+
 
 async function deleteById(req, res) {
   try {

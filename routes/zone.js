@@ -3,10 +3,25 @@ const router = require("express").Router();
 const zoneController = require("./../controllers/zone");
 
 module.exports = () => {
-    router.post("/create-zone", zoneController.insert);
-    router.get("/:id", zoneController.getById);
-    router.get("/", zoneController.getAll);
-    router.delete("/:id", zoneController.deleteById);
-    router.put("/:id", zoneController.updateById);
-    return router;
+  /**
+   *  @param {String} name
+   */
+  router.post("/create-zone", zoneController.insert);
+  /**
+   *  @param {String} _id
+   */
+  router.get("/:id", zoneController.getById);
+  router.get("/", zoneController.getAll);
+  /**
+   *  @param {String} name
+   */
+  router.delete("/:id", zoneController.deleteById);
+  /**
+   *
+   *@param {String} _id
+   *@param {String} name
+   *@param  {Array}  videoArray[{_id:stirng, path: String, duration: Number, size: Number}], playlistArray["String"], deviceArray["String"]
+   */
+  router.put("/:id", zoneController.updateById);
+  return router;
 }

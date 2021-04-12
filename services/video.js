@@ -71,6 +71,17 @@ function findOneById(videoId) {
   });
 }
 
+function findAll() {
+  return new Promise((resolve, reject) => {
+    return Video.find()
+      .select()
+      .exec((error, videoDocument) => {
+        if (error) return reject(error);
+        return resolve(videoDocument);
+      });
+  });
+}
+
 function findOneByName(nameVideo) {
   return new Promise((resolve, reject) => {
     return Video.findOne({ name: nameVideo })
@@ -90,4 +101,5 @@ module.exports = {
   saveVideo: saveVideo,
   findOneByName: findOneByName,
   findOneById: findOneById,
+  findAll: findAll,
 };

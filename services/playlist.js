@@ -26,6 +26,21 @@ function getAll(){
         })
     })
 }
+/**
+ * 
+ * @param {String} zoneId
+ */
+// function getManyByZoneId(zoneId){
+//     return new Promise((resolve, reject) => {
+//         Playlist.find()
+//           .in(playListIds)
+//           .select()
+//           .exec((error, playlistDocument) => {
+//             if (error) return reject(error);
+//             return resolve(playlistDocument);
+//           });
+//     })
+// }
 
 /**
  * 
@@ -36,12 +51,22 @@ function getManyByArrayId(playListIds){
         Playlist.find()
           .where("_id")
           .in(playListIds)
-          .select()
+          .select("_id", "mediaArray", "name", "type")
           .exec((error, playlistDocument) => {
             if (error) return reject(error);
             return resolve(playlistDocument);
           });
     })
+}
+
+function getById(playlistId){
+    return new Promise((resolve, reject) => {
+        Playlist.findById(playlistId).exec((error, playlistDocument) =>
+        {
+            if(errro) return reject(error);
+            return resolve(playlistDocument);
+        })
+    });
 }
 
 function deleteById(playlistId){
@@ -67,6 +92,7 @@ module.exports = {
   insert: insert,
   getManyByArrayId: getManyByArrayId,
   getAll: getAll,
+  getById: getByIdl,
   updateById: updateById,
   deleteById: deleteById,
 };
