@@ -96,6 +96,9 @@ async function addPlaylistToZone(req, res) {
     const { zoneId, playListIds } = req.body;
     let zoneDocument = await zoneService.getById(zoneId);
     let playlistDocument = await playlistService.getManyByArrayId(playListIds);
+    for(let i =0; i < zoneDocument["playlistArray"]; i++){
+      
+    }
   } catch (error) {}
 }
 

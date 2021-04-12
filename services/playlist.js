@@ -78,9 +78,9 @@ function deleteById(playlistId){
     })
 }
 
-function updateById(playlistId, mediaArray){
+function updateById(playlistId, name, mediaArray){
     return new Promise((resolve, reject) => {
-        Playlist.updateOne({ _id: playlistId }, { mediaArray: mediaArray }).exec((error) => {
+        Playlist.updateOne({ _id: playlistId }, {name:name, mediaArray: mediaArray }).exec((error) => {
             if(error) return reject(error);
             return resolve(true);
         });
