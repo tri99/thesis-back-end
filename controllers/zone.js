@@ -59,8 +59,9 @@ async function updateById(req, res) {
 
 async function deleteById(req, res) {
   try {
-    const { _id } = req.query;
-    await zoneService.deleteById(_id);
+    const { id } = req.params;
+    await zoneService.deleteById(id);
+    
     return res.status(config.status_code.OK).send({ zone: true });
   } catch (error) {
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
@@ -87,6 +88,7 @@ async function getAll(req, res) {
     const newZoneDocument = await zoneService.getAll();
     return res.status(config.status_code.OK).send({ zone: newZoneDocument });
   } catch (error) {
+    console.log(error)
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }
 }

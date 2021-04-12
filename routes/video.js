@@ -11,7 +11,7 @@ module.exports = () => {
    * @param {ArrayString} tags
    */
   router.post(
-    "/upload-video",
+    "/",
     fileUpload.catchErrorVideo(),
     videoController.upload
   );

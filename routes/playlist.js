@@ -21,4 +21,5 @@ module.exports = () => {
    * @param {ArrayString} mediaArray
    */
   router.delete("/:id", playlistController.deleteById);
+  return router;
 }

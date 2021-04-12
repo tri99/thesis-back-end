@@ -6,7 +6,7 @@ module.exports = () => {
   /**
    *  @param {String} name
    */
-  router.post("/create-zone", zoneController.insert);
+  router.post("/", zoneController.insert);
   /**
    *  @param {String} _id
    */

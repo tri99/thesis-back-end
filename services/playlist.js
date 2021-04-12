@@ -92,7 +92,7 @@ module.exports = {
   insert: insert,
   getManyByArrayId: getManyByArrayId,
   getAll: getAll,
-  getById: getByIdl,
+  getById: getById,
   updateById: updateById,
   deleteById: deleteById,
 };
