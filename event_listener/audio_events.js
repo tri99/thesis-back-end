@@ -10,7 +10,7 @@ module.exports.connect = socket => {
          */
         try {
         if (!data_authen.token) return socket.disconnect();
-        const decode_data = await jwt.verifyToken(data_authen.token);
+        const decode_data = await jwt.verifyDevice(data_authen.token);
         socket.device_id = decode_data["_id"];
         socket.auth = true;
         socket.join(decode_data["_id"]);

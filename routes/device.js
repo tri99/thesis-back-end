@@ -1,11 +1,14 @@
 const router = require("express").Router();
-const deviceService = require("./../controllers/device");
+const deviceController = require("./../controllers/device");
 
 module.exports = () => {
-  router.post("/add-device", deviceService.insert);
-  router.get("/get-device-by-id", deviceService.getById);
-  router.get("/get-all-devices", deviceService.getAll);
-  router.delete("/delete-device", deviceService.deleteById);
-  router.put("/update-device", deviceService.updateById);
+  router.post("/", deviceController.insert);
+  router.post("/config-device", deviceController.getConfig);
+  router.get("/:id", deviceController.getById);
+  router.get("/get-all", deviceController.getAll);
+  router.delete("/:id", deviceController.deleteDevice);
+  router.put("/:id", deviceController.updateDevice);
+  router.put("/zone/:id", deviceController.updateZoneDevice);
+
   return router;
 };

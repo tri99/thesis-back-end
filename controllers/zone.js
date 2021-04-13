@@ -1,5 +1,6 @@
 const config = require("./../config/config");
 const zoneService = require("./../services/zone");
+const deviceService = require("./../services/device");
 const playlistService = require("./../services/playlist");
 /**
  *  @param {String} name
@@ -104,10 +105,41 @@ async function addPlaylistToZone(req, res) {
   } catch (error) {}
 }
 
+
+async function deletePlaylistFromZone(req, res) {
+  try {
+    const { zoneId, playListIds } = req.body;
+    let zoneDocument = await zoneService.getById(zoneId);
+    let playlistDocument = await playlistService.getManyByArrayId(playListIds);
+    for (let i = 0; i < zoneDocument["playlistArray"]; i++) {}
+  } catch (error) {
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
+async function addDeviceToZone(req, res) {
+  try {
+    const { zoneId, deviceId } = req.body;
+    let zoneDocument = await zoneService.getById(zoneId);
+    let deviceDocument = await deviceService.getById(deviceId);
+    deviceDocument["deviceId"] = zoneDocument["_id"];
+    zoneDocument["deviceArray"].push(deviceDocument["_id"]);
+    await deviceService.insert(deviceDocument);
+    await zoneService.insert(zoneDocument);
+
+    return res
+      .status(config.status_code.OK)
+      .send({ deviceId: "deviceDocument" });
+  } catch (error) {
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
 module.exports = {
   insert: insert,
   getById: getById,
   getAll: getAll,
   deleteById: deleteById,
   updateById: updateById,
+  addDeviceToZone: addDeviceToZone,
 };

@@ -1,4 +1,3 @@
-
 const router = require("express").Router();
 const zoneController = require("./../controllers/zone");
 
@@ -23,5 +22,11 @@ module.exports = () => {
    *@param  {Array}  videoArray[{_id:stirng, path: String, duration: Number, size: Number}], playlistArray["String"], deviceArray["String"]
    */
   router.put("/:id", zoneController.updateById);
+
+  /**
+   * @param {String} zoneId
+   * @param {String} deviceId
+   */
+  router.post("/add-device/", zoneController.addDeviceToZone);
   return router;
-}
+};

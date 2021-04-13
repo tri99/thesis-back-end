@@ -14,6 +14,7 @@ module.exports = {
     NOT_FOUND: 404,
     WRONG: 401,
     TOKEN_ERROR: 403,
+    FORBIDEN: 403,
   },
   status_message: {
     OK: "OK",
@@ -21,7 +22,8 @@ module.exports = {
     NOT_FOUND: "NOT_FOUND",
     TOKEN_NOT_FOUND: "TOKEN_NOT_FOUND",
     NOT_PERMISSION: "NOT_PERMISSION",
-    SOMETHING_WRONG: "SOMETHING_WRONG"
+    SOMETHING_WRONG: "SOMETHING_WRONG",
+    DEVICE_EXIST: "DEVICE_EXIST",
   },
   response_message: {
     the_video_has_been_uploaded_before_please_check_back:
@@ -29,8 +31,8 @@ module.exports = {
   },
   upload_folder: "./upload/",
   video_folder: "videos/",
-  image_folder: "images/"
-  ,
+  image_folder: "images/",
   jwtKey: "NhetCaiKeyVoDay",
+  jwtDeviceKey: "deviceKey",
   algorithm: "HS512",
 };

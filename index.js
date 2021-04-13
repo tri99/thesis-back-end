@@ -42,7 +42,7 @@ app.use("/api/zones", require("./routes/zone")());
 app.use("/api/videos", require("./routes/video")());
 
 app_local.use("/api/video-control", require("./routes/videoController")());
-// app.use("/api/devices", require("./routes/device")());
+app.use("/api/devices", require("./routes/device")());
 app.use("/api/playlists", require("./routes/playlist")());
 
 server.listen(config.port, config.host, () => {
