@@ -37,10 +37,10 @@ async function insert(req, res) {
 
 async function updateById(req, res) {
   try {
-    const { _id } = req.query;
+    const { id } = req.params;
     const { videoArray, playlistArray, deviceArray, name } = req.body;
     await zoneService.updateById(
-      _id,
+      id,
       videoArray,
       playlistArray,
       deviceArray,
@@ -54,7 +54,7 @@ async function updateById(req, res) {
 }
 
 /**
- *  @param {String} _id
+ *  @param {String} id
  */
 
 async function deleteById(req, res) {
@@ -69,13 +69,13 @@ async function deleteById(req, res) {
 }
 
 /**
- *  @param {String} _id
+ *  @param {String} id
  */
 
 async function getById(req, res) {
   try {
-    const { _id } = req.query;
-    const newZoneDocument = await zoneService.getById(_id);
+    const { id } = req.params;
+    const newZoneDocument = await zoneService.getById(id);
     return res.status(config.status_code.OK).send({ zone: newZoneDocument });
   } catch (error) {
     console.log(error);
