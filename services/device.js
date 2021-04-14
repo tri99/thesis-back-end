@@ -64,9 +64,9 @@ function getById(deviceId) {
   });
 }
 
-function getByOneParam(key) {
+function getBySerialNumber(key) {
   return new Promise((resolve, reject) => {
-    Device.findOne({ key: key })
+    Device.findOne({ serialNumber: key })
       .select("_id")
       .exec((error, deviceDocument) => {
         if (error) return reject(error);
@@ -83,5 +83,5 @@ module.exports = {
   updateDevice: updateDevice,
   getAll: getAll,
   getById: getById,
-  getByOneParam: getByOneParam,
+  getBySerialNumber: getBySerialNumber,
 };

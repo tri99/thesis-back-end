@@ -4,20 +4,21 @@ const app = express();
 const appHttp = express();
 const app_local = express();
 
-const server = http.createServer(app);
-const serverHttp = http.createServer(appHttp);
-const serverLocal = http.createServer(app_local);
 
+const server = http.createServer(app);
 const cors = require("cors");
 const socketIO = require("socket.io")(server);
 const SocketService = require("./socket");
 SocketService.setIO(socketIO);
+
+
+const serverHttp = http.createServer(appHttp);
+const serverLocal = http.createServer(app_local);
+
+
 const connectSocketHttp = require("./socket/indexHttp");
-
 var ioHttp = require("socket.io")(serverHttp);
-
-connectSocketHttp(ioHttp);
-
+connectSocketHttp(ioHttp);  
 // socketio.setIO(IO);
 // socketio.connection();
 
@@ -46,7 +47,7 @@ app.use("/api/devices", require("./routes/device")());
 app.use("/api/playlists", require("./routes/playlist")());
 
 server.listen(config.port, config.host, () => {
-  console.log(1, `SERVER ON LISTENING: ${config.host}:${config.port}`);
+  console.log(1, `SERVER Api ON LISTENING: ${config.host}:${config.port}`);
 });
 
 serverHttp.listen(27117, config.host, () => {
@@ -55,4 +56,11 @@ serverHttp.listen(27117, config.host, () => {
 
 serverLocal.listen(27118, config.host, () => {
   console.log(3, `SERVER Local ON LISTENING: ${config.host}:27118`);
+});
+
+
+
+process.on("uncaughtException", function (err) {
+  console.error(err.stack);
+  console.log("Node NOT Exiting...");
 });

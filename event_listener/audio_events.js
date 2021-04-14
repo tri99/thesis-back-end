@@ -2,36 +2,47 @@ const jwt = require("./../utils/jwt");
 const deviceService = require("./../services/device");
 const socketService = require("./../socket/index");
 
-module.exports.connect = socket => {
-    socket.auth = false;
-    socket.on("authentication", async data_authen => {
-        /**
-         * @param data_authen {token: String}
-         */
-        try {
-        if (!data_authen.token) return socket.disconnect();
-        const decode_data = await jwt.verifyDevice(data_authen.token);
-        socket.device_id = decode_data["_id"];
-        socket.auth = true;
-        socket.join(decode_data["_id"]);
-        let payload = { deviceId: decode_data["_id"] };
-        
-        
-        // ============= CHECK DEVICE ==================================
-        const deviceDocument = await deviceService.getById(decode_data["_id"]);
-        if(!deviceDocument)
-            socket.disconnect();
-        if (deviceDocument["zoneId"]) {
-          payload["zoneId"] = deviceDocument["zoneId"];
-          socket.join(deviceDocument["zoneId"]);
-        }
-        socket.user_id = "admin";   
-        initFunction(socket, payload);
-        } catch (error) {
-            
-        }
-    })
+function connection(IO){
+  IO.on("connection", socket => {
+    console.log("aloalo");
+  })
 }
+
+module.exports = { 
+  connection: connection
+}
+
+// module.exports.connect = socket => {
+//   console.log("aloalo");
+//     socket.auth = false;
+//     socket.on("authentication", async data_authen => {
+//         /**
+//          * @param data_authen {token: String}
+//          */
+//         try {
+//         if (!data_authen.token) return socket.disconnect();
+//         const decode_data = await jwt.verifyDevice(data_authen.token);
+//         socket.device_id = decode_data["_id"];
+//         socket.auth = true;
+//         socket.join(decode_data["_id"]);
+//         let payload = { deviceId: decode_data["_id"] };
+        
+        
+//         // ============= CHECK DEVICE ==================================
+//         const deviceDocument = await deviceService.getById(decode_data["_id"]);
+//         if(!deviceDocument)
+//             socket.disconnect();
+//         if (deviceDocument["zoneId"]) {
+//           payload["zoneId"] = deviceDocument["zoneId"];
+//           socket.join(deviceDocument["zoneId"]);
+//         }
+//         socket.user_id = "admin";   
+//         initFunction(socket, payload);
+//         } catch (error) {
+//             console.log(error);
+//         }
+//     })
+// }
 
 function initFunction(socket, payload){
   // ===== ADD DEVICE JOIN ZONE ========================

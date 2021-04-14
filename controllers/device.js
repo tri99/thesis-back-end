@@ -1,5 +1,5 @@
 const deviceService = require("./../services/device");
-const jwt = require("./../utils/jwt")
+const jwt = require("./../utils/jwt");
 const config = require("./../config/config");
 
 async function insert(req, res) {
@@ -47,7 +47,7 @@ async function updateZoneDevice(req, res) {
 
 async function updateDevice(req, res) {
   try {
-    const { deviceId, name ,zoneId } = req.body;
+    const { deviceId, name, zoneId } = req.body;
     await deviceService.updateDevice(deviceId, name, zoneId);
     return res.status(config.status_code.OK).send({ deviceId: true });
   } catch (error) {
@@ -76,25 +76,21 @@ async function getById(req, res) {
 
 async function getConfig(req, res) {
   try {
-    console.log(req.body);
     const { token, serial_number } = req.body;
     if (!token || !serial_number)
       return res
         .status(config.status_code.FORBIDEN)
         .send({ message: config.status_message.NOT_PERMISSION });
-    const deviceDocument = await deviceService.getByOneParam(serial_number);
+    const deviceDocument = await deviceService.getBySerialNumber(serial_number);
     if (!deviceDocument)
       return res
         .status(config.status_code.FORBIDEN)
         .send({ message: config.status_message.NOT_PERMISSION });
-    
-    const tokenDevice = await jwt.signDevice(deviceDocument["_id"]);
-    return res
-      .status(config.STATUS_CODE.OK)
-      .send({
-        token: tokenDevice,
-      });
-    
+
+    const tokenDevice = await jwt.signDevice({id: deviceDocument["_id"]});
+    return res.status(config.status_code.OK).send({
+      token: tokenDevice,
+    });
   } catch (error) {
     return res
       .status(config.status_code.SERVER_ERROR)

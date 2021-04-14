@@ -1,12 +1,12 @@
 module.exports = {
-  host: "localhost",
+  host: "192.168.1.171",
   port: 3000,
   db: {
     username: "",
     password: "",
     host: "localhost",
     port: "27017",
-    database: "chat",
+    database: "MESH",
   },
   status_code: {
     OK: 200,
