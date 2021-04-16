@@ -4,23 +4,27 @@ const app = express();
 const appHttp = express();
 const app_local = express();
 
-
 const server = http.createServer(app);
 const cors = require("cors");
-const socketIO = require("socket.io")(server);
+const socketIO = require("socket.io")(server,{
+  cors:{
+    origin:"*",
+  }
+});
 const SocketService = require("./socket");
 SocketService.setIO(socketIO);
-
+SocketService.connection();
 
 const serverHttp = http.createServer(appHttp);
 const serverLocal = http.createServer(app_local);
 
-
 const connectSocketHttp = require("./socket/indexHttp");
-var ioHttp = require("socket.io")(serverHttp);
-connectSocketHttp(ioHttp);  
-// socketio.setIO(IO);
-// socketio.connection();
+var ioHttp = require("socket.io")(serverHttp, {
+  cors: {
+    origin: "*",
+  },
+});
+connectSocketHttp(ioHttp);
 
 app.use(cors({ credentials: true, origin: true }));
 
@@ -57,8 +61,6 @@ serverHttp.listen(27117, config.host, () => {
 serverLocal.listen(27118, config.host, () => {
   console.log(3, `SERVER Local ON LISTENING: ${config.host}:27118`);
 });
-
-
 
 process.on("uncaughtException", function (err) {
   console.error(err.stack);

@@ -25,7 +25,7 @@ async function insert(req, res){
 
 async function getManyByArrayId(req, res){
     try {
-        const {videoIds} = req.body;
+        const {videoIds} = req.query;
         const videoDocument = await videoService.getManyByArrayId(videoIds);
         return res.status(config.status_code.OK).send({video: videoDocument});
     } catch (error) {
