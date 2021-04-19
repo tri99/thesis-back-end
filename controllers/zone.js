@@ -128,7 +128,7 @@ async function getZoneByDeviceId(req, res){
   try {
     const { deviceId } = req.body;
     zoneDocument = await zoneService.getZoneByDeviceId(deviceId);
-    return res.status(config.status_code.OK).send({ zones: zoneDocument });
+    return res.status(config.status_code.OK).send({ zone: zoneDocument });
   } catch (error) {
     console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
@@ -154,6 +154,14 @@ async function deletePlaylistFromZone(req, res) {
     for (let i = 0; i < zoneDocument["playlistArray"]; i++) {}
   } catch (error) {
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
+async function addVideoToZone(req, res){
+  try {
+    const {videoId, zoneId} = req.body
+  } catch (error) {
+    
   }
 }
 

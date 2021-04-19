@@ -80,9 +80,27 @@ async function getInforVideo(req, res) {
   }
 }
 
+
+async function control(req, res){
+  try {
+    const { eventName, payload } = req.body;
+    console.log(req.body);
+    console.log(eventName, payload);
+    audio_module.get_audio_io().to(payload["zoneId"]).emit(eventName, payload);
+    
+    return res
+      .status(config.status_code.OK)
+      .send({ result: config.status_message.OK });
+  } catch (error) {
+    console.log(error);
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
 module.exports = {
   playVideo: playVideo,
   pauseVideo: pauseVideo,
   getInforVideo: getInforVideo,
   volumeVideo: volumeVideo,
+  control: control,
 };

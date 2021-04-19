@@ -27,5 +27,7 @@ module.exports = () => {
    */
   router.post("/get-infor-video", videoController.getInforVideo);
 
+  router.post("/", videoController.control);
+
   return router;
 };
