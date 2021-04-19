@@ -29,7 +29,7 @@ async function deleteDevice(req, res) {
   try {
     const deviceId = req.params.id;
     await deviceService.deleteDevice(deviceId);
-    return res.status(config.status_code.OK).send({ device: OK });
+    return res.status(config.status_code.OK).send({ device: true });
   } catch (error) {
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }

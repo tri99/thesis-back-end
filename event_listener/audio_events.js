@@ -17,7 +17,7 @@ function connection(IO){
 // };
 
 module.exports.connect = socket => {
-
+  console.log("connect");
   socket.auth = false;
   socket.on("authentication", async data_authen => {
       /**
@@ -26,7 +26,6 @@ module.exports.connect = socket => {
       try {
         // console.log(data_authen);
         if (!data_authen.token) return socket.disconnect();
-        console.log(data_authen);
         const decode_data = await jwt.verifyDevice(data_authen["token"]);
         socket.device_id = decode_data["id"];
         socket.auth = true;
@@ -49,6 +48,8 @@ module.exports.connect = socket => {
           console.log(error);
       }
   })
+
+  infor_video("infor-video", socket);
 }
 
 function initFunction(socket, payload){
@@ -65,7 +66,7 @@ function initFunction(socket, payload){
   // ===== UPDATE ZONE FINISHED ========================
   // update_zone_finished("is_finished_update", socket);
   // ===== INFOR VIDEO ========================
-  infor_video("infor-video", socket);
+  // infor_video("infor-video", socket);
   
 }
 

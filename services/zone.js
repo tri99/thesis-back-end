@@ -7,6 +7,9 @@ function createModel(videoArray, playlistArray, deviceArray, name, videoVolume){
       deviceArray: deviceArray,
       name: name,
       videoVolume: videoVolume,
+      isMuteVideo: false,
+      isLoopOneVideo: false,
+      isLoopAllVideo: false,
     });
     return newZoneModel;
 }
@@ -51,11 +54,32 @@ function deleteById(_id){
 
 function updateById(_id, videoArray, playlistArray, deviceArray, name){
     return new Promise((resolve, reject) => {
-        Zone.updateOne({_id: _id}, {name: name, videoArray: videoArray, playlistArray: playlistArray, deviceArray: deviceArray}).exec(error => {
-            if(error) reject(error);
-            return resolve(error);
-        })
+        Zone.updateOne(
+          { _id: _id },
+          {
+            name: name,
+            videoArray: videoArray,
+            playlistArray: playlistArray,
+            deviceArray: deviceArray,
+            volumeVideo: volumeVideo,
+            isMuteVideo: isMuteVideo,
+            isLoopOneVideo: isLoopOneVideo,
+            isLoopAllVideo: isLoopAllVideo,
+          }
+        ).exec((error) => {
+          if (error) reject(error);
+          return resolve(error);
+        });
     })
+}
+
+function getZoneByDeviceId(deviceId){
+  return new Promise((resolve, reject) => {
+    Zone.find({deviceArray: {$in :[deviceId]}}).select().exec((error, zoneDocument) => {
+      if(error) return reject(error);
+      return resolve(zoneDocument)
+    })
+  });
 }
 
 
@@ -124,4 +148,5 @@ module.exports = {
   addVideoArray: addVideoArray,
   addVideoArrayByArrayAudioZoneId,
   removeVideoArrayByArrayAudioZoneId,
+  getZoneByDeviceId: getZoneByDeviceId,
 };

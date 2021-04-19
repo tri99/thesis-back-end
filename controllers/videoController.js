@@ -68,12 +68,14 @@ async function getInforVideo(req, res) {
   try {
     const { zoneId } = req.body;
     const data_to_send = { to: zoneId };
+    console.log(data_to_send);
     audio_module
       .get_audio_io()
       .to(data_to_send.to)
-      .emit("get-infor-audio", data_to_send);
-    return res.status(config.STATUS_CODE.OK).send({ result: config.SUCCESS });
+      .emit("get-infor-video", data_to_send);
+    return res.status(config.status_code.OK).send({ result: config.status_message.OK });
   } catch (error) {
+    console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }
 }

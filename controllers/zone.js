@@ -39,13 +39,26 @@ async function insert(req, res) {
 async function updateById(req, res) {
   try {
     const { id } = req.params;
-    const { videoArray, playlistArray, deviceArray, name } = req.body;
+    const {
+      videoArray,
+      playlistArray,
+      deviceArray,
+      name,
+      volumeVideo,
+      isMuteVideo,
+      isLoopOneVideo,
+      isLoopAllVideo,
+    } = req.body;
     await zoneService.updateById(
       id,
       videoArray,
       playlistArray,
       deviceArray,
-      name
+      name,
+      volumeVideo,
+      isMuteVideo,
+      isLoopOneVideo,
+      isLoopAllVideo
     );
     return res.status(config.status_code.OK).send({ zone: true });
   } catch (error) {
@@ -77,6 +90,23 @@ async function getById(req, res) {
   try {
     const { id } = req.params;
     const newZoneDocument = await zoneService.getById(id);
+    const deviceDocument = await deviceService.getManyByArrayId(
+    newZoneDocument["deviceArray"]
+    );
+    newZoneDocument["deviceArray"] = deviceDocument;
+    return res.status(config.status_code.OK).send({ zone: newZoneDocument });
+  } catch (error) {
+    console.log(error);
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
+async function getByIdforDevice(req, res) {
+  try {
+    const { zoneId } = req.body;
+    let newZoneDocument = await zoneService.getById(zoneId);
+    if(!newZoneDocument)
+      newZoneDocument = {videoArray: [], playlistArray:[], name: ""}
     return res.status(config.status_code.OK).send({ zone: newZoneDocument });
   } catch (error) {
     console.log(error);
@@ -88,6 +118,17 @@ async function getAll(req, res) {
   try {
     const newZoneDocument = await zoneService.getAll();
     return res.status(config.status_code.OK).send({ zones: newZoneDocument });
+  } catch (error) {
+    console.log(error);
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
+async function getZoneByDeviceId(req, res){
+  try {
+    const { deviceId } = req.body;
+    zoneDocument = await zoneService.getZoneByDeviceId(deviceId);
+    return res.status(config.status_code.OK).send({ zones: zoneDocument });
   } catch (error) {
     console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
@@ -137,7 +178,7 @@ async function addDeviceToZone(req, res) {
         .status(config.status_code.FORBIDEN)
         .send({ message: "device was added" });
 
-    deviceDocument["deviceId"] = zoneDocument["_id"];
+    deviceDocument["zoneId"] = zoneDocument["_id"];
 
     zoneDocument["deviceArray"].push(deviceDocument["_id"]);
     await deviceService.insert(deviceDocument);
@@ -155,6 +196,8 @@ module.exports = {
   insert: insert,
   getById: getById,
   getAll: getAll,
+  getZoneByDeviceId: getZoneByDeviceId,
+  getByIdforDevice: getByIdforDevice,
   deleteById: deleteById,
   updateById: updateById,
   addDeviceToZone: addDeviceToZone,

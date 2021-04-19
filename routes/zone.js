@@ -6,6 +6,9 @@ module.exports = () => {
    *  @param {String} name
    */
   router.post("/", zoneController.insert);
+  // api for device, dont touch
+  router.post("/get-zone-for-device", zoneController.getByIdforDevice);
+  router.post("/get-zone-for-device-2", zoneController.getZoneByDeviceId);
   /**
    *  @param {String} _id
    */

@@ -75,6 +75,16 @@ function getBySerialNumber(key) {
   });
 }
 
+function getManyByArrayId(deviceIds){
+  return new Promise((resolve, reject) => {
+    Device.find({_id: deviceIds}).select("_id name").exec((error, deviceDocument) => {
+      if(error) return reject(error);
+      return resolve(deviceDocument);
+    })
+  });
+}
+
+
 module.exports = {
   createModel: createModel,
   insert: insert,
@@ -84,4 +94,5 @@ module.exports = {
   getAll: getAll,
   getById: getById,
   getBySerialNumber: getBySerialNumber,
+  getManyByArrayId: getManyByArrayId,
 };
