@@ -87,7 +87,7 @@ async function getById(req, res) {
 async function getAll(req, res) {
   try {
     const newZoneDocument = await zoneService.getAll();
-    return res.status(config.status_code.OK).send({ zone: newZoneDocument });
+    return res.status(config.status_code.OK).send({ zones: newZoneDocument });
   } catch (error) {
     console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });

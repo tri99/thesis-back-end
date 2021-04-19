@@ -24,7 +24,7 @@ async function insert(req, res){
 async function getAll(req, res) {
     try {
         const playlistDocument = await playlistService.getAll();
-        return res.status(config.status_code.OK).send({playlist: playlistDocument});
+        return res.status(config.status_code.OK).send({playlists: playlistDocument});
     } catch (error) {
         return res.status(config.status_code.SERVER_ERROR).send({message: error});
     }

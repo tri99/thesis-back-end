@@ -27,7 +27,7 @@ async function insert(req, res) {
 
 async function deleteDevice(req, res) {
   try {
-    const { deviceId } = req.body;
+    const deviceId = req.params.id;
     await deviceService.deleteDevice(deviceId);
     return res.status(config.status_code.OK).send({ device: OK });
   } catch (error) {
@@ -47,7 +47,8 @@ async function updateZoneDevice(req, res) {
 
 async function updateDevice(req, res) {
   try {
-    const { deviceId, name, zoneId } = req.body;
+    const deviceId = req.params.id;
+    const { name, zoneId } = req.body;
     await deviceService.updateDevice(deviceId, name, zoneId);
     return res.status(config.status_code.OK).send({ deviceId: true });
   } catch (error) {
@@ -57,16 +58,17 @@ async function updateDevice(req, res) {
 
 async function getAll(req, res) {
   try {
-    const deviceDocument = await deviceDocument.getAll();
-    return res.status(config.status_code.OK).send({ deviceId: deviceDocument });
+    const deviceDocument = await deviceService.getAll();
+    return res.status(config.status_code.OK).send({ devices: deviceDocument });
   } catch (error) {
+    console.log(error)
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }
 }
 
 async function getById(req, res) {
   try {
-    const { deviceId } = req.body;
+    const deviceId = req.params.id;
     const deviceDocument = await deviceDocument.getById(deviceId);
     return res.status(config.status_code.OK).send({ deviceId: deviceDocument });
   } catch (error) {

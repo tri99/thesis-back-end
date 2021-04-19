@@ -36,7 +36,7 @@ async function getManyByArrayId(req, res){
 async function getAll(req, res){
   try {
     const videoDocument = await videoService.findAll();
-    return res.status(config.status_code.OK).send({ video: videoDocument });
+    return res.status(config.status_code.OK).send({ videos: videoDocument });
   } catch (error) {
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }
