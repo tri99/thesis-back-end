@@ -65,7 +65,7 @@ function initFunction(socket, payload){
   // ===== UPDATE ZONE FINISHED ========================
   // update_zone_finished("is_finished_update", socket);
   // ===== INFOR VIDEO ========================
-  // infor_video("infor-video", socket);
+  infor_video("infor-video", socket);
   
 }
 

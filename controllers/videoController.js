@@ -79,7 +79,8 @@ async function getInforVideo(req, res) {
 }
 
 module.exports = {
-    playVideo: playVideo,
-    pauseVideo: pauseVideo,
-    getInforVideo: getInforVideo
-}
+  playVideo: playVideo,
+  pauseVideo: pauseVideo,
+  getInforVideo: getInforVideo,
+  volumeVideo: volumeVideo,
+};

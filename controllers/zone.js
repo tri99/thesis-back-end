@@ -62,7 +62,7 @@ async function deleteById(req, res) {
   try {
     const { id } = req.params;
     await zoneService.deleteById(id);
-    
+
     return res.status(config.status_code.OK).send({ zone: true });
   } catch (error) {
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
@@ -89,7 +89,7 @@ async function getAll(req, res) {
     const newZoneDocument = await zoneService.getAll();
     return res.status(config.status_code.OK).send({ zone: newZoneDocument });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }
 }
@@ -99,12 +99,11 @@ async function addPlaylistToZone(req, res) {
     const { zoneId, playListIds } = req.body;
     let zoneDocument = await zoneService.getById(zoneId);
     let playlistDocument = await playlistService.getManyByArrayId(playListIds);
-    for(let i =0; i < zoneDocument["playlistArray"]; i++){
+    for (let i = 0; i < zoneDocument["playlistArray"]; i++) {
       
     }
   } catch (error) {}
 }
-
 
 async function deletePlaylistFromZone(req, res) {
   try {
@@ -122,7 +121,24 @@ async function addDeviceToZone(req, res) {
     const { zoneId, deviceId } = req.body;
     let zoneDocument = await zoneService.getById(zoneId);
     let deviceDocument = await deviceService.getById(deviceId);
+
+    if (!deviceDocument)
+      return res
+        .status(config.status_code.FORBIDEN)
+        .send({ message: "device not found" });
+
+    if (!zoneDocument)
+      return res
+        .status(config.status_code.FORBIDEN)
+        .send({ message: "zone not found" });
+
+    if (zoneDocument["deviceArray"].includes(deviceDocument["_id"]))
+      return res
+        .status(config.status_code.FORBIDEN)
+        .send({ message: "device was added" });
+
     deviceDocument["deviceId"] = zoneDocument["_id"];
+
     zoneDocument["deviceArray"].push(deviceDocument["_id"]);
     await deviceService.insert(deviceDocument);
     await zoneService.insert(zoneDocument);

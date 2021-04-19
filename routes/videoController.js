@@ -15,5 +15,17 @@ module.exports = () => {
    * @param {ArrayString}deviceArray
    */
   router.post("/pause-video", videoController.pauseVideo);
+  /**
+   * @param {String}zoneId,
+   * @param {Number} volume
+   * @param {ArrayString}deviceArray
+   */
+  router.post("/volume-video", videoController.volumeVideo);
+
+  /**
+   * @param {String}zoneId,
+   */
+  router.post("/get-infor-video", videoController.getInforVideo);
+
   return router;
 };
