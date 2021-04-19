@@ -4,8 +4,8 @@ const deviceController = require("./../controllers/device");
 module.exports = () => {
   router.post("/", deviceController.insert);
   router.post("/config-device", deviceController.getConfig);
-  router.get("/:id", deviceController.getById);
   router.get("/", deviceController.getAll);
+  router.get("/:id", deviceController.getById);
   router.delete("/:id", deviceController.deleteDevice);
   router.put("/:id", deviceController.updateDevice);
   router.put("/zone/:id", deviceController.updateZoneDevice);
