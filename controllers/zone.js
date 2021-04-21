@@ -54,11 +54,14 @@ async function updateById(req, res) {
     } = req.body;
 
     let plId = []
-    for (let i = 0; i < playlistArray.length; i++){
+    for (let i = 0; i < playlistArray.length; i++) {
       plId.push(playlistArray[i]["_id"]);
     }
     let playlistDocument = await playlistService.getManyByArrayId(plId);
     let videoIds = []
+    for (let i = 0; i < videoArray.length; i++) {
+      videoIds.push(videoArray[i]["_id"]);
+    }
     for (let i = 0; i < playlistDocument.length; i++) {
       videoIds.push.apply(videoIds, playlistArray[i]["mediaArray"]);
     }
@@ -102,6 +105,12 @@ async function updateById(req, res) {
 async function deleteById(req, res) {
   try {
     const { id } = req.params;
+    let zoneDocument = await zoneService.getById(id)
+    let deviceDocument = await deviceService.getManyByArrayId(zoneDocument["deviceArray"]);
+    for(let i = 0; i < deviceDocument.length; i++){
+      deviceDocument[i]["zoneId"] = null;
+      await deviceService.insert(deviceDocument[i]);
+    }
     await zoneService.deleteById(id);
 
     return res.status(config.status_code.OK).send({ zone: true });
