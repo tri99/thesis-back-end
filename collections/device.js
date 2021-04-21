@@ -13,6 +13,10 @@ const deviceSchema = new Schema({
     },
     zoneId:{
         type: Schema.Types.ObjectId
+    },
+    status:{
+        type: Boolean,
+        required: true
     }
 });
 

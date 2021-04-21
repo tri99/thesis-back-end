@@ -25,6 +25,12 @@ module.exports.connect = (socket) => {
   socket.on("audio-joined-zone", async (zoneId) => {
      socket.join(zoneId);
   });
+  socket.on("disconnect", async()  => {
+    await deviceService.updateStatusDevice(socket.device_id, false);
+    socketService
+      .getIO()
+      .emit(`/recive/update/${device_id}/disconnect`, infor);
+  })
   socket.on("authentication", async (data_authen) => {
     /**
      * @param data_authen {token: String}
@@ -37,6 +43,7 @@ module.exports.connect = (socket) => {
       socket.auth = true;
 
       socket.join(decode_data["id"]);
+      await deviceService.updateStatusDevice(socket.device_id, true);
       let payload = { deviceId: decode_data["id"] };
 
       // ============= CHECK DEVICE ==================================
@@ -48,6 +55,9 @@ module.exports.connect = (socket) => {
         socket.join(deviceDocument["zoneId"]);
       }
       socket.user_id = "admin";
+      socketService
+        .getIO()
+        .emit(`/recive/update/${device_id}/connect`, infor);
       initFunction(socket, payload);
     } catch (error) {
       console.log(error);

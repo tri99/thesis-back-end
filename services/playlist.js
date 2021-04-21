@@ -49,10 +49,8 @@ function getAll(){
  */
 function getManyByArrayId(playListIds){
     return new Promise((resolve, reject) => {
-        Playlist.find()
-          .where("_id")
-          .in(playListIds)
-          .select("_id", "mediaArray", "name", "type", "volume")
+        Playlist.find({ _id: { $in: playListIds } })
+          .select("_id mediaArray name type volume")
           .exec((error, playlistDocument) => {
             if (error) return reject(error);
             return resolve(playlistDocument);

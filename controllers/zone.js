@@ -1,5 +1,6 @@
 const config = require("./../config/config");
 const zoneService = require("./../services/zone");
+const videoService = require("./../services/video")
 const deviceService = require("./../services/device");
 const playlistService = require("./../services/playlist");
 const audio_module = require("./../exports/audio-io");
@@ -41,7 +42,7 @@ async function insert(req, res) {
 async function updateById(req, res) {
   try {
     const { id } = req.params;
-    const {
+    let {
       videoArray,
       playlistArray,
       deviceArray,
@@ -51,6 +52,23 @@ async function updateById(req, res) {
       isLoopOneVideo,
       isLoopAllVideo,
     } = req.body;
+
+    let plId = []
+    for (let i = 0; i < playlistArray.length; i++){
+      plId.push(playlistArray[i]["_id"]);
+    }
+    let playlistDocument = await playlistService.getManyByArrayId(plId);
+    let videoIds = []
+    for (let i = 0; i < playlistDocument.length; i++) {
+      videoIds.push.apply(videoIds, playlistArray[i]["mediaArray"]);
+    }
+    console.log(videoIds);
+    videoIds = videoIds.filter(function (elem, pos) {
+      return videoIds.indexOf(elem) == pos;
+    });
+    console.log(videoIds);
+    let videoDocument = await videoService.getManyByArrayId(videoIds);
+    videoArray = videoDocument;
     await zoneService.updateById(
       id,
       videoArray,
@@ -63,12 +81,14 @@ async function updateById(req, res) {
       isLoopAllVideo
     );
 
+    let zoneDocument = await zoneService.getById(id)
+
     audio_module
       .get_audio_io()
       .to(id)
       .emit("update-zone", (data = { zoneId: id }));
 
-    return res.status(config.status_code.OK).send({ zone: true });
+    return res.status(config.status_code.OK).send({ zone: zoneDocument });
   } catch (error) {
     console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });

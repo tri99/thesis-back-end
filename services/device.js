@@ -5,6 +5,7 @@ function createModel(name, serialNumber, zoneId) {
     name: name,
     serialNumber: serialNumber,
     zoneId: zoneId,
+    status: false
   });
   return deviceDocument;
 }
@@ -39,6 +40,15 @@ function updateZoneDevice(deviceId, zoneId) {
 function updateDevice(deviceId, name, zoneId) {
   return new Promise((resolve, reject) => {
     Device.update({ _id: deviceId }, { name: name }).exec((error) => {
+      if (error) return reject(error);
+      return resolve(error);
+    });
+  });
+}
+
+function updateStatusDevice(deviceId, status) {
+  return new Promise((resolve, reject) => {
+    Device.update({ _id: deviceId }, { status: status }).exec((error) => {
       if (error) return reject(error);
       return resolve(error);
     });
@@ -95,4 +105,5 @@ module.exports = {
   getById: getById,
   getBySerialNumber: getBySerialNumber,
   getManyByArrayId: getManyByArrayId,
+  updateStatusDevice: updateStatusDevice,
 };
