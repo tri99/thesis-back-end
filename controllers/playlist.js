@@ -57,8 +57,8 @@ async function getManyByArrayId(req, res){
 async function updateById(req, res) {
   try {
     const playlistId = req.params.id
-    const {name, mediaArray } = req.body;
-    await playlistService.updateById(playlistId, name, mediaArray);
+    const { name, mediaArray, volume } = req.body;
+    await playlistService.updateById(playlistId, name, mediaArray, volume);
     return res.status(config.status_code.OK).send({ playlist: true });
   } catch (error) {
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });

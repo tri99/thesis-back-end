@@ -14,6 +14,10 @@ const playlistSchema = new Schema({
     type:{
         type: String,
         required: true
+    },
+    volume:{
+        type: Number,
+        required: true
     }
 })
 

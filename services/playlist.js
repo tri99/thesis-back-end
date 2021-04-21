@@ -4,7 +4,8 @@ function createModel(mediaArray, name, type){
     const playlistDocument = new Playlist({
         mediaArray: mediaArray,
         name: name,
-        type: type
+        type: type,
+        volume: 50
     });
     return playlistDocument;
 }
@@ -51,7 +52,7 @@ function getManyByArrayId(playListIds){
         Playlist.find()
           .where("_id")
           .in(playListIds)
-          .select("_id", "mediaArray", "name", "type")
+          .select("_id", "mediaArray", "name", "type", "volume")
           .exec((error, playlistDocument) => {
             if (error) return reject(error);
             return resolve(playlistDocument);
@@ -61,7 +62,7 @@ function getManyByArrayId(playListIds){
 
 function getById(playlistId){
     return new Promise((resolve, reject) => {
-        Playlist.findById(playlistId).exec((error, playlistDocument) =>
+        Playlist.findById(playlistId).select().exec((error, playlistDocument) =>
         {
             if(errro) return reject(error);
             return resolve(playlistDocument);
@@ -78,13 +79,16 @@ function deleteById(playlistId){
     })
 }
 
-function updateById(playlistId, name, mediaArray){
-    return new Promise((resolve, reject) => {
-        Playlist.updateOne({ _id: playlistId }, {name:name, mediaArray: mediaArray }).exec((error) => {
-            if(error) return reject(error);
-            return resolve(true);
-        });
-    })
+function updateById(playlistId, name, mediaArray, volume) {
+  return new Promise((resolve, reject) => {
+    Playlist.updateOne(
+      { _id: playlistId },
+      { name: name, mediaArray: mediaArray, volume }
+    ).exec((error) => {
+      if (error) return reject(error);
+      return resolve(true);
+    });
+  });
 }
 
 module.exports = {

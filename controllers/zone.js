@@ -2,6 +2,8 @@ const config = require("./../config/config");
 const zoneService = require("./../services/zone");
 const deviceService = require("./../services/device");
 const playlistService = require("./../services/playlist");
+const audio_module = require("./../exports/audio-io");
+
 /**
  *  @param {String} name
  */
@@ -60,6 +62,12 @@ async function updateById(req, res) {
       isLoopOneVideo,
       isLoopAllVideo
     );
+
+    audio_module
+      .get_audio_io()
+      .to(id)
+      .emit("update-zone", (data = { zoneId: id }));
+
     return res.status(config.status_code.OK).send({ zone: true });
   } catch (error) {
     console.log(error);
@@ -91,7 +99,7 @@ async function getById(req, res) {
     const { id } = req.params;
     const newZoneDocument = await zoneService.getById(id);
     const deviceDocument = await deviceService.getManyByArrayId(
-    newZoneDocument["deviceArray"]
+      newZoneDocument["deviceArray"]
     );
     newZoneDocument["deviceArray"] = deviceDocument;
     return res.status(config.status_code.OK).send({ zone: newZoneDocument });
@@ -105,8 +113,16 @@ async function getByIdforDevice(req, res) {
   try {
     const { zoneId } = req.body;
     let newZoneDocument = await zoneService.getById(zoneId);
-    if(!newZoneDocument)
-      newZoneDocument = {videoArray: [], playlistArray:[], name: ""}
+    if (!newZoneDocument)
+      newZoneDocument = {
+        videoArray: [],
+        playlistArray: [],
+        name: "",
+        volumeVideo: 50,
+        isMuteVideo: false,
+        isLoopOneVideo: false,
+        isLoopAllVideo: false,
+      };
     return res.status(config.status_code.OK).send({ zone: newZoneDocument });
   } catch (error) {
     console.log(error);
@@ -124,7 +140,7 @@ async function getAll(req, res) {
   }
 }
 
-async function getZoneByDeviceId(req, res){
+async function getZoneByDeviceId(req, res) {
   try {
     const { deviceId } = req.body;
     zoneDocument = await zoneService.getZoneByDeviceId(deviceId);
@@ -135,33 +151,43 @@ async function getZoneByDeviceId(req, res){
   }
 }
 
-async function addPlaylistToZone(req, res) {
+async function removeDeviceFromZone(req, res) {
   try {
-    const { zoneId, playListIds } = req.body;
+    const { zoneId, deviceId } = req.body;
+    console.log(deviceId);
     let zoneDocument = await zoneService.getById(zoneId);
-    let playlistDocument = await playlistService.getManyByArrayId(playListIds);
-    for (let i = 0; i < zoneDocument["playlistArray"]; i++) {
-      
-    }
-  } catch (error) {}
-}
+    let deviceDocument = await deviceService.getById(deviceId);
+    if (!deviceDocument)
+      return res
+        .status(config.status_code.FORBIDEN)
+        .send({ message: "device not found" });
 
-async function deletePlaylistFromZone(req, res) {
-  try {
-    const { zoneId, playListIds } = req.body;
-    let zoneDocument = await zoneService.getById(zoneId);
-    let playlistDocument = await playlistService.getManyByArrayId(playListIds);
-    for (let i = 0; i < zoneDocument["playlistArray"]; i++) {}
+    if (!zoneDocument)
+      return res
+        .status(config.status_code.FORBIDEN)
+        .send({ message: "zone not found" });
+
+    if (!zoneDocument["deviceArray"].includes(deviceDocument["_id"]))
+      return res
+        .status(config.status_code.FORBIDEN)
+        .send({ message: "device was not added" });
+
+    deviceDocument["zoneId"] = null;
+    zoneDocument["deviceArray"] = zoneDocument["deviceArray"].filter(
+      (device) => {
+        return !device.equals(deviceDocument["_id"]);
+      }
+    );
+    await deviceService.insert(deviceDocument);
+    await zoneService.insert(zoneDocument);
+
+    audio_module.get_audio_io().to(deviceId).emit("remove-device-in-zone", "");
+    return res
+      .status(config.status_code.OK)
+      .send({ deviceId: "deviceDocument" });
   } catch (error) {
+    console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
-  }
-}
-
-async function addVideoToZone(req, res){
-  try {
-    const {videoId, zoneId} = req.body
-  } catch (error) {
-    
   }
 }
 
@@ -191,14 +217,32 @@ async function addDeviceToZone(req, res) {
     zoneDocument["deviceArray"].push(deviceDocument["_id"]);
     await deviceService.insert(deviceDocument);
     await zoneService.insert(zoneDocument);
-
-    return res
+    audio_module
+      .get_audio_io()
+      .to(deviceId)
+      .emit(
+        "add-device-into-zone",
+        (payload = { to: deviceId, zoneId: zoneId })
+      );    return res
       .status(config.status_code.OK)
       .send({ deviceId: "deviceDocument" });
   } catch (error) {
+    console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }
 }
+
+async function addPlaylistToZone(req, res){
+  try {
+    const {zoneId, playlistId} = req.body;
+    let zoneDocument = await zoneService.getById(zoneId);
+    let playlistDocument = await playlistService.getById(playlistId);
+
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 
 module.exports = {
   insert: insert,
@@ -209,4 +253,5 @@ module.exports = {
   deleteById: deleteById,
   updateById: updateById,
   addDeviceToZone: addDeviceToZone,
+  removeDeviceFromZone: removeDeviceFromZone,
 };

@@ -1,17 +1,23 @@
 const Zone = require("./../collections/zone");
 
-function createModel(videoArray, playlistArray, deviceArray, name, videoVolume){
-    let newZoneModel = new Zone({
-      videoArray: videoArray,
-      playlistArray: playlistArray,
-      deviceArray: deviceArray,
-      name: name,
-      videoVolume: videoVolume,
-      isMuteVideo: false,
-      isLoopOneVideo: false,
-      isLoopAllVideo: false,
-    });
-    return newZoneModel;
+function createModel(
+  videoArray,
+  playlistArray,
+  deviceArray,
+  name,
+  volumeVideo
+) {
+  let newZoneModel = new Zone({
+    videoArray: videoArray,
+    playlistArray: playlistArray,
+    deviceArray: deviceArray,
+    name: name,
+    volumeVideo: volumeVideo,
+    isMuteVideo: false,
+    isLoopOneVideo: false,
+    isLoopAllVideo: false,
+  });
+  return newZoneModel;
 }
 
 function insert(newZoneDocument){
@@ -52,25 +58,35 @@ function deleteById(_id){
     })
 }
 
-function updateById(_id, videoArray, playlistArray, deviceArray, name){
-    return new Promise((resolve, reject) => {
-        Zone.updateOne(
-          { _id: _id },
-          {
-            name: name,
-            videoArray: videoArray,
-            playlistArray: playlistArray,
-            deviceArray: deviceArray,
-            volumeVideo: volumeVideo,
-            isMuteVideo: isMuteVideo,
-            isLoopOneVideo: isLoopOneVideo,
-            isLoopAllVideo: isLoopAllVideo,
-          }
-        ).exec((error) => {
-          if (error) reject(error);
-          return resolve(error);
-        });
-    })
+function updateById(
+  _id,
+  videoArray,
+  playlistArray,
+  deviceArray,
+  name,
+  volumeVideo,
+  isMuteVideo,
+  isLoopOneVideo,
+  isLoopAllVideo
+) {
+  return new Promise((resolve, reject) => {
+    Zone.updateOne(
+      { _id: _id },
+      {
+        name: name,
+        videoArray: videoArray,
+        playlistArray: playlistArray,
+        deviceArray: deviceArray,
+        volumeVideo: volumeVideo,
+        isMuteVideo: isMuteVideo,
+        isLoopOneVideo: isLoopOneVideo,
+        isLoopAllVideo: isLoopAllVideo,
+      }
+    ).exec((error) => {
+      if (error) reject(error);
+      return resolve(error);
+    });
+  });
 }
 
 function getZoneByDeviceId(deviceId){

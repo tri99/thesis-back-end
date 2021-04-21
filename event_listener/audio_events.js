@@ -2,10 +2,10 @@ const jwt = require("./../utils/jwt");
 const deviceService = require("./../services/device");
 const socketService = require("./../socket/index");
 
-function connection(IO){
-  IO.on("connection", socket => {
+function connection(IO) {
+  IO.on("connection", (socket) => {
     console.log("aloalo");
-  })
+  });
 }
 
 // module.exports.connect = (socket) => {
@@ -16,43 +16,48 @@ function connection(IO){
 //   });
 // };
 
-module.exports.connect = socket => {
+module.exports.connect = (socket) => {
   console.log("connect");
   socket.auth = false;
-  socket.on("authentication", async data_authen => {
-      /**
-       * @param data_authen {token: String}
-       */
-      try {
-        // console.log(data_authen);
-        if (!data_authen.token) return socket.disconnect();
-        const decode_data = await jwt.verifyDevice(data_authen["token"]);
-        socket.device_id = decode_data["id"];
-        socket.auth = true;
-        
-        socket.join(decode_data["id"]);
-        let payload = { deviceId: decode_data["id"] };
-        
-        // ============= CHECK DEVICE ==================================
-        const deviceDocument = await deviceService.getById(decode_data["id"]);
-        if(!deviceDocument)
-            socket.disconnect();
-        payload["zoneId"] = deviceDocument["zoneId"];
-        if (deviceDocument["zoneId"]) {
-         
-          socket.join(deviceDocument["zoneId"]);
-        }
-        socket.user_id = "admin";   
-        initFunction(socket, payload);
-      } catch (error) {
-          console.log(error);
+  socket.on("audio-leaved-zone", async (zoneId) => {
+    socket.leave(zoneId);
+  });
+  socket.on("audio-joined-zone", async (zoneId) => {
+     socket.join(zoneId);
+  });
+  socket.on("authentication", async (data_authen) => {
+    /**
+     * @param data_authen {token: String}
+     */
+    try {
+      // console.log(data_authen);
+      if (!data_authen.token) return socket.disconnect();
+      const decode_data = await jwt.verifyDevice(data_authen["token"]);
+      socket.device_id = decode_data["id"];
+      socket.auth = true;
+
+      socket.join(decode_data["id"]);
+      let payload = { deviceId: decode_data["id"] };
+
+      // ============= CHECK DEVICE ==================================
+      const deviceDocument = await deviceService.getById(decode_data["id"]);
+      if (!deviceDocument) socket.disconnect();
+      payload["zoneId"] = deviceDocument["zoneId"];
+      socket.join(deviceDocument["_id"]);
+      if (deviceDocument["zoneId"]) {
+        socket.join(deviceDocument["zoneId"]);
       }
-  })
+      socket.user_id = "admin";
+      initFunction(socket, payload);
+    } catch (error) {
+      console.log(error);
+    }
+  });
 
   infor_video("infor-video", socket);
-}
+};
 
-function initFunction(socket, payload){
+function initFunction(socket, payload) {
   // ===== ADD DEVICE JOIN ZONE ========================
   audio_joined_zone("audio-joined-zone", socket);
   // ===== REMOVE DEVICE FROM ZONE ========================
@@ -67,7 +72,6 @@ function initFunction(socket, payload){
   // update_zone_finished("is_finished_update", socket);
   // ===== INFOR VIDEO ========================
   // infor_video("infor-video", socket);
-  
 }
 
 function send_event_authentication_success(event_name, socket, payload) {
@@ -97,7 +101,6 @@ function send_event_authentication_success(event_name, socket, payload) {
 //   });
 // }
 
-
 function audio_joined_zone(event_name, socket) {
   try {
     socket.on(event_name, (zone_id) => {
@@ -118,22 +121,21 @@ function audio_levead_zone(event_name, socket, payload) {
   }
 }
 
-function device_disconnected(event_name, socket, payload){
-    socket.on(event_name, async () => {
-        try {
-            socket.auth = false;
-        } catch (error) {
-            return
-        }
-    });
+function device_disconnected(event_name, socket, payload) {
+  socket.on(event_name, async () => {
+    try {
+      socket.auth = false;
+    } catch (error) {
+      return;
+    }
+  });
 }
-
 
 function infor_video(event_name, socket) {
   socket.on(event_name, (infor) => {
     try {
       infor["deviceId"] = socket.device_id;
-      const zoneId = infor["zoneId"]
+      const zoneId = infor["zoneId"];
       socketService.getIO().emit(`/recive/update/${zoneId}/infor-video`, infor);
       return;
     } catch (error) {
@@ -141,8 +143,3 @@ function infor_video(event_name, socket) {
     }
   });
 }
-
-
-
-
-

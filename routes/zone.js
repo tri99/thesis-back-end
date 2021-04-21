@@ -31,5 +31,11 @@ module.exports = () => {
    * @param {String} deviceId
    */
   router.post("/add-device/", zoneController.addDeviceToZone);
+
+  /**
+   * @param {String} zoneId
+   * @param {String} deviceId
+   */
+  router.post("/remove-device/", zoneController.removeDeviceFromZone);
   return router;
 };

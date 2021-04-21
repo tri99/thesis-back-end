@@ -6,7 +6,9 @@ async function insert(req, res) {
   try {
     const { name, serialNumber, zoneId } = req.body;
 
-    let deviceDocumentCheck = await deviceService.getByOneParam(serialNumber);
+    let deviceDocumentCheck = await deviceService.getBySerialNumber(
+      serialNumber
+    );
     if (deviceDocumentCheck)
       return res
         .status(config.status_code.FORBIDEN)
