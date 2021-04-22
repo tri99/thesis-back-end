@@ -1,5 +1,5 @@
 const Zone = require("./../collections/zone");
-
+const mongoose = require("mongoose")
 function createModel(
   videoArray,
   playlistArray,
@@ -20,22 +20,24 @@ function createModel(
   return newZoneModel;
 }
 
-function insert(newZoneDocument){
-    return new Promise((resolve, reject) => {
-        newZoneDocument.save((error) => {
-          if (error) return reject(error);
-          return resolve(true);
-        });
-    })
+function insert(newZoneDocument) {
+  return new Promise((resolve, reject) => {
+    newZoneDocument.save((error) => {
+      if (error) return reject(error);
+      return resolve(true);
+    });
+  });
 }
 
-function getById(_id){
-    return new Promise ((resolve, reject) => {
-        Zone.findById(_id).select().exec((error, zoneDocument) => {
-            if(error) return reject(error);
-            return resolve(zoneDocument);
-        })
-    })
+function getById(_id) {
+  return new Promise((resolve, reject) => {
+    Zone.findById(_id)
+      .select()
+      .exec((error, zoneDocument) => {
+        if (error) return reject(error);
+        return resolve(zoneDocument);
+      });
+  });
 }
 
 function getAll() {
@@ -49,13 +51,13 @@ function getAll() {
   });
 }
 
-function deleteById(_id){
-    return new Promise ((resolve, reject) => {
-        Zone.deleteMany({_id: _id}).exec(error => {
-            if(error) reject(error);
-            return resolve(true);
-        }) 
-    })
+function deleteById(_id) {
+  return new Promise((resolve, reject) => {
+    Zone.deleteMany({ _id: _id }).exec((error) => {
+      if (error) reject(error);
+      return resolve(true);
+    });
+  });
 }
 
 function updateById(
@@ -89,31 +91,32 @@ function updateById(
   });
 }
 
-function getZoneByDeviceId(deviceId){
+function getZoneByDeviceId(deviceId) {
   return new Promise((resolve, reject) => {
-    Zone.find({deviceArray: {$in :[deviceId]}}).select().exec((error, zoneDocument) => {
-      if(error) return reject(error);
-      return resolve(zoneDocument)
-    })
+    Zone.find({ deviceArray: { $in: [deviceId] } })
+      .select()
+      .exec((error, zoneDocument) => {
+        if (error) return reject(error);
+        return resolve(zoneDocument);
+      });
   });
 }
 
-
 /**
- * 
+ *
  * @param {String} audioZoneId
  * @param {Array<String>} newVideos
  */
-function addVideoArray(audioZoneId, newVideos){
-    return new Promise((resolve, reject) => {
-        Zone.updateOne(
-          { _id: audioZoneId },
-          { $addToSet: { videoArray: { $each: newVideos } } }
-        ).exec((error) => {
-          if (error) reject(error);
-          return resolve(true);
-        });
-    })
+function addVideoArray(audioZoneId, newVideos) {
+  return new Promise((resolve, reject) => {
+    Zone.updateOne(
+      { _id: audioZoneId },
+      { $addToSet: { videoArray: { $each: newVideos } } }
+    ).exec((error) => {
+      if (error) reject(error);
+      return resolve(true);
+    });
+  });
 }
 
 /**
@@ -121,11 +124,7 @@ function addVideoArray(audioZoneId, newVideos){
  *  @param {Array} newVideos
  */
 
-function addVideoArrayByArrayAudioZoneId(
-  audioZoneIds,
-  newVideos,
-  size
-) {
+function addVideoArrayByArrayAudioZoneId(audioZoneIds, newVideos, size) {
   return new Promise((resolve, reject) => {
     Zone.updateMany(
       { _id: audioZoneIds },
@@ -137,11 +136,7 @@ function addVideoArrayByArrayAudioZoneId(
   });
 }
 
-function removeVideoArrayByArrayAudioZoneId(
-  audioZoneIds,
-  newVideos,
-  size
-) {
+function removeVideoArrayByArrayAudioZoneId(audioZoneIds, newVideos, size) {
   return new Promise((resolve, reject) => {
     Zone.updateMany(
       { _id: audioZoneIds },
@@ -153,6 +148,28 @@ function removeVideoArrayByArrayAudioZoneId(
   });
 }
 
+function getZoneByPlaylistArrayId(playlistIds) {
+  return new Promise((resolve, reject) => {
+    Zone.find({ "playlistArray._id": { $in: playlistIds } })
+      .select()
+      .exec((error, zoneDocument) => {
+        if(error) return reject(error);
+        return resolve(zoneDocument);
+      });
+  });
+}
+
+function getZoneByVideoArrayId(videoIds) {
+  let objectIdArray = videoIds.map((s) => mongoose.Types.ObjectId(s));
+  return new Promise((resolve, reject) => {
+    Zone.find({ "videoArray._id": { $in: objectIdArray } })
+      .select()
+      .exec((error, zoneDocument) => {
+        if (error) return reject(error);
+        return resolve(zoneDocument);
+      });
+  });
+}
 
 module.exports = {
   createModel: createModel,
@@ -165,4 +182,6 @@ module.exports = {
   addVideoArrayByArrayAudioZoneId,
   removeVideoArrayByArrayAudioZoneId,
   getZoneByDeviceId: getZoneByDeviceId,
+  getZoneByPlaylistArrayId: getZoneByPlaylistArrayId,
+  getZoneByVideoArrayId: getZoneByVideoArrayId,
 };

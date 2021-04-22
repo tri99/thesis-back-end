@@ -9,6 +9,7 @@ module.exports = () => {
   // api for device, dont touch
   router.post("/get-zone-for-device", zoneController.getByIdforDevice);
   router.post("/get-zone-for-device-2", zoneController.getZoneByDeviceId);
+  // router.post("/test", zoneController.getZoneByvideoArrayId)
   /**
    *  @param {String} _id
    */
@@ -37,5 +38,9 @@ module.exports = () => {
    * @param {String} deviceId
    */
   router.post("/remove-device/", zoneController.removeDeviceFromZone);
+
+
+
+  
   return router;
 };

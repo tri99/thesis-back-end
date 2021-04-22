@@ -1,5 +1,5 @@
 const  videoService = require("./../services/video")
-
+const zoneService = require("./../services/zone")
 const config = require("./../config/config");
 const audio_module = require("./../exports/audio-io");
 
@@ -109,6 +109,14 @@ async function deleteById(req, res) {
   try {
     const videoId = req.params.id;
     const videoDocument = await videoService.findOneById(videoId);
+
+    const zoneDocument = await zoneService.getZoneByVideoArrayId([videoId]);
+    if(zoneDocument.length > 0){
+      return res
+        .status(config.status_code.FORBIDEN)
+        .send({ message: "Some Zone include this video" });
+    }
+
     if(!videoDocument){
       return res
         .status(403)
@@ -124,6 +132,7 @@ async function deleteById(req, res) {
     await videoService.deleteDocument(videoId);
     return res.status(config.status_code.OK).send({ video: true });
   } catch (error) {
+    console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }
 }

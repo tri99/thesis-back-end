@@ -1,4 +1,6 @@
 const playlistService = require("./../services/playlist");
+const zoneService = require("./../services/zone")
+
 const config = require("./../config/config");
 
 
@@ -69,6 +71,12 @@ async function updateById(req, res) {
 async function deleteById(req, res) {
   try {
     const  playlistId  = req.params.id;
+
+    let zoneDocument = await zoneService.getZoneByPlaylistArrayId([playlistId])
+    console.log(zoneDocument);
+    if(zoneDocument.length > 0){
+      return res.status(config.status_code.FORBIDEN).send({ message: "Some Zone include this playlist" });
+    }
     await playlistService.deleteById(playlistId);
     return res.status(config.status_code.OK).send({ playlist: true });
   } catch (error) {

@@ -39,6 +39,24 @@ async function insert(req, res) {
  *@param {Array} deviceArray[_id:"String"]
  */
 
+async function processAddingPlaylist(playlistArray, videoArray){
+  let plId = [];
+  for (let i = 0; i < playlistArray.length; i++) {
+    plId.push(playlistArray[i]["_id"]);
+  }
+  let playlistDocument = await playlistService.getManyByArrayId(plId);
+  let videoIds = [];
+  for (let i = 0; i < videoArray.length; i++) {
+    videoIds.push(videoArray[i]["_id"]);
+  }
+  for (let i = 0; i < playlistDocument.length; i++) {
+    videoIds.push.apply(videoIds, playlistArray[i]["mediaArray"]);
+  }
+  videoIds = videoIds.filter(function (elem, pos) {
+    return videoIds.indexOf(elem) == pos;
+  });
+}
+
 async function updateById(req, res) {
   try {
     const { id } = req.params;
@@ -53,23 +71,8 @@ async function updateById(req, res) {
       isLoopAllVideo,
     } = req.body;
 
-    let plId = []
-    for (let i = 0; i < playlistArray.length; i++) {
-      plId.push(playlistArray[i]["_id"]);
-    }
-    let playlistDocument = await playlistService.getManyByArrayId(plId);
-    let videoIds = []
-    for (let i = 0; i < videoArray.length; i++) {
-      videoIds.push(videoArray[i]["_id"]);
-    }
-    for (let i = 0; i < playlistDocument.length; i++) {
-      videoIds.push.apply(videoIds, playlistArray[i]["mediaArray"]);
-    }
-    console.log(videoIds);
-    videoIds = videoIds.filter(function (elem, pos) {
-      return videoIds.indexOf(elem) == pos;
-    });
-    console.log(videoIds);
+    let videoIds = await processAddingPlaylist(playlistArray, videoArray);
+    
     let videoDocument = await videoService.getManyByArrayId(videoIds);
     videoArray = videoDocument;
     await zoneService.updateById(
@@ -252,25 +255,28 @@ async function addDeviceToZone(req, res) {
       .emit(
         "add-device-into-zone",
         (payload = { to: deviceId, zoneId: zoneId })
-      );    return res
+      );    
+      return res
       .status(config.status_code.OK)
-      .send({ deviceId: "deviceDocument" });
+      .send({ device: deviceDocument });
   } catch (error) {
     console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }
 }
 
-async function addPlaylistToZone(req, res){
-  try {
-    const {zoneId, playlistId} = req.body;
-    let zoneDocument = await zoneService.getById(zoneId);
-    let playlistDocument = await playlistService.getById(playlistId);
-
-  } catch (error) {
-    console.log(error);
-  }
-}
+// async function getZoneByvideoArrayId(req, res){
+//   try {
+//     const { videoIds } = req.body;
+//     console.log(videoIds);
+//     let zoneDocument = await zoneService.getZoneByVideoArrayId(videoIds);
+//     console.log(zoneDocument);
+//     return res.status(config.status_code.OK).send({ zone: zoneDocument });
+//   } catch (error) {
+//     console.log(error);
+//     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+//   }
+// }
 
 
 module.exports = {
@@ -279,6 +285,7 @@ module.exports = {
   getAll: getAll,
   getZoneByDeviceId: getZoneByDeviceId,
   getByIdforDevice: getByIdforDevice,
+  // getZoneByvideoArrayId: getZoneByvideoArrayId,
   deleteById: deleteById,
   updateById: updateById,
   addDeviceToZone: addDeviceToZone,
