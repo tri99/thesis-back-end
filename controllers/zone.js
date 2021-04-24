@@ -102,7 +102,7 @@ async function updateById(req, res) {
     );
 
     let zoneDocument = await zoneService.getById(id)
-
+    console.log(zoneDocument);
     audio_module
       .get_audio_io()
       .to(id)
@@ -285,7 +285,7 @@ async function getZoneByUserId(req, res){
     // console.log(videoIds);
     let zoneDocument = await zoneService.getManyByUserId(userId);
     console.log(zoneDocument);
-    return res.status(config.status_code.OK).send({ zone: zoneDocument });
+    return res.status(config.status_code.OK).send({ zones: zoneDocument });
   } catch (error) {
     // console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });

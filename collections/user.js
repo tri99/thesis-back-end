@@ -15,7 +15,7 @@ const userSchema = new Schema({
       message: (props) => `${props.value} is not a valid Email!`,
     },
   },
-  name: {
+  username: {
     type: String,
     required: true,
   },

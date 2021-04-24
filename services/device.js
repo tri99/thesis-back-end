@@ -1,11 +1,12 @@
 const Device = require("./../collections/device");
 
-function createModel(name, serialNumber, zoneId) {
+function createModel(name, serialNumber, zoneId, userId) {
   const deviceDocument = new Device({
     name: name,
     serialNumber: serialNumber,
     zoneId: zoneId,
-    status: false
+    status: false,
+    userId: userId,
   });
   return deviceDocument;
 }
@@ -97,7 +98,7 @@ function getManyByArrayId(deviceIds){
 function getManyByUserId(userId) {
   return new Promise((resolve, reject) => {
     Device.find({ userId: userId })
-      .select("_id name")
+      .select()
       .exec((error, deviceDocument) => {
         if (error) return reject(error);
         return resolve(deviceDocument);

@@ -89,7 +89,8 @@ async function upload(req,res){
       duration,
       videoSize,
       urlVideoGlobal,
-      tags
+      tags,
+      req.userId
     );
     await videoService.saveVideo(newVideo);
 
@@ -137,6 +138,19 @@ async function deleteById(req, res) {
   }
 }
 
+async function getVideosByUserId(req, res) {
+  try {
+    const userId = req.userId;
+    // console.log(videoIds);
+    let videoDocument = await videoService.getManyByUserId(userId);
+    // console.log(videoDocument);
+    return res.status(config.status_code.OK).send({ videos: videoDocument });
+  } catch (error) {
+    // console.log(error);
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
 
 
 module.exports = {
@@ -146,4 +160,5 @@ module.exports = {
   getInforVideo: getInforVideo,
   upload: upload,
   getAll: getAll,
+  getVideosByUserId: getVideosByUserId,
 };

@@ -49,10 +49,12 @@ module.exports.connect = (socket) => {
 
       // ============= CHECK DEVICE ==================================
       const deviceDocument = await deviceService.getById(decode_data["id"]);
+      console.log(decode_data["id"]);
       if (!deviceDocument) socket.disconnect();
-      payload["zoneId"] = deviceDocument["zoneId"];
+      
       socket.join(deviceDocument["_id"]);
       if (deviceDocument["zoneId"]) {
+        payload["zoneId"] = deviceDocument["zoneId"];
         socket.join(deviceDocument["zoneId"]);
       }
       socket.user_id = "admin";

@@ -8,7 +8,6 @@ async function isAuthen(req, res, next) {
         .status(config.status_code.TOKEN_ERROR)
         .send({ message: "TOKEN ERROR" });
     }
-    console.log(token);
     if (!token)
       return res
         .status(config.status_code.TOKEN_ERROR)

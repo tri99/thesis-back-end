@@ -46,9 +46,9 @@ function emailValidate(e) {
 
 async function signUp(req, res) {
   try {
-    let { name, email, password } = req.body;
-    console.log(name, email, password);
-    if (!name || !email || !password) {
+    let { username, email, password } = req.body;
+    console.log(username, email, password);
+    if (!username || !email || !password) {
       return res
         .status(config.status_code.FORBIDEN)
         .send({ message: "missing field" });
@@ -70,7 +70,7 @@ async function signUp(req, res) {
 
     password = await encrypt.encryptPassword(password);
 
-    const newUserDocument = UserService.createModel(name, email, password);
+    const newUserDocument = UserService.createModel(username, email, password);
     await UserService.insert(newUserDocument);
 
     return res.status(config.status_code.OK).send({ user: newUserDocument });
@@ -84,6 +84,16 @@ async function getUserById(req, res) {
   try {
     const { id } = req.params;
     const newUserDocument = await UserService.getUserById(_id);
+
+    return res.status(200).send({ user: newUserDocument });
+  } catch (error) {
+    res.status(500).send({ message: error });
+  }
+}
+
+async function getCurrentUser(req, res) {
+  try {
+    const newUserDocument = await UserService.getUserById(req.userId);
 
     return res.status(200).send({ user: newUserDocument });
   } catch (error) {
@@ -130,8 +140,8 @@ async function updateUserById(req, res) {
   try {
     // const _id = req.userId
     const id = req.body.id
-    const { name, password, permission } = req.body;
-    await UserService.updateUserById(id, name, password, permission);
+    const { username, password, permission } = req.body;
+    await UserService.updateUserById(id, username, password, permission);
 
     const userDocument = await UserService.getUserById(id);
 
@@ -149,4 +159,5 @@ module.exports = {
   getAllUser: getAllUser,
   getUserByListId: getUserByListId,
   updateUserById: updateUserById,
+  getCurrentUser: getCurrentUser,
 };

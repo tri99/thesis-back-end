@@ -1,8 +1,8 @@
 const User = require("./../collections/user");
 
-function createModel(name, email, password) {
+function createModel(username, email, password) {
   const newUserDocument = new User({
-    name: name,
+    username: username,
     email: email,
     password: password,
     permission: [],
@@ -22,7 +22,7 @@ function insert(newUserDocument) {
 function getUserByEmail(email) {
   return new Promise((resolve, reject) => {
     User.findOne({ email: email })
-      .select("name email password permission")
+      .select("username email password permission")
       .exec((error, userDocument) => {
         if (error) return reject(error);
         return resolve(userDocument);
@@ -32,8 +32,8 @@ function getUserByEmail(email) {
 
 function getUserById(_id) {
   return new Promise((resolve, reject) => {
-    User.find({ _id: _id })
-      .select("_id name email permission")
+    User.findById(_id)
+      .select("_id username email permission")
       .exec((error, userDocument) => {
         if (error) return reject(error);
         return resolve(userDocument);
@@ -44,7 +44,7 @@ function getUserById(_id) {
 function getUserByListId(listuserId) {
   return new Promise((resolve, reject) => {
     User.find({ _id: {$in: listuserId} })
-      .select("_id name email permission")
+      .select("_id username email permission")
       .exec((error, userDocument) => {
         if (error) return reject(error);
         return resolve(userDocument);
@@ -55,7 +55,7 @@ function getUserByListId(listuserId) {
 function getAllUser(_id) {
   return new Promise((resolve, reject) => {
     User.find()
-      .select("_id name email permission")
+      .select("_id username email permission")
       .exec((error, userDocument) => {
         if (error) return reject(error);
         return resolve(userDocument);
@@ -63,11 +63,11 @@ function getAllUser(_id) {
   });
 }
 
-function updateUserById(_id, name, password, permission) {
+function updateUserById(_id, username, password, permission) {
   return new Promise((resolve, reject) => {
     User.updateOne(
       { _id: _id },
-      { name: name, password: password, permission: permission }
+      { username: username, password: password, permission: permission }
     ).exec((error) => {
       if (error) return reject(error);
       return resolve(true);

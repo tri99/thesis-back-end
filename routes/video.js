@@ -1,7 +1,7 @@
 const videoController = require("./../controllers/video");
 const router = require("express").Router();
-const fileUpload = require("./../utils/uploadFile")
-
+const fileUpload = require("./../utils/uploadFile");
+const auth = require("./../middlewares/authen_token");
 module.exports = () => {
   // router.post("/insert-video", videoController.insert);
   /**
@@ -12,17 +12,18 @@ module.exports = () => {
    */
   router.post(
     "/",
+    auth.isAuthen,
     fileUpload.catchErrorVideo(),
     videoController.upload
   );
-  router.get("/", videoController.getAll);
+  router.get("/", auth.isAuthen, videoController.getVideosByUserId);
   /**
    * @param {ArrayString} videoIds
    */
-  router.get("/get-many", videoController.getManyByArrayId);
+  router.get("/get-many", auth.isAuthen, videoController.getManyByArrayId);
   /**
    * @param {String} _id
    */
-  router.delete("/:id", videoController.deleteById);
+  router.delete("/:id", auth.isAuthen, videoController.deleteById);
   return router;
-}
+};

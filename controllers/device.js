@@ -4,7 +4,7 @@ const config = require("./../config/config");
 
 async function insert(req, res) {
   try {
-    const { name, serialNumber, zoneId } = req.body;
+    const { name, serialNumber } = req.body;
 
     let deviceDocumentCheck = await deviceService.getBySerialNumber(
       serialNumber
@@ -17,10 +17,36 @@ async function insert(req, res) {
     const deviceDocument = deviceService.createModel(
       name,
       serialNumber,
-      zoneId
+      null,
+      null
     );
     await deviceService.insert(deviceDocument);
     return res.status(config.status_code.OK).send({ device: deviceDocument });
+  } catch (error) {
+    console.log(error);
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
+async function addDevice(req, res) {
+  try {
+    const { name, serialNumber } = req.body;
+
+    let deviceDocumentCheck = await deviceService.getBySerialNumber(
+      serialNumber
+    );
+    if (!deviceDocumentCheck) {
+      return res
+        .status(config.status_code.FORBIDEN)
+        .send({ message: config.status_message.DEVICE_EXIST });
+    }
+    deviceDocumentCheck["name"] = name;
+    deviceDocumentCheck["zoneId"] = null;
+    deviceDocumentCheck["userId"] = req.userId;
+    await deviceService.insert(deviceDocumentCheck);
+    return res
+      .status(config.status_code.OK)
+      .send({ device: deviceDocumentCheck });
   } catch (error) {
     console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
@@ -63,7 +89,7 @@ async function getAll(req, res) {
     const deviceDocument = await deviceService.getAll();
     return res.status(config.status_code.OK).send({ devices: deviceDocument });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }
 }
@@ -91,7 +117,7 @@ async function getConfig(req, res) {
         .status(config.status_code.FORBIDEN)
         .send({ message: config.status_message.NOT_PERMISSION });
 
-    const tokenDevice = await jwt.signDevice({id: deviceDocument["_id"]});
+    const tokenDevice = await jwt.signDevice({ id: deviceDocument["_id"] });
     return res.status(config.status_code.OK).send({
       token: tokenDevice,
     });
@@ -99,6 +125,19 @@ async function getConfig(req, res) {
     return res
       .status(config.status_code.SERVER_ERROR)
       .send({ message: "NOT_PERMISSION" });
+  }
+}
+
+async function getDevicesByUserId(req, res) {
+  try {
+    const userId = req.userId;
+    // console.log(videoIds);
+    let deviceDocument = await deviceService.getManyByUserId(userId);
+    // console.log(videoDocument);
+    return res.status(config.status_code.OK).send({ devices: deviceDocument });
+  } catch (error) {
+    // console.log(error);
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }
 }
 
@@ -110,4 +149,6 @@ module.exports = {
   getAll: getAll,
   getById: getById,
   getConfig: getConfig,
+  getDevicesByUserId: getDevicesByUserId,
+  addDevice: addDevice,
 };

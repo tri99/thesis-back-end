@@ -10,7 +10,8 @@ async function insert(req, res){
         const playlistDocument = playlistService.createModel(
             mediaArray,
             name,
-            type
+            type,
+            req.userId
         );
         await playlistService.insert(playlistDocument);
         return res
@@ -84,10 +85,27 @@ async function deleteById(req, res) {
   }
 }
 
+async function getPlaylistByUserId(req, res) {
+  try {
+    const userId = req.userId;
+    // console.log(videoIds);
+    let playlistDocument = await playlistService.getManyByUserId(userId);
+    return res
+      .status(config.status_code.OK)
+      .send({ playlists: playlistDocument });
+  } catch (error) {
+    console.log(error);
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
+
+
 module.exports = {
   insert: insert,
   getManyByArrayId: getManyByArrayId,
   getAll: getAll,
+  getPlaylistByUserId: getPlaylistByUserId,
   updateById: updateById,
   deleteById: deleteById,
 };

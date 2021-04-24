@@ -1,11 +1,12 @@
 const Playlist = require("./../collections/playlist");
 
-function createModel(mediaArray, name, type){
+function createModel(mediaArray, name, type, userId){
     const playlistDocument = new Playlist({
-        mediaArray: mediaArray,
-        name: name,
-        type: type,
-        volume: 50
+      mediaArray: mediaArray,
+      name: name,
+      type: type,
+      volume: 50,
+      userId: userId,
     });
     return playlistDocument;
 }
@@ -92,7 +93,7 @@ function updateById(playlistId, name, mediaArray, volume) {
 function getManyByUserId(userId) {
   return new Promise((resolve, reject) => {
     Playlist.find({ userId: userId })
-      .select("path name duration size tag")
+      .select()
       .exec((error, videoDocument) => {
         if (error) return reject(error);
         return resolve(videoDocument);
