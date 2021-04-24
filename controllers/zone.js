@@ -21,7 +21,8 @@ async function insert(req, res) {
       playlistArray,
       deviceArray,
       name,
-      videoVolume
+      videoVolume,
+      req.userId
     );
     console.log(newZoneDocument);
     await zoneService.insert(newZoneDocument);
@@ -71,8 +72,21 @@ async function updateById(req, res) {
       isLoopAllVideo,
     } = req.body;
 
-    let videoIds = await processAddingPlaylist(playlistArray, videoArray);
-    
+    let plId = [];
+    for (let i = 0; i < playlistArray.length; i++) {
+      plId.push(playlistArray[i]["_id"]);
+    }
+    let playlistDocument = await playlistService.getManyByArrayId(plId);
+    let videoIds = [];
+    for (let i = 0; i < videoArray.length; i++) {
+      videoIds.push(videoArray[i]["_id"]);
+    }
+    for (let i = 0; i < playlistDocument.length; i++) {
+      videoIds.push.apply(videoIds, playlistArray[i]["mediaArray"]);
+    }
+    videoIds = videoIds.filter(function (elem, pos) {
+      return videoIds.indexOf(elem) == pos;
+    });
     let videoDocument = await videoService.getManyByArrayId(videoIds);
     videoArray = videoDocument;
     await zoneService.updateById(
@@ -265,18 +279,18 @@ async function addDeviceToZone(req, res) {
   }
 }
 
-// async function getZoneByvideoArrayId(req, res){
-//   try {
-//     const { videoIds } = req.body;
-//     console.log(videoIds);
-//     let zoneDocument = await zoneService.getZoneByVideoArrayId(videoIds);
-//     console.log(zoneDocument);
-//     return res.status(config.status_code.OK).send({ zone: zoneDocument });
-//   } catch (error) {
-//     console.log(error);
-//     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
-//   }
-// }
+async function getZoneByUserId(req, res){
+  try {
+    const userId = req.userId;
+    // console.log(videoIds);
+    let zoneDocument = await zoneService.getManyByUserId(userId);
+    console.log(zoneDocument);
+    return res.status(config.status_code.OK).send({ zone: zoneDocument });
+  } catch (error) {
+    // console.log(error);
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
 
 
 module.exports = {
@@ -290,4 +304,5 @@ module.exports = {
   updateById: updateById,
   addDeviceToZone: addDeviceToZone,
   removeDeviceFromZone: removeDeviceFromZone,
+  getZoneByUserId: getZoneByUserId,
 };

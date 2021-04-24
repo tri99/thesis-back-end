@@ -1,14 +1,17 @@
 const router = require("express").Router();
 const zoneController = require("./../controllers/zone");
-
+const auth = require("./../middlewares/authen_token")
 module.exports = () => {
   /**
    *  @param {String} name
    */
-  router.post("/", zoneController.insert);
+  router.post("/",auth.isAuthen, zoneController.insert);
   // api for device, dont touch
   router.post("/get-zone-for-device", zoneController.getByIdforDevice);
   router.post("/get-zone-for-device-2", zoneController.getZoneByDeviceId);
+  
+  router.get("/user/", auth.isAuthen, zoneController.getZoneByUserId);
+
   // router.post("/test", zoneController.getZoneByvideoArrayId)
   /**
    *  @param {String} _id
@@ -38,8 +41,6 @@ module.exports = () => {
    * @param {String} deviceId
    */
   router.post("/remove-device/", zoneController.removeDeviceFromZone);
-
-
 
   
   return router;

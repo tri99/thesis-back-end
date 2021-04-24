@@ -26,10 +26,11 @@ module.exports.connect = (socket) => {
      socket.join(zoneId);
   });
   socket.on("disconnect", async()  => {
+    console.log(socket.device_id, " disconnected");
     await deviceService.updateStatusDevice(socket.device_id, false);
     socketService
       .getIO()
-      .emit(`/recive/update/${device_id}/disconnect`, infor);
+      .emit(`/receive/update/${socket.device_id}/disconnect`, socket.device_id);
   })
   socket.on("authentication", async (data_authen) => {
     /**
@@ -57,7 +58,7 @@ module.exports.connect = (socket) => {
       socket.user_id = "admin";
       socketService
         .getIO()
-        .emit(`/recive/update/${device_id}/connect`, infor);
+        .emit(`/receive/update/${socket.device_id}/connect`, socket.device_id);
       initFunction(socket, payload);
     } catch (error) {
       console.log(error);
@@ -146,7 +147,7 @@ function infor_video(event_name, socket) {
     try {
       infor["deviceId"] = socket.device_id;
       const zoneId = infor["zoneId"];
-      socketService.getIO().emit(`/recive/update/${zoneId}/infor-video`, infor);
+      socketService.getIO().emit(`/receive/update/${zoneId}/infor-video`, infor);
       return;
     } catch (error) {
       return;

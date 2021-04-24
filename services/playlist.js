@@ -89,6 +89,18 @@ function updateById(playlistId, name, mediaArray, volume) {
   });
 }
 
+function getManyByUserId(userId) {
+  return new Promise((resolve, reject) => {
+    Playlist.find({ userId: userId })
+      .select("path name duration size tag")
+      .exec((error, videoDocument) => {
+        if (error) return reject(error);
+        return resolve(videoDocument);
+      });
+  });
+}
+
+
 module.exports = {
   createModel: createModel,
   insert: insert,
@@ -97,4 +109,5 @@ module.exports = {
   getById: getById,
   updateById: updateById,
   deleteById: deleteById,
+  getManyByUserId: getManyByUserId,
 };

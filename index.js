@@ -49,6 +49,7 @@ app.use("/api/videos", require("./routes/video")());
 app.use("/api/video-control", require("./routes/videoController")());
 app.use("/api/devices", require("./routes/device")());
 app.use("/api/playlists", require("./routes/playlist")());
+app.use("/api/users", require("./routes/user")());
 
 server.listen(config.port, config.host, () => {
   console.log(1, `SERVER Api ON LISTENING: ${config.host}:${config.port}`);

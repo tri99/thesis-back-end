@@ -94,6 +94,17 @@ function getManyByArrayId(deviceIds){
   });
 }
 
+function getManyByUserId(userId) {
+  return new Promise((resolve, reject) => {
+    Device.find({ userId: userId })
+      .select("_id name")
+      .exec((error, deviceDocument) => {
+        if (error) return reject(error);
+        return resolve(deviceDocument);
+      });
+  });
+}
+
 
 module.exports = {
   createModel: createModel,
@@ -106,4 +117,5 @@ module.exports = {
   getBySerialNumber: getBySerialNumber,
   getManyByArrayId: getManyByArrayId,
   updateStatusDevice: updateStatusDevice,
+  getManyByUserId: getManyByUserId,
 };

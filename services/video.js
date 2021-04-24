@@ -38,7 +38,18 @@ function getManyByArrayId(videoIds) {
   });
 }
 
-function createModel(name, duration, size, pathVideo, tag) {
+function getManyByUserId(userId) {
+  return new Promise((resolve, reject) => {
+    Video.find({ userId: userId })
+      .select("path name duration size tag")
+      .exec((error, videoDocument) => {
+        if (error) return reject(error);
+        return resolve(videoDocument);
+      });
+  });
+}
+
+function createModel(name, duration, size, pathVideo, tag, userId) {
   const videoDocument = new Video({
     name: name,
     duration: duration,
@@ -47,6 +58,7 @@ function createModel(name, duration, size, pathVideo, tag) {
     tag: tag,
     cDate: new Date(),
     mDate: new Date(),
+    userId: userId,
   });
   return videoDocument;
 }
@@ -97,6 +109,7 @@ module.exports = {
   insertMany: insertMany,
   deleteDocument: deleteDocument,
   getManyByArrayId: getManyByArrayId,
+  getManyByUserId: getManyByUserId,
   createModel: createModel,
   saveVideo: saveVideo,
   findOneByName: findOneByName,

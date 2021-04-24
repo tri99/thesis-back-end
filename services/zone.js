@@ -5,7 +5,8 @@ function createModel(
   playlistArray,
   deviceArray,
   name,
-  volumeVideo
+  volumeVideo,
+  userId
 ) {
   let newZoneModel = new Zone({
     videoArray: videoArray,
@@ -16,6 +17,7 @@ function createModel(
     isMuteVideo: false,
     isLoopOneVideo: false,
     isLoopAllVideo: false,
+    userId: userId
   });
   return newZoneModel;
 }
@@ -102,6 +104,17 @@ function getZoneByDeviceId(deviceId) {
   });
 }
 
+function getZoneByUserId(userId) {
+  return new Promise((resolve, reject) => {
+    Zone.find({ userId: userId })
+      .select()
+      .exec((error, zoneDocument) => {
+        if (error) return reject(error);
+        return resolve(zoneDocument);
+      });
+  });
+}
+
 /**
  *
  * @param {String} audioZoneId
@@ -171,6 +184,17 @@ function getZoneByVideoArrayId(videoIds) {
   });
 }
 
+function getManyByUserId(userId) {
+  return new Promise((resolve, reject) => {
+    Zone.find({ userId: userId })
+      .select("_id name")
+      .exec((error, deviceDocument) => {
+        if (error) return reject(error);
+        return resolve(deviceDocument);
+      });
+  });
+}
+
 module.exports = {
   createModel: createModel,
   insert: insert,
@@ -184,4 +208,6 @@ module.exports = {
   getZoneByDeviceId: getZoneByDeviceId,
   getZoneByPlaylistArrayId: getZoneByPlaylistArrayId,
   getZoneByVideoArrayId: getZoneByVideoArrayId,
+  getZoneByUserId: getZoneByUserId,
+  getManyByUserId: getManyByUserId,
 };

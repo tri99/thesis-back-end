@@ -35,6 +35,10 @@ const zoneSchema = new Schema({
     type: Boolean,
     required: true,
   },
+  userId:{
+    type: Schema.Types.ObjectId,
+    require: true
+  }
 });
 
 const Zone = mongoose.model("zone", zoneSchema);
