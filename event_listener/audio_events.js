@@ -17,23 +17,25 @@ function connection(IO) {
 // };
 
 module.exports.connect = (socket) => {
+  // socket.emit("connect", {})
   console.log("connect");
   socket.auth = false;
   socket.on("audio-leaved-zone", async (zoneId) => {
     socket.leave(zoneId);
   });
   socket.on("audio-joined-zone", async (zoneId) => {
-     socket.join(zoneId);
+    socket.join(zoneId);
   });
-  socket.on("disconnect", async()  => {
+  socket.on("disconnect", async () => {
     console.log(socket.device_id, " disconnected");
     await deviceService.updateStatusDevice(socket.device_id, false);
-    let userDoc = deviceService.getById(socekt.device_id)
+    let deviceDoc = await deviceService.getById(socket.device_id);
+    console.log(deviceDoc["userId"]);
     socketService
       .getIO()
-      .to(userDoc["userId"])
-      .emit(`/receive/update/socket/disconnect`, socket.device_id);
-  })
+      .in(deviceDoc["userId"].toString())
+      .emit(`/receive/update/socket/disconnect`, deviceDoc);
+  });
   socket.on("authentication", async (data_authen) => {
     /**
      * @param data_authen {token: String}
@@ -53,18 +55,18 @@ module.exports.connect = (socket) => {
       const deviceDocument = await deviceService.getById(decode_data["id"]);
       console.log(decode_data["id"]);
       if (!deviceDocument) socket.disconnect();
-      
+
       socket.join(deviceDocument["_id"]);
       if (deviceDocument["zoneId"]) {
         payload["zoneId"] = deviceDocument["zoneId"];
         socket.join(deviceDocument["zoneId"]);
       }
-      
+
       socket.user_id = "admin";
       socketService
         .getIO()
-        .to(deviceDocument["userId"])
-        .emit(`/receive/update/socket/connect`, socket.device_id);
+        .in(deviceDocument["userId"].toString())
+        .emit(`/receive/update/socket/connect`, deviceDocument);
       initFunction(socket, payload);
     } catch (error) {
       console.log(error);
@@ -152,7 +154,7 @@ function infor_video(event_name, socket) {
   socket.on(event_name, async (infor) => {
     try {
       infor["deviceId"] = socket.device_id;
-      let userDoc = deviceService.getById(socket.device_id)
+      let userDoc = deviceService.getById(socket.device_id);
 
       const zoneId = infor["zoneId"];
       socketService

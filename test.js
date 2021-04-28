@@ -1,12 +1,11 @@
-// let myArray = [1, 2, 3, 4, 1, 2, 1, 2];
+const io = require("socket.io-client");
 
-// uniqueArray = myArray.filter(function (elem, pos) {
-//   return myArray.indexOf(elem) == pos;
-// });
-
-// console.log(uniqueArray);
-
-let a = [1, 2, 3, 4, 2, 4, 2, 23];
-let b = [2, 4, 2, 23];
-a.push.apply(a,b)
-console.log(a);
+const socket = io("ws://192.168.43.154:3000", {
+  reconnectionDelayMax: 10000,
+  auth: {
+    token: "123",
+  },
+  query: {
+    "my-key": "my-value",
+  },
+});
