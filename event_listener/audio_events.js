@@ -28,9 +28,11 @@ module.exports.connect = (socket) => {
   socket.on("disconnect", async()  => {
     console.log(socket.device_id, " disconnected");
     await deviceService.updateStatusDevice(socket.device_id, false);
+    let userDoc = deviceService.getById(socekt.device_id)
     socketService
       .getIO()
-      .emit(`/receive/update/${socket.device_id}/disconnect`, socket.device_id);
+      .to(userDoc["userId"])
+      .emit(`/receive/update/socket/disconnect`, socket.device_id);
   })
   socket.on("authentication", async (data_authen) => {
     /**
@@ -57,10 +59,12 @@ module.exports.connect = (socket) => {
         payload["zoneId"] = deviceDocument["zoneId"];
         socket.join(deviceDocument["zoneId"]);
       }
+      
       socket.user_id = "admin";
       socketService
         .getIO()
-        .emit(`/receive/update/${socket.device_id}/connect`, socket.device_id);
+        .to(deviceDocument["userId"])
+        .emit(`/receive/update/socket/connect`, socket.device_id);
       initFunction(socket, payload);
     } catch (error) {
       console.log(error);
@@ -145,11 +149,16 @@ function device_disconnected(event_name, socket, payload) {
 }
 
 function infor_video(event_name, socket) {
-  socket.on(event_name, (infor) => {
+  socket.on(event_name, async (infor) => {
     try {
       infor["deviceId"] = socket.device_id;
+      let userDoc = deviceService.getById(socket.device_id)
+
       const zoneId = infor["zoneId"];
-      socketService.getIO().emit(`/receive/update/${zoneId}/infor-video`, infor);
+      socketService
+        .getIO()
+        .to(userDoc["userId"])
+        .emit(`/receive/update/${zoneId}/infor-video`, infor);
       return;
     } catch (error) {
       return;
