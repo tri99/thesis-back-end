@@ -30,10 +30,6 @@ const userSchema = new Schema({
       message: () => `your password is not long enough, 8 or more plzz`,
     },
   },
-  permission: {
-    type: Array,
-    required: true,
-  },
   admin: Schema.Types.ObjectId,
 });
 
