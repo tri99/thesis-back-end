@@ -6,10 +6,10 @@ const app_local = express();
 
 const server = http.createServer(app);
 const cors = require("cors");
-const socketIO = require("socket.io")(server,{
-  cors:{
-    origin:"*",
-  }
+const socketIO = require("socket.io")(server, {
+  cors: {
+    origin: "*",
+  },
 });
 const SocketService = require("./socket");
 SocketService.setIO(socketIO);
@@ -50,7 +50,7 @@ app.use("/api/video-control", require("./routes/videoController")());
 app.use("/api/devices", require("./routes/device")());
 app.use("/api/playlists", require("./routes/playlist")());
 app.use("/api/users", require("./routes/user")());
-
+app.use("/api/perm-groups", require("./routes/permissionGroup")());
 server.listen(config.port, config.host, () => {
   console.log(1, `SERVER Api ON LISTENING: ${config.host}:${config.port}`);
 });
