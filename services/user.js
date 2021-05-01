@@ -1,11 +1,11 @@
 const User = require("./../collections/user");
 
-function createModel(username, email, password) {
+function createModel(username, email, password, admin) {
   const newUserDocument = new User({
     username: username,
     email: email,
     password: password,
-    permission: [],
+    admin,
   });
   return newUserDocument;
 }
@@ -43,7 +43,7 @@ function getUserById(_id) {
 
 function getUserByListId(listuserId) {
   return new Promise((resolve, reject) => {
-    User.find({ _id: {$in: listuserId} })
+    User.find({ _id: { $in: listuserId } })
       .select("_id username email permission")
       .exec((error, userDocument) => {
         if (error) return reject(error);
@@ -52,7 +52,7 @@ function getUserByListId(listuserId) {
   });
 }
 
-function getAllUser(_id) {
+function getAllUser() {
   return new Promise((resolve, reject) => {
     User.find()
       .select("_id username email permission")
@@ -63,11 +63,11 @@ function getAllUser(_id) {
   });
 }
 
-function updateUserById(_id, username, password, permission) {
+function updateUserById(_id, username, password) {
   return new Promise((resolve, reject) => {
     User.updateOne(
       { _id: _id },
-      { username: username, password: password, permission: permission }
+      { username: username, password: password }
     ).exec((error) => {
       if (error) return reject(error);
       return resolve(true);

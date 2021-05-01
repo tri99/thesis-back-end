@@ -28,13 +28,13 @@ async function signIn(req, res) {
     delete user._doc.password;
     console.log(userDocument._id);
 
-    const token = await jwtToken.signToken({id: userDocument._id});
+    const token = await jwtToken.signToken({ id: userDocument._id });
 
     return res
       .status(config.status_code.OK)
       .send({ user: user._doc, token: token });
   } catch (error) {
-      console.log(error);
+    console.log(error);
     res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }
 }
@@ -63,14 +63,19 @@ async function signUp(req, res) {
         .send({ message: "your password is too short" });
     // encode user password
     let userDocument = await UserService.getUserByEmail(email);
-    if(userDocument)
-        return res
-          .status(config.status_code.FORBIDEN)
-          .send({ message: "user is existed" });
+    if (userDocument)
+      return res
+        .status(config.status_code.FORBIDEN)
+        .send({ message: "user is existed" });
 
     password = await encrypt.encryptPassword(password);
 
-    const newUserDocument = UserService.createModel(username, email, password);
+    const newUserDocument = UserService.createModel(
+      username,
+      email,
+      password,
+      req.userId
+    );
     await UserService.insert(newUserDocument);
 
     return res.status(config.status_code.OK).send({ user: newUserDocument });
@@ -83,7 +88,7 @@ async function signUp(req, res) {
 async function getUserById(req, res) {
   try {
     const { id } = req.params;
-    const newUserDocument = await UserService.getUserById(_id);
+    const newUserDocument = await UserService.getUserById(id);
 
     return res.status(200).send({ user: newUserDocument });
   } catch (error) {
@@ -139,9 +144,9 @@ async function getUserByEmail(req, res) {
 async function updateUserById(req, res) {
   try {
     // const _id = req.userId
-    const id = req.body.id
-    const { username, password, permission } = req.body;
-    await UserService.updateUserById(id, username, password, permission);
+    const id = req.body.id;
+    const { username, password } = req.body;
+    await UserService.updateUserById(id, username, password);
 
     const userDocument = await UserService.getUserById(id);
 

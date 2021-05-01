@@ -1,39 +1,37 @@
-const  videoService = require("./../services/video")
-const zoneService = require("./../services/zone")
+const videoService = require("./../services/video");
+const zoneService = require("./../services/zone");
 const config = require("./../config/config");
 const audio_module = require("./../exports/audio-io");
 
-const handle = require("./../services/handle")
-async function insert(req, res){
-    try {
-        const {name, path, size, duration, tag} = req.body;
-        const newVideoDocument = videoService.createModel(
-          name,
-          duration,
-          size,
-          path,
-          tag
-        );
-        await videoService.saveVideo(newVideoDocument);
-        return res.status(config.status_code.OK).send({video: newVideoDocument});
-    } catch (error) {
-        return res.status(config.status_code.SERVER_ERROR).send({message: error})
-    }
+const handle = require("./../services/handle");
+async function insert(req, res) {
+  try {
+    const { name, path, size, duration, tag } = req.body;
+    const newVideoDocument = videoService.createModel(
+      name,
+      duration,
+      size,
+      path,
+      tag
+    );
+    await videoService.saveVideo(newVideoDocument);
+    return res.status(config.status_code.OK).send({ video: newVideoDocument });
+  } catch (error) {
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
 }
 
-
-
-async function getManyByArrayId(req, res){
-    try {
-        const {videoIds} = req.query;
-        const videoDocument = await videoService.getManyByArrayId(videoIds);
-        return res.status(config.status_code.OK).send({video: videoDocument});
-    } catch (error) {
-        return res.status(config.status_code.SERVER_ERROR).send({message: error})
-    }
+async function getManyByArrayId(req, res) {
+  try {
+    const { videoIds } = req.query;
+    const videoDocument = await videoService.getManyByArrayId(videoIds);
+    return res.status(config.status_code.OK).send({ video: videoDocument });
+  } catch (error) {
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
 }
 
-async function getAll(req, res){
+async function getAll(req, res) {
   try {
     const videoDocument = await videoService.findAll();
     return res.status(config.status_code.OK).send({ videos: videoDocument });
@@ -42,23 +40,21 @@ async function getAll(req, res){
   }
 }
 
-async function getInforVideo(req, res){
+async function getInforVideo(req, res) {
   try {
-    const {zoneId} = req.body;
-    const data_to_send = {to: zoneId};
+    const { zoneId } = req.body;
+    const data_to_send = { to: zoneId };
     audio_module
       .get_audio_io()
       .to(data_to_send.to)
       .emit("get-infor-audio", data_to_send);
     return res.status(config.STATUS_CODE.OK).send({ result: config.SUCCESS });
   } catch (error) {
-    return res
-      .status(config.status_code.SERVER_ERROR)
-      .send({ message: error });
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }
 }
 
-async function upload(req,res){
+async function upload(req, res) {
   try {
     const duration = Number.parseInt(req.body.duration);
     const tags = req.body.tags;
@@ -112,19 +108,16 @@ async function deleteById(req, res) {
     const videoDocument = await videoService.findOneById(videoId);
 
     const zoneDocument = await zoneService.getZoneByVideoArrayId([videoId]);
-    if(zoneDocument.length > 0){
+    if (zoneDocument.length > 0) {
       return res
         .status(config.status_code.FORBIDEN)
         .send({ message: "Some Zone include this video" });
     }
 
-    if(!videoDocument){
-      return res
-        .status(403)
-        .send({
-          message:
-            config.status_message.SOMETHING_WRONG
-        });
+    if (!videoDocument) {
+      return res.status(403).send({
+        message: config.status_message.SOMETHING_WRONG,
+      });
     }
     const withoutUri = `${config.host}:${config.port}/`;
     const pathVideoInURL = handle.getPathInURL(videoDocument.path, withoutUri);
@@ -150,8 +143,6 @@ async function getVideosByUserId(req, res) {
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }
 }
-
-
 
 module.exports = {
   insert: insert,
