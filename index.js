@@ -51,6 +51,8 @@ app.use("/api/devices", require("./routes/device")());
 app.use("/api/playlists", require("./routes/playlist")());
 app.use("/api/users", require("./routes/user")());
 app.use("/api/perm-groups", require("./routes/permissionGroup")());
+app.use("/api/user-perms", require("./routes/userPermission")());
+
 server.listen(config.port, config.host, () => {
   console.log(1, `SERVER Api ON LISTENING: ${config.host}:${config.port}`);
 });

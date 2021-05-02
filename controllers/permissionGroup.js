@@ -12,6 +12,7 @@ async function insert(req, res) {
       name,
       permissions,
       desc,
+      adminId: req.userId,
     });
     console.log(newDocument);
     await permGroupService.insert(newDocument);
@@ -69,7 +70,7 @@ async function getById(req, res) {
 
 async function getAll(req, res) {
   try {
-    const documents = await permGroupService.getAll();
+    const documents = await permGroupService.getAll({ adminId: req.userId });
     return res.status(config.status_code.OK).send({ permGroups: documents });
   } catch (error) {
     console.log(error);
