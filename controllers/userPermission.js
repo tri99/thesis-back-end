@@ -18,6 +18,27 @@ async function insert(req, res) {
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }
 }
+
+async function insertMany(req, res) {
+  try {
+    const { user, permissionGroups, zone } = req.body;
+    const newDocuments = [];
+    permissionGroups.forEach((pg) =>
+      newDocuments.push({
+        user,
+        zone,
+        permissionGroup: pg,
+        adminId: req.userId,
+      })
+    );
+    console.log("insertMany:", await UserPermService.insertMany(newDocuments));
+    return res
+      .status(config.status_code.OK)
+      .send({ userPermissions: newDocuments });
+  } catch (error) {
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
 async function getBySubuserId(req, res) {
   try {
     const { id } = req.params;
@@ -34,4 +55,5 @@ async function getBySubuserId(req, res) {
 module.exports = {
   getBySubuserId,
   insert,
+  insertMany,
 };

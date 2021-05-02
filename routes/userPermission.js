@@ -6,6 +6,7 @@ module.exports = () => {
    *  @param {String} name
    */
   router.post("/", auth.isAuthen, userPermController.insert);
+  router.post("/insert-many", auth.isAuthen, userPermController.insertMany);
   //   router.get("/", auth.isAuthen, userPermController.getAll);
   //   router.get("/:id", auth.isAuthen, userPermController.getById);
   //   router.delete("/:id", auth.isAuthen, userPermController.deleteById);
