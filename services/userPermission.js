@@ -21,11 +21,10 @@ function getUserPermissions(
         try {
           documents.forEach((doc) => {
             console.log(doc, firstPath, secondPath);
-            console.log(doc[firstPath]._id, typeof doc[firstPath]._id);
+
             const key = doc[firstPath]._id.toString();
 
             const newSecondPathItem = doc[secondPath];
-
             newSecondPathItem.relationId = doc._id;
             if (!map.has(key)) {
               map.set(key, {
@@ -56,7 +55,17 @@ function getBySubuserId(userId) {
     { path: "permissionGroup", select: "_id name" }
   );
 }
+
+function insertMany(objects) {
+  return new Promise((resolve, reject) => {
+    UserPerm.insertMany(objects, (error, documents) => {
+      if (error) return reject(error);
+      return resolve(documents);
+    });
+  });
+}
 module.exports = {
   ...UserPermCRUD,
   getBySubuserId,
+  insertMany,
 };
