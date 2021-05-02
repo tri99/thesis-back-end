@@ -21,10 +21,10 @@ const crudServiceGenerator = (model) => ({
         });
     });
   },
-  getAll() {
+  getAll(findObject) {
     return new Promise((resolve, reject) => {
       model
-        .find()
+        .find(findObject)
         .select()
         .exec((error, document) => {
           if (error) return reject(error);

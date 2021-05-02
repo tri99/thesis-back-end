@@ -18,6 +18,7 @@ const userPermZoneSchema = new Schema({
     ref: "zone",
     required: true,
   },
+  adminId: Schema.Types.ObjectId,
 });
 
 var userPermZone = mongoose.model("userPermZone", userPermZoneSchema);

@@ -9,6 +9,7 @@ const permissionGroupSchema = new Schema({
   },
   permissions: [Number],
   desc: String,
+  adminId: Schema.Types.ObjectId,
 });
 
 var permissionGroup = mongoose.model("permissionGroup", permissionGroupSchema);
