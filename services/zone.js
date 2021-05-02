@@ -1,5 +1,5 @@
 const Zone = require("./../collections/zone");
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 function createModel(
   videoArray,
   playlistArray,
@@ -17,7 +17,7 @@ function createModel(
     isMuteVideo: false,
     isLoopOneVideo: false,
     isLoopAllVideo: false,
-    userId: userId
+    userId: userId,
   });
   return newZoneModel;
 }
@@ -166,7 +166,7 @@ function getZoneByPlaylistArrayId(playlistIds) {
     Zone.find({ "playlistArray._id": { $in: playlistIds } })
       .select()
       .exec((error, zoneDocument) => {
-        if(error) return reject(error);
+        if (error) return reject(error);
         return resolve(zoneDocument);
       });
   });
