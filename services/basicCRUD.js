@@ -1,16 +1,16 @@
-const crudServiceGenerator = (model) => ({
-  createModel(newDocument) {
+const crudServiceGenerator = (model) => {
+  const createModel = (newDocument) => {
     return new model(newDocument);
-  },
-  insert(newDocument) {
+  };
+  const insert = (newDocument) => {
     return new Promise((resolve, reject) => {
       newDocument.save((error) => {
         if (error) return reject(error);
         return resolve(true);
       });
     });
-  },
-  getById(_id) {
+  };
+  const getById = (_id) => {
     return new Promise((resolve, reject) => {
       model
         .findById(_id)
@@ -20,8 +20,8 @@ const crudServiceGenerator = (model) => ({
           return resolve(document);
         });
     });
-  },
-  getAll(findObject) {
+  };
+  const getAll = (findObject) => {
     return new Promise((resolve, reject) => {
       model
         .find(findObject)
@@ -31,22 +31,35 @@ const crudServiceGenerator = (model) => ({
           return resolve(document);
         });
     });
-  },
-  deleteById(_id) {
+  };
+  const deleteBy = (deleteObject) => {
     return new Promise((resolve, reject) => {
-      model.deleteMany({ _id: _id }).exec((error) => {
+      model.deleteMany(deleteObject).exec((error, result) => {
         if (error) reject(error);
-        return resolve(true);
+        return resolve(result);
       });
     });
-  },
-  updateById(_id, updatedDocument) {
+  };
+  const updateById = (_id, updatedDocument) => {
     return new Promise((resolve, reject) => {
       model.updateOne({ _id: _id }, updatedDocument).exec((error) => {
         if (error) reject(error);
         return resolve(error);
       });
     });
-  },
-});
+  };
+
+  const deleteById = (_id) => {
+    return deleteBy({ _id });
+  };
+  return {
+    insert,
+    getById,
+    getAll,
+    updateById,
+    deleteBy,
+    createModel,
+    deleteById,
+  };
+};
 module.exports = crudServiceGenerator;

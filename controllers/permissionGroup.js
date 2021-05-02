@@ -1,6 +1,6 @@
 const config = require("../config/config");
 const permGroupService = require("../services/permissionGroup");
-
+const userPermService = require("../services/userPermission");
 /**
  *  @param {String} name
  */
@@ -45,10 +45,12 @@ async function updateById(req, res) {
 async function deleteById(req, res) {
   try {
     const { id } = req.params;
-    await permGroupService.deleteById(id);
 
+    await permGroupService.deleteById(id);
+    await userPermService.deleteBy({ permissionGroup: id });
     return res.status(config.status_code.OK).send({ permGroup: true });
   } catch (error) {
+    console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }
 }

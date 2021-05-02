@@ -24,8 +24,11 @@ function getUserPermissions(
 
             const key = doc[firstPath]._id.toString();
 
-            const newSecondPathItem = doc[secondPath];
-            newSecondPathItem.relationId = doc._id;
+            let newSecondPathItem = {};
+            for (const key of secondPopulateObject["select"].split(" ")) {
+              newSecondPathItem[key] = doc[secondPath][key];
+            }
+            newSecondPathItem = { ...newSecondPathItem, relationId: doc._id };
             if (!map.has(key)) {
               map.set(key, {
                 [firstPath]: doc[firstPath],
@@ -56,6 +59,21 @@ function getBySubuserId(userId) {
   );
 }
 
+function getByPermissionGroupId(permGroupId) {
+  return getUserPermissions(
+    { permissionGroup: permGroupId },
+    { path: "zone", select: "_id name" },
+    { path: "user", select: "_id username" }
+  );
+}
+
+function getByZoneId(zoneId) {
+  return getUserPermissions(
+    { zone: zoneId },
+    { path: "user", select: "_id username" },
+    { path: "permissionGroup", select: "_id name" }
+  );
+}
 function insertMany(objects) {
   return new Promise((resolve, reject) => {
     UserPerm.insertMany(objects, (error, documents) => {
@@ -67,5 +85,7 @@ function insertMany(objects) {
 module.exports = {
   ...UserPermCRUD,
   getBySubuserId,
+  getByZoneId,
+  getByPermissionGroupId,
   insertMany,
 };

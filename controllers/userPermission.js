@@ -31,29 +31,68 @@ async function insertMany(req, res) {
         adminId: req.userId,
       })
     );
-    console.log("insertMany:", await UserPermService.insertMany(newDocuments));
+    const insertedDocuments = await UserPermService.insertMany(newDocuments);
     return res
       .status(config.status_code.OK)
-      .send({ userPermissions: newDocuments });
+      .send({ userPermissions: insertedDocuments });
   } catch (error) {
-    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
-  }
-}
-async function getBySubuserId(req, res) {
-  try {
-    const { id } = req.params;
-    const documents = await UserPermService.getBySubuserId(id);
-    return res
-      .status(config.status_code.OK)
-      .send({ userPermissions: documents });
-  } catch (error) {
-    console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }
 }
 
+async function deleteManyByPermGroups(req, res) {
+  try {
+    const { user, permissionGroups, zone } = req.body;
+    const result = await UserPermService.deleteBy({
+      user,
+      permissionGroup: { $in: permissionGroups },
+      zone,
+    });
+    return res.status(config.status_code.OK).send({ userPermissions: result });
+  } catch (error) {
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
+async function deleteByZone(req, res) {
+  try {
+    const { user, zone } = req.body;
+    const result = await UserPermService.deleteBy({
+      user,
+      zone,
+    });
+    return res.status(config.status_code.OK).send({ userPermissions: result });
+  } catch (error) {
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
+function getBy(service) {
+  return async function (req, res) {
+    try {
+      const { id } = req.params;
+      const documents = await service(id);
+      return res
+        .status(config.status_code.OK)
+        .send({ userPermissions: documents });
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(config.status_code.SERVER_ERROR)
+        .send({ message: error });
+    }
+  };
+}
+const getBySubuserId = getBy(UserPermService.getBySubuserId);
+const getByPermissionGroupId = getBy(UserPermService.getByPermissionGroupId);
+const getByZoneId = getBy(UserPermService.getByZoneId);
+
 module.exports = {
   getBySubuserId,
+  getByZoneId,
+  getByPermissionGroupId,
   insert,
   insertMany,
+  deleteManyByPermGroups,
+  deleteByZone,
 };
