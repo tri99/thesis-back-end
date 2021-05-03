@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+const getUserPermissions = require("../utils/getUserPermissions");
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
@@ -30,9 +30,39 @@ const userSchema = new Schema({
       message: () => `your password is not long enough, 8 or more plzz`,
     },
   },
-  admin: Schema.Types.ObjectId,
+  adminId: Schema.Types.ObjectId,
 });
 
-const User = mongoose.model("user", userSchema);
+// function getBySubuserId(userId) {
+//   return getUserPermissions(
+//     { user: userId },
+//     { path: "zone", select: "_id name" },
+//     { path: "permissionGroup", select: "_id name" }
+//   );
+// }
 
+// function getByPermissionGroupId(permGroupId) {
+//   return getUserPermissions(
+//     { permissionGroup: permGroupId },
+//     { path: "zone", select: "_id name" },
+//     { path: "user", select: "_id username" }
+//   );
+// }
+
+// function getByZoneId(zoneId) {
+//   return getUserPermissions(
+//     { zone: zoneId },
+//     { path: "user", select: "_id username" },
+//     { path: "permissionGroup", select: "_id name" }
+//   );
+// }
+
+userSchema.virtual("zonePermissionGroups").get(function () {
+  return getUserPermissions(
+    { user: this._id },
+    { path: "zone", select: "_id name" },
+    { path: "permissionGroup", select: "_id name" }
+  );
+});
+const User = mongoose.model("user", userSchema);
 module.exports = User;

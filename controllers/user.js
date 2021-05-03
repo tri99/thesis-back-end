@@ -23,12 +23,13 @@ async function signIn(req, res) {
         .send({ message: "wrong password" });
 
     // TAP TRUNG XU LY
-
     let user = Object.assign({}, userDocument);
     delete user._doc.password;
-    console.log(userDocument._id);
-
-    const token = await jwtToken.signToken({ id: userDocument._id });
+    const token = await jwtToken.signToken(
+      userDocument.adminId
+        ? { id: userDocument.adminId, subuserId: userDocument._id }
+        : { id: userDocument._id }
+    );
 
     return res
       .status(config.status_code.OK)
@@ -98,9 +99,15 @@ async function getUserById(req, res) {
 
 async function getCurrentUser(req, res) {
   try {
-    const newUserDocument = await UserService.getUserById(req.userId);
-
-    return res.status(200).send({ user: newUserDocument });
+    const newUserDocument = await UserService.getUserById(
+      req.subuserId || req.userId
+    );
+    const currentUser = await newUserDocument.toObject();
+    currentUser.zonePermissionGroups = await newUserDocument[
+      "zonePermissionGroups"
+    ];
+    console.log("currenuser", currentUser);
+    return res.status(200).send({ user: currentUser });
   } catch (error) {
     res.status(500).send({ message: error });
   }

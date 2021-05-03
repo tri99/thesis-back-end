@@ -1,7 +1,7 @@
 const User = require("./../collections/user");
 function getAll(adminId) {
   return new Promise((resolve, reject) => {
-    User.find({ admin: adminId })
+    User.find({ adminId })
       .select("_id username email")
       .exec((error, userDocument) => {
         if (error) return reject(error);

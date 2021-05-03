@@ -22,7 +22,7 @@ function insert(newUserDocument) {
 function getUserByEmail(email) {
   return new Promise((resolve, reject) => {
     User.findOne({ email: email })
-      .select("username email password permission")
+      .select("username email password adminId")
       .exec((error, userDocument) => {
         if (error) return reject(error);
         return resolve(userDocument);
@@ -33,7 +33,7 @@ function getUserByEmail(email) {
 function getUserById(_id) {
   return new Promise((resolve, reject) => {
     User.findById(_id)
-      .select("_id username email permission")
+      .select("_id username email adminId")
       .exec((error, userDocument) => {
         if (error) return reject(error);
         return resolve(userDocument);
@@ -44,7 +44,7 @@ function getUserById(_id) {
 function getUserByListId(listuserId) {
   return new Promise((resolve, reject) => {
     User.find({ _id: { $in: listuserId } })
-      .select("_id username email permission")
+      .select("_id username email adminId")
       .exec((error, userDocument) => {
         if (error) return reject(error);
         return resolve(userDocument);
@@ -55,7 +55,7 @@ function getUserByListId(listuserId) {
 function getAllUser() {
   return new Promise((resolve, reject) => {
     User.find()
-      .select("_id username email permission")
+      .select("_id username email adminId")
       .exec((error, userDocument) => {
         if (error) return reject(error);
         return resolve(userDocument);

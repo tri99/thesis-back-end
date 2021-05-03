@@ -2,6 +2,7 @@ const videoController = require("./../controllers/video");
 const router = require("express").Router();
 const fileUpload = require("./../utils/uploadFile");
 const auth = require("./../middlewares/authen_token");
+const authorization = require("../middlewares/authorization");
 module.exports = () => {
   // router.post("/insert-video", videoController.insert);
   /**
@@ -13,6 +14,7 @@ module.exports = () => {
   router.post(
     "/",
     auth.isAuthen,
+    authorization(2),
     fileUpload.catchErrorVideo(),
     videoController.upload
   );

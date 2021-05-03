@@ -2,7 +2,6 @@ const videoService = require("./../services/video");
 const zoneService = require("./../services/zone");
 const config = require("./../config/config");
 const audio_module = require("./../exports/audio-io");
-
 const handle = require("./../services/handle");
 async function insert(req, res) {
   try {

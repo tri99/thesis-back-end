@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-
 const Schema = mongoose.Schema;
 
 const userPermZoneSchema = new Schema({
@@ -22,4 +21,5 @@ const userPermZoneSchema = new Schema({
 });
 
 var userPermZone = mongoose.model("userPermZone", userPermZoneSchema);
+
 module.exports = userPermZone;
