@@ -1,5 +1,7 @@
 const UserService = require("./../services/user");
 const ZoneService = require("../services/zone");
+const permGroupService = require("../services/permissionGroup");
+const UserPermService = require("../services/userPermission");
 const config = require("./../config/config");
 
 const encrypt = require("./../utils/encrypt");
@@ -45,6 +47,22 @@ function emailValidate(e) {
   return re.test(String(e).toLowerCase());
 }
 
+async function createAdminPermission(adminId, generalZoneId) {
+  const adminPG = permGroupService.createModel({
+    name: "admin",
+    permissions: [...Array(14).keys()],
+    desc: "admin permissions",
+    adminId,
+  });
+  await permGroupService.insert(adminPG);
+  const newDocument = UserPermService.createModel({
+    user: adminId,
+    permissionGroup: adminPG._id,
+    zone: generalZoneId,
+    adminId,
+  });
+  await UserPermService.insert(newDocument);
+}
 async function signUp(req, res) {
   try {
     let { username, email, password } = req.body;
@@ -86,6 +104,7 @@ async function signUp(req, res) {
     );
     if (!req.userId) {
       generalZone.userId = newUserDocument._id;
+      await createAdminPermission(newUserDocument._id, generalZone._id);
       await ZoneService.insert(generalZone);
     }
     await UserService.insert(newUserDocument);
