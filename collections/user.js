@@ -31,6 +31,7 @@ const userSchema = new Schema({
     },
   },
   adminId: Schema.Types.ObjectId,
+  generalZoneId: Schema.Types.ObjectId,
 });
 
 // function getBySubuserId(userId) {
@@ -61,7 +62,7 @@ userSchema.virtual("zonePermissionGroups").get(function () {
   return getUserPermissions(
     { user: this._id },
     { path: "zone", select: "_id name" },
-    { path: "permissionGroup", select: "_id name" }
+    { path: "permissionGroup", select: "_id name permissions" }
   );
 });
 const User = mongoose.model("user", userSchema);

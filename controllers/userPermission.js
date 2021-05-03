@@ -1,6 +1,5 @@
 const config = require("../config/config");
 const UserPermService = require("./../services/userPermission");
-const UserService = require("../services/user");
 async function insert(req, res) {
   try {
     const { user, permissionGroup, zone } = req.body;
@@ -85,21 +84,21 @@ function getBy(service) {
   };
 }
 
-async function getBySubuserId(req, res) {
-  try {
-    const { id } = req.params;
-    const document = await UserService.getUserById(id);
-    console.log("lalala:", document);
+// async function getBySubuserId(req, res) {
+//   try {
+//     const { id } = req.params;
+//     const document = await UserService.getUserById(id);
+//     console.log("lalala:", document);
 
-    const userPermissions = await document["zonePermissionGroups"];
-    console.log("userPermissions", userPermissions);
-    return res.status(config.status_code.OK).send({ userPermissions });
-  } catch (error) {
-    console.log(error);
-    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
-  }
-}
-// const getBySubuserId = getBy(UserPermService.getBySubuserId);
+//     const userPermissions = await document["zonePermissionGroups"];
+//     console.log("userPermissions", userPermissions);
+//     return res.status(config.status_code.OK).send({ userPermissions });
+//   } catch (error) {
+//     console.log(error);
+//     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+//   }
+// }
+const getBySubuserId = getBy(UserPermService.getBySubuserId);
 const getByPermissionGroupId = getBy(UserPermService.getByPermissionGroupId);
 const getByZoneId = getBy(UserPermService.getByZoneId);
 

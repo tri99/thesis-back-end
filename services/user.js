@@ -1,11 +1,12 @@
 const User = require("./../collections/user");
 
-function createModel(username, email, password, admin) {
+function createModel(username, email, password, adminId, generalZoneId) {
   const newUserDocument = new User({
     username: username,
     email: email,
     password: password,
-    admin,
+    adminId,
+    generalZoneId,
   });
   return newUserDocument;
 }
@@ -22,7 +23,7 @@ function insert(newUserDocument) {
 function getUserByEmail(email) {
   return new Promise((resolve, reject) => {
     User.findOne({ email: email })
-      .select("username email password adminId")
+      .select("username email password adminId generalZoneId")
       .exec((error, userDocument) => {
         if (error) return reject(error);
         return resolve(userDocument);
@@ -33,7 +34,7 @@ function getUserByEmail(email) {
 function getUserById(_id) {
   return new Promise((resolve, reject) => {
     User.findById(_id)
-      .select("_id username email adminId")
+      .select("_id username email adminId generalZoneId")
       .exec((error, userDocument) => {
         if (error) return reject(error);
         return resolve(userDocument);

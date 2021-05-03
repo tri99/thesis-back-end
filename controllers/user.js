@@ -1,5 +1,5 @@
 const UserService = require("./../services/user");
-
+const ZoneService = require("../services/zone");
 const config = require("./../config/config");
 
 const encrypt = require("./../utils/encrypt");
@@ -70,13 +70,24 @@ async function signUp(req, res) {
         .send({ message: "user is existed" });
 
     password = await encrypt.encryptPassword(password);
-
+    let generalZone, generalZoneId;
+    if (!req.userId) {
+      generalZone = ZoneService.createModel([], [], [], "General", 0);
+      generalZoneId = generalZone._id;
+    } else {
+      generalZoneId = (await UserService.getUserById(req.userId)).generalZoneId;
+    }
     const newUserDocument = UserService.createModel(
       username,
       email,
       password,
-      req.userId
+      req.userId,
+      generalZoneId
     );
+    if (!req.userId) {
+      generalZone.userId = newUserDocument._id;
+      await ZoneService.insert(generalZone);
+    }
     await UserService.insert(newUserDocument);
 
     return res.status(config.status_code.OK).send({ user: newUserDocument });
