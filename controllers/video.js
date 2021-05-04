@@ -59,7 +59,10 @@ async function upload(req, res) {
     const tags = req.body.tags;
     const video = req.file;
     const nameVideo = handle.spliceExtention(video.originalname);
-    const videoDocument = await videoService.findOneByName(nameVideo);
+    const videoDocument = await videoService.findOneBy({
+      name: nameVideo,
+      userId: req.userId,
+    });
     if (videoDocument) {
       await handle.removeFile(video.path);
       return res.status(400).send({

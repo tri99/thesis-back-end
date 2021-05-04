@@ -49,6 +49,18 @@ const crudServiceGenerator = (model) => {
     });
   };
 
+  const findOneBy = (findOption, selectOption = "_id") => {
+    return new Promise((resolve, reject) => {
+      return model
+        .findOne(findOption)
+        .select(selectOption)
+        .exec((error, document) => {
+          if (error) return reject(error);
+          return resolve(document);
+        });
+    });
+  };
+
   const deleteById = (_id) => {
     return deleteBy({ _id });
   };
@@ -60,6 +72,7 @@ const crudServiceGenerator = (model) => {
     deleteBy,
     createModel,
     deleteById,
+    findOneBy,
   };
 };
 module.exports = crudServiceGenerator;
