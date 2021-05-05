@@ -27,5 +27,6 @@ module.exports = () => {
    * @param {String} _id
    */
   router.delete("/:id", auth.isAuthen, videoController.deleteById);
+  router.put("/:id", auth.isAuthen, videoController.updateTagsById);
   return router;
 };

@@ -75,7 +75,7 @@ function saveVideo(newVideoDocument) {
 
 function findOneById(videoId) {
   return new Promise((resolve, reject) => {
-    return Video.findById(videoId)
+    Video.findById(videoId)
       .select()
       .exec((error, videoDocument) => {
         if (error) return reject(error);
@@ -86,7 +86,7 @@ function findOneById(videoId) {
 
 function findAll() {
   return new Promise((resolve, reject) => {
-    return Video.find()
+    Video.find()
       .select()
       .exec((error, videoDocument) => {
         if (error) return reject(error);
@@ -97,12 +97,21 @@ function findAll() {
 
 function findOneByName(nameVideo) {
   return new Promise((resolve, reject) => {
-    return Video.findOne({ name: nameVideo })
+    Video.findOne({ name: nameVideo })
       .select("_id")
       .exec((error, videoDocument) => {
         if (error) return reject(error);
         return resolve(videoDocument);
       });
+  });
+}
+
+function updateTagsById(videoId, tags) {
+  return new Promise((resolve, reject) => {
+    Video.updateOne({ _id: videoId }, { tag: tags }).exec((error) => {
+      if (error) return reject(error);
+      return resolve(true);
+    });
   });
 }
 
@@ -117,4 +126,5 @@ module.exports = {
   findOneById: findOneById,
   findAll: findAll,
   findOneBy: videoCRUD.findOneBy,
+  updateTagsById: updateTagsById,
 };

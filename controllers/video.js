@@ -2,6 +2,7 @@ const videoService = require("./../services/video");
 const zoneService = require("./../services/zone");
 const config = require("./../config/config");
 const audio_module = require("./../exports/audio-io");
+
 const handle = require("./../services/handle");
 async function insert(req, res) {
   try {
@@ -107,9 +108,15 @@ async function upload(req, res) {
 async function deleteById(req, res) {
   try {
     const videoId = req.params.id;
-    const videoDocument = await videoService.findOneById(videoId);
+    let videoDocument = await videoService.findOneById(videoId);
 
     const zoneDocument = await zoneService.getZoneByVideoArrayId([videoId]);
+    videoDocument = await videoService.findOneById(videoId);
+    if (videoDocument["userId"].toString() != req.userId) {
+      return res
+        .status(config.status_code.FORBIDEN)
+        .send({ message: "wrong user" });
+    }
     if (zoneDocument.length > 0) {
       return res
         .status(config.status_code.FORBIDEN)
@@ -146,6 +153,27 @@ async function getVideosByUserId(req, res) {
   }
 }
 
+async function updateTagsById(req, res) {
+  try {
+    const videoId = req.params.id;
+    const { tag } = req.body;
+    // console.log(videoIds);
+    let videoDocument = await videoService.findOneById(videoId);
+    if (videoDocument["userId"].toString() != req.userId) {
+      return res
+        .status(config.status_code.FORBIDEN)
+        .send({ message: "wrong user" });
+    }
+    videoDocument = await videoService.findOneById(videoId);
+    await videoService.updateTagsById(videoId, tag);
+    // console.log(videoDocument);
+    return res.status(config.status_code.OK).send({ videos: videoDocument });
+  } catch (error) {
+    // console.log(error);
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
 module.exports = {
   insert: insert,
   deleteById: deleteById,
@@ -154,4 +182,5 @@ module.exports = {
   upload: upload,
   getAll: getAll,
   getVideosByUserId: getVideosByUserId,
+  updateTagsById: updateTagsById,
 };
