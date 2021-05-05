@@ -1,5 +1,7 @@
 const UserService = require("./../services/user");
-
+const ZoneService = require("../services/zone");
+const permGroupService = require("../services/permissionGroup");
+const UserPermService = require("../services/userPermission");
 const config = require("./../config/config");
 
 const encrypt = require("./../utils/encrypt");
@@ -23,18 +25,19 @@ async function signIn(req, res) {
         .send({ message: "wrong password" });
 
     // TAP TRUNG XU LY
-
     let user = Object.assign({}, userDocument);
     delete user._doc.password;
-    console.log(userDocument._id);
-
-    const token = await jwtToken.signToken({id: userDocument._id});
+    const token = await jwtToken.signToken(
+      userDocument.adminId
+        ? { id: userDocument.adminId, subuserId: userDocument._id }
+        : { id: userDocument._id }
+    );
 
     return res
       .status(config.status_code.OK)
       .send({ user: user._doc, token: token });
   } catch (error) {
-      console.log(error);
+    console.log(error);
     res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }
 }
@@ -44,6 +47,22 @@ function emailValidate(e) {
   return re.test(String(e).toLowerCase());
 }
 
+async function createAdminPermission(adminId, generalZoneId) {
+  const adminPG = permGroupService.createModel({
+    name: "admin",
+    permissions: [...Array(14).keys()],
+    desc: "admin permissions",
+    adminId,
+  });
+  await permGroupService.insert(adminPG);
+  const newDocument = UserPermService.createModel({
+    user: adminId,
+    permissionGroup: adminPG._id,
+    zone: generalZoneId,
+    adminId,
+  });
+  await UserPermService.insert(newDocument);
+}
 async function signUp(req, res) {
   try {
     let { username, email, password } = req.body;
@@ -63,14 +82,31 @@ async function signUp(req, res) {
         .send({ message: "your password is too short" });
     // encode user password
     let userDocument = await UserService.getUserByEmail(email);
-    if(userDocument)
-        return res
-          .status(config.status_code.FORBIDEN)
-          .send({ message: "user is existed" });
+    if (userDocument)
+      return res
+        .status(config.status_code.FORBIDEN)
+        .send({ message: "user is existed" });
 
     password = await encrypt.encryptPassword(password);
-
-    const newUserDocument = UserService.createModel(username, email, password);
+    let generalZone, generalZoneId;
+    if (!req.userId) {
+      generalZone = ZoneService.createModel([], [], [], "General", 0);
+      generalZoneId = generalZone._id;
+    } else {
+      generalZoneId = (await UserService.getUserById(req.userId)).generalZoneId;
+    }
+    const newUserDocument = UserService.createModel(
+      username,
+      email,
+      password,
+      req.userId,
+      generalZoneId
+    );
+    if (!req.userId) {
+      generalZone.userId = newUserDocument._id;
+      await createAdminPermission(newUserDocument._id, generalZone._id);
+      await ZoneService.insert(generalZone);
+    }
     await UserService.insert(newUserDocument);
 
     return res.status(config.status_code.OK).send({ user: newUserDocument });
@@ -83,7 +119,7 @@ async function signUp(req, res) {
 async function getUserById(req, res) {
   try {
     const { id } = req.params;
-    const newUserDocument = await UserService.getUserById(_id);
+    const newUserDocument = await UserService.getUserById(id);
 
     return res.status(200).send({ user: newUserDocument });
   } catch (error) {
@@ -93,9 +129,15 @@ async function getUserById(req, res) {
 
 async function getCurrentUser(req, res) {
   try {
-    const newUserDocument = await UserService.getUserById(req.userId);
-
-    return res.status(200).send({ user: newUserDocument });
+    const newUserDocument = await UserService.getUserById(
+      req.subuserId || req.userId
+    );
+    const currentUser = await newUserDocument.toObject();
+    currentUser.zonePermissionGroups = await newUserDocument[
+      "zonePermissionGroups"
+    ];
+    console.log("currenuser", currentUser);
+    return res.status(200).send({ user: currentUser });
   } catch (error) {
     res.status(500).send({ message: error });
   }
@@ -139,9 +181,9 @@ async function getUserByEmail(req, res) {
 async function updateUserById(req, res) {
   try {
     // const _id = req.userId
-    const id = req.body.id
-    const { username, password, permission } = req.body;
-    await UserService.updateUserById(id, username, password, permission);
+    const id = req.body.id;
+    const { username, password } = req.body;
+    await UserService.updateUserById(id, username, password);
 
     const userDocument = await UserService.getUserById(id);
 

@@ -1,5 +1,6 @@
 const Video = require("./../collections/video");
-
+const basiCRUD = require("./basicCRUD");
+const videoCRUD = basiCRUD(Video);
 /**
  *
  * @param {Array} newVideos
@@ -115,4 +116,5 @@ module.exports = {
   findOneByName: findOneByName,
   findOneById: findOneById,
   findAll: findAll,
+  findOneBy: videoCRUD.findOneBy,
 };

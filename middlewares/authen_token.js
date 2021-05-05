@@ -18,6 +18,7 @@ async function isAuthen(req, res, next) {
         .status(config.status_code.TOKEN_ERROR)
         .send({ message: config.status_message.TOKEN_NOT_FOUND });
     req.userId = decodeToken.id;
+    req.subuserId = decodeToken.subuserId;
     next();
   } catch (error) {
     return res.status(config.status_code.WRONG).send({ message: error });

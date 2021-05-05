@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+const getUserPermissions = require("../utils/getUserPermissions");
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
@@ -27,15 +27,43 @@ const userSchema = new Schema({
         console.log(p);
         return p.length >= 8;
       },
-      message: (props) => `your password is not long enough, 8 or more plzz`,
+      message: () => `your password is not long enough, 8 or more plzz`,
     },
   },
-  permission: {
-    type: Array,
-    required: true,
-  },
+  adminId: Schema.Types.ObjectId,
+  generalZoneId: Schema.Types.ObjectId,
 });
 
-const User = mongoose.model("user", userSchema);
+// function getBySubuserId(userId) {
+//   return getUserPermissions(
+//     { user: userId },
+//     { path: "zone", select: "_id name" },
+//     { path: "permissionGroup", select: "_id name" }
+//   );
+// }
 
+// function getByPermissionGroupId(permGroupId) {
+//   return getUserPermissions(
+//     { permissionGroup: permGroupId },
+//     { path: "zone", select: "_id name" },
+//     { path: "user", select: "_id username" }
+//   );
+// }
+
+// function getByZoneId(zoneId) {
+//   return getUserPermissions(
+//     { zone: zoneId },
+//     { path: "user", select: "_id username" },
+//     { path: "permissionGroup", select: "_id name" }
+//   );
+// }
+
+userSchema.virtual("zonePermissionGroups").get(function () {
+  return getUserPermissions(
+    { user: this._id },
+    { path: "zone", select: "_id name" },
+    { path: "permissionGroup", select: "_id name permissions" }
+  );
+});
+const User = mongoose.model("user", userSchema);
 module.exports = User;
