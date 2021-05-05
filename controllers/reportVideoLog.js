@@ -32,7 +32,7 @@ async function getByPeriod(req, res) {
   }
 }
 
-async function deleteById(req, res) {
+async function deleteByUserId(req, res) {
   try {
     const userId = req.userId;
     const reportVideoLogDocument = await reportVideoLogService.getByOneParam(
@@ -55,5 +55,5 @@ async function deleteById(req, res) {
 module.exports = {
   getByPeriod: getByPeriod,
   getByUserId: getByUserId,
-  deleteBy: deleteById,
+  deleteByUserId: deleteByUserId,
 };

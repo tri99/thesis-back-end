@@ -1,0 +1,25 @@
+adset/
+
+    locationBuilding/
+
+    age/
+
+    gender/
+
+    timeSlot/
+
+adCreative/
+    
+    media/
+
+TVCManager/
+
+    setting/
+
+    locationBuilding/
+
+Budget/
+
+    price/
+
+    

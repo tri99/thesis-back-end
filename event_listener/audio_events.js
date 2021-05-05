@@ -1,7 +1,7 @@
 const jwt = require("./../utils/jwt");
 const deviceService = require("./../services/device");
 const socketService = require("./../socket/index");
-
+const reportVideoLog = require("./../services/reportVideoLog");
 // module.exports.connect = (socket) => {
 //   console.log("????");
 //   socket.emit("send", "aloalo")
@@ -162,6 +162,15 @@ function infor_ai_process(event_name, socket) {
         .getIO()
         .in(userDoc["userId"].toString())
         .emit(`/receive/update/socket/infor-ai-process`, infor);
+      let newReportVideoLogDoc = reportVideoLog.createModel(
+        userDoc["userId"],
+        infor[0]["videoId"],
+        infor[0]["zoneId"],
+        infor[0]["timeStamp"],
+        infor.length * 5,
+        infor
+      );
+      await reportVideoLog.insert(newReportVideoLogDoc);
       return;
     } catch (error) {
       return;
