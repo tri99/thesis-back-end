@@ -10,7 +10,7 @@ const zoneSupport = require("./../utils/convertZoneDataForDevice");
 
 async function insert(req, res) {
   try {
-    const { name } = req.body;
+    const { name, price, formula } = req.body;
     if (name.toLowerCase() === "General") {
       return res
         .status(config.status_code.FORBIDEN)
@@ -31,7 +31,8 @@ async function insert(req, res) {
       isLoopAllVideo: false,
       userId: req.userId,
       adArray: [],
-      adArraySet: [],
+      price,
+      formula,
     });
     await zoneService.insert(newZoneDocument);
     return res.status(config.status_code.OK).send({ zone: newZoneDocument });
@@ -273,6 +274,8 @@ async function updateById(req, res) {
       isLoopOneVideo,
       isLoopAllVideo,
       adArray,
+      price,
+      formula,
     } = req.body;
 
     zoneDocument = await zoneService.updateById(id, {
@@ -282,6 +285,8 @@ async function updateById(req, res) {
       isLoopOneVideo,
       isLoopAllVideo,
       adArray,
+      price,
+      formula,
     });
     zoneDocument = await zoneService.getByIdwithAdName(id);
 

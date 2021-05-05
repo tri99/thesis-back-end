@@ -1,8 +1,14 @@
 const router = require("express").Router();
 const reportVideoLog = require("./../controllers/reportVideoLog");
 const auth = require("./../middlewares/authen_token");
-
+const upload = require("./../utils/uploadFile");
 module.exports = () => {
+  router.post(
+    "/deivce/infor-ai",
+    auth.deviceAuthen,
+    upload.catchErrorImage(),
+    reportVideoLog.insert
+  );
   router.get("/user/", auth.isAuthen, reportVideoLog.getByUserId);
   router.get(
     "/period/:timeS/:timeE",

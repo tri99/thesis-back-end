@@ -1,7 +1,6 @@
 const config = require("./../config/config");
 const multer = require("multer");
 
-
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, config.upload_folder + "/" + config.video_folder);
@@ -17,16 +16,37 @@ var upload = multer({
 
 const uploadVideo = upload.single("video");
 
+const imageStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, config.upload_folder + "/" + config.image_folder);
+  },
+});
+
+const uploadImage = imageStorage.upload("image");
+
+function catchErrorImage() {
+  return (req, res, next) => {
+    uploadImage(req, res, (error) => {
+      if (error) {
+        console.log(error);
+        return res.status(413).send({
+          message: "upload image error",
+        });
+      } else {
+        next();
+      }
+    });
+  };
+}
+
 function catchErrorVideo() {
   return (req, res, next) => {
     uploadVideo(req, res, (error) => {
       if (error) {
-          console.log(error);
-        return res
-          .status(413)
-          .send({
-            message: "oversize video",
-          });
+        console.log(error);
+        return res.status(413).send({
+          message: "oversize video",
+        });
       } else {
         next();
       }
@@ -35,5 +55,6 @@ function catchErrorVideo() {
 }
 
 module.exports = {
-  catchErrorVideo: catchErrorVideo,
+  catchErrorVideo,
+  catchErrorImage,
 };

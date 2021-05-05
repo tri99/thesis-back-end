@@ -6,8 +6,8 @@ async function insert(req, res) {
     const { name, ages, genders, daysOfWeek, hoursOfDay } = req.body;
     const newDocument = adSetService.createModel({
       name,
-      ages,
-      genders,
+      ages: [],
+      genders: [],
       daysOfWeek,
       hoursOfDay,
       adManagerId: req.userId,
@@ -72,7 +72,7 @@ async function getByAdManagerId(req, res) {
 async function updateById(req, res) {
   try {
     const { id } = req.params;
-    const { ages, genders, daysOfWeek, hoursOfDay } = req.body;
+    const { daysOfWeek, hoursOfDay } = req.body;
     let document = adSetService.getById(id);
     if (document["adManagerId"].toString() != req.userId) {
       return res
@@ -87,8 +87,6 @@ async function updateById(req, res) {
       });
     }
     await adSetService.updateById(id, {
-      ages,
-      genders,
       daysOfWeek,
       hoursOfDay,
     });

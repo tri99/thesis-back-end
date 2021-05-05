@@ -2,6 +2,7 @@ const reportVideoLogService = require("./../services/reportVideoLog");
 const reportVideoLog = require("./../collections/reportVideoLog");
 const config = require("./../config/config");
 const { getAgeTagName } = require("../utils/ageGenders");
+const handle = require("./../services/handle");
 const dayjs = require("dayjs");
 var isSameOrAfter = require("dayjs/plugin/isSameOrAfter");
 var isSameOrBefore = require("dayjs/plugin/isSameOrBefore");
@@ -326,6 +327,55 @@ async function deleteByUserId(req, res) {
   }
 }
 
+async function insert(req, res) {
+  try {
+    const { infor } = req.body;
+    const image = req.file;
+    let urlImageGlobal = null;
+    const typeImage = handle.getTypeFile(image.mimetype);
+    const signatureName = handle.getSignatureName();
+    const nameImageInPath = signatureName + "." + typeImage;
+    const pathImageStorage = `${config.upload_folder}${config.image_folder}${nameImageInPath}`;
+    await handle.moveFile(image.path, pathImageStorage);
+    urlImageGlobal = `${config.host}:${config.port}/${nameImageInPath}`;
+
+    const totalAgeCounts = Array(9).fill(0);
+    const totalGenderCounts = [0, 0];
+    let totalFaces = 0;
+    infor["snapshots"].forEach((ele) => {
+      const { ages, genders } = ele;
+      ages.map((age) => (totalAgeCounts[getAgeTag(age)] += 1));
+      genders.map((gender) =>
+        gender === "M" ? totalGenderCounts[0]++ : totalGenderCounts[1]++
+      );
+      totalFaces += ele["number_of_face"];
+    });
+    const adOffer = await adOfferService.getById(infor["adOfferId"]);
+
+    let newReportVideoLogDoc = reportVideoLog.createModel({
+      adOfferId: infor["adOfferId"],
+      adManagerId: adOffer["adManagerId"],
+      bdManagerId: adOffer["bdManagerId"],
+      videoId: infor["videoId"],
+      zoneId: infor["zoneId"],
+      timeStart: infor["timeStamp"],
+      runTime: infor["snapshots"].length * 5,
+      views: totalFaces,
+      ages: totalAgeCounts,
+      genders: totalGenderCounts,
+      raw: infor,
+      imagePath: urlImageGlobal,
+    });
+    await reportVideoLog.insert(newReportVideoLogDoc);
+    return res.status(200).send({
+      reportVideoLog: "success",
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
 module.exports = {
   getByPeriod: getByPeriod,
   getByUserId: getByUserId,
@@ -335,4 +385,5 @@ module.exports = {
   getByAge,
   getByGender,
   getOverview,
+  insert,
 };

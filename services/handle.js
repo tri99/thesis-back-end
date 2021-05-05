@@ -37,8 +37,8 @@ function getTypeFile(typeFile) {
 
   if (strings[1] == "mp4") {
     strings[1] = "mp4";
-  } else if (strings[1] == "wave") {
-    strings[1] = "wav";
+  } else if (strings[1] == "jpg") {
+    strings[1] = "jpg";
   } else if (strings[1] == "x-flac") {
     strings[1] = "flac";
   } else if (strings[1] == "quicktime") {

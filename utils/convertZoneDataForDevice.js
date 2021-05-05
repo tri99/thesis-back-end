@@ -20,7 +20,6 @@ async function convertZoneData(data) {
   data = JSON.parse(data);
   data["adArray"] = adOfferDoc;
   data["videoArray"] = videoDoc;
-  console.log(data["videoArray"]);
   return data;
 }
 
