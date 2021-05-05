@@ -2,12 +2,6 @@ const jwt = require("./../utils/jwt");
 const deviceService = require("./../services/device");
 const socketService = require("./../socket/index");
 
-function connection(IO) {
-  IO.on("connection", (socket) => {
-    console.log("aloalo");
-  });
-}
-
 // module.exports.connect = (socket) => {
 //   console.log("????");
 //   socket.emit("send", "aloalo")
@@ -91,6 +85,7 @@ function initFunction(socket, payload) {
   // update_zone_finished("is_finished_update", socket);
   // ===== INFOR VIDEO ========================
   // infor_video("infor-video", socket);
+  infor_ai_process("infor-ai-process", socket);
 }
 
 function send_event_authentication_success(event_name, socket, payload) {
@@ -130,7 +125,7 @@ function audio_joined_zone(event_name, socket) {
   }
 }
 
-function audio_levead_zone(event_name, socket, payload) {
+function audio_levead_zone(event_name, socket) {
   try {
     socket.on(event_name, (zoneId) => {
       socket.leave(zoneId);
@@ -138,16 +133,6 @@ function audio_levead_zone(event_name, socket, payload) {
   } catch (error) {
     return;
   }
-}
-
-function device_disconnected(event_name, socket, payload) {
-  socket.on(event_name, async () => {
-    try {
-      socket.auth = false;
-    } catch (error) {
-      return;
-    }
-  });
 }
 
 function infor_video(event_name, socket) {
@@ -159,8 +144,24 @@ function infor_video(event_name, socket) {
       const zoneId = infor["zoneId"];
       socketService
         .getIO()
-        .to(userDoc["userId"])
+        .in(userDoc["userId"].toString())
         .emit(`/receive/update/${zoneId}/infor-video`, infor);
+      return;
+    } catch (error) {
+      return;
+    }
+  });
+}
+
+function infor_ai_process(event_name, socket) {
+  socket.on(event_name, async (infor) => {
+    try {
+      infor["deviceId"] = socket.device_id;
+      let userDoc = deviceService.getById(socket.device_id);
+      socketService
+        .getIO()
+        .in(userDoc["userId"].toString())
+        .emit(`/receive/update/socket/infor-ai-process`, infor);
       return;
     } catch (error) {
       return;
