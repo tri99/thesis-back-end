@@ -61,6 +61,18 @@ const crudServiceGenerator = (model) => {
     });
   };
 
+  let findByPipeLine = (pipeline, selectOption = "_id") => {
+    return new Promise((resolve, reject) => {
+      return model
+        .find(pipeline)
+        .selct(selectOption)
+        .exec((error, document) => {
+          if (error) return reject(error);
+          return resolve(document);
+        });
+    });
+  };
+
   const deleteById = (_id) => {
     return deleteBy({ _id });
   };
@@ -73,6 +85,7 @@ const crudServiceGenerator = (model) => {
     createModel,
     deleteById,
     findOneBy,
+    findByPipeLine,
   };
 };
 module.exports = crudServiceGenerator;
