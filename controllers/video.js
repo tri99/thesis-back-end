@@ -2,23 +2,12 @@ const videoService = require("./../services/video");
 const zoneService = require("./../services/zone");
 const config = require("./../config/config");
 const audio_module = require("./../exports/audio-io");
-// const adSetService = require("./../services/adSet");
+const adSetService = require("./../services/adSet");
 const handle = require("./../services/handle");
 async function insert(req, res) {
   try {
     const { name, path, size, duration, tag } = req.body;
-    let tags = (tag) => tag.filter((v, i) => tag.indexOf(v) === i);
-    let age = [];
-    let gender = [];
-    for (let i = 0; i < tags.length; i++) {
-      if (tag[i] >= 10) gender.push(tag[i]);
-      else age.push(tag[i]);
-    }
-    // const newAdSetDoc = adSetService.createModel({
-    //   age: age,
-    //   gender: gender,
 
-    // })
     const newVideoDocument = videoService.createModel(
       name,
       duration,
@@ -85,6 +74,23 @@ async function upload(req, res) {
       });
     }
 
+    let tag = [...new Set(tags)];
+    let age = [];
+    let gender = [];
+    for (let i = 0; i < tag.length; i++) {
+      if (Number.parseInt(tag[i]) >= 10) gender.push(tag[i]);
+      else age.push(Number.parseInt(tag[i]));
+    }
+    const newAdSetDoc = adSetService.createModel({
+      age: age,
+      gender: gender,
+      dateOfWeek: [],
+      hourOfDate: [],
+      adManagerId: req.userId,
+    });
+
+    await adSetService.insert(newAdSetDoc);
+
     let urlVideoGlobal = null;
 
     const typeVideo = handle.getTypeFile(video.mimetype);
@@ -101,7 +107,8 @@ async function upload(req, res) {
       videoSize,
       urlVideoGlobal,
       tags,
-      req.userId
+      req.userId,
+      newAdSetDoc._id
     );
     await videoService.saveVideo(newVideo);
 
@@ -144,6 +151,8 @@ async function deleteById(req, res) {
     const pathVideoInURL = handle.getPathInURL(videoDocument.path, withoutUri);
     const pathVideoStorage = `${config.upload_folder}${config.video_folder}${pathVideoInURL}`;
     await handle.removeFile(pathVideoStorage);
+    if (videoDocument["adSetId"])
+      await adSetService.deleteById(videoDocument["adSetId"]);
     await videoService.deleteDocument(videoId);
     return res.status(config.status_code.OK).send({ video: true });
   } catch (error) {

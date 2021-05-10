@@ -1,11 +1,30 @@
 const adOfferService = require("./../services/adOffer");
+const adSetService = require("./../services/adSet");
 const config = require("./../config/config");
 
 async function insert(req, res) {
   try {
-    const { adSetId, bdManagerId, contentId, budget } = req.body;
+    const {
+      bdManagerId,
+      contentId,
+      budget,
+      age,
+      gender,
+      dateOfWeek,
+      hourOfDate,
+    } = req.body;
+
+    const newAdSetDoc = adSetService.createModel({
+      age,
+      gender,
+      dateOfWeek,
+      hourOfDate,
+      adManagerId: req.userId,
+    });
+    await adSetService.insert(newAdSetDoc);
+
     const newDocument = adOfferService.createModel({
-      adSetId,
+      adSetId: newAdSetDoc._id,
       bdManagerId,
       contentId,
       budget,
@@ -15,7 +34,7 @@ async function insert(req, res) {
       status: "pending",
       timeStatus: new Date().getTime(),
     });
-    await adOfferService.insert(adOfferService);
+    await adOfferService.insert(newDocument);
     return res.status(config.status_code.OK).send({ adSet: newDocument });
   } catch (error) {
     console.log(error);
@@ -26,7 +45,7 @@ async function insert(req, res) {
 async function getAll(req, res) {
   try {
     const document = await adOfferService.getAll();
-    return res.status(config.status_code.OK).send({ adSets: document });
+    return res.status(config.status_code.OK).send({ adOffer: document });
   } catch (error) {
     console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
@@ -35,8 +54,20 @@ async function getAll(req, res) {
 
 async function getById(req, res) {
   try {
-    const document = await adOfferService.getById(req.userId);
-    return res.status(config.status_code.OK).send({ adSets: document });
+    const { id } = req.params;
+    const document = await adOfferService.getById(id);
+    return res.status(config.status_code.OK).send({ adOffer: document });
+  } catch (error) {
+    console.log(error);
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
+async function getFullInfor(req, res) {
+  try {
+    const { id } = req.params;
+    const document = await adOfferService.getFullInfor(id);
+    return res.status(config.status_code.OK).send({ adOffers: document });
   } catch (error) {
     console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
@@ -47,7 +78,7 @@ async function getByAdManagerId(req, res) {
   try {
     const { id } = req.params;
     const document = adOfferService.findByPipeLine({ adManagerId: id });
-    return res.status(config.status_code.OK).send({ adSets: document });
+    return res.status(config.status_code.OK).send({ adOffers: document });
   } catch (error) {
     console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
@@ -58,7 +89,7 @@ async function getByBdManagerId(req, res) {
   try {
     const { id } = req.params;
     const document = adOfferService.findByPipeLine({ bdManagerId: id });
-    return res.status(config.status_code.OK).send({ adSets: document });
+    return res.status(config.status_code.OK).send({ adOffers: document });
   } catch (error) {
     console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
@@ -67,48 +98,67 @@ async function getByBdManagerId(req, res) {
 
 async function updateStatusById(req, res) {
   try {
-    const { _id, status, timeStatus } = req.body;
-    let document = adOfferService.getById(_id);
+    const { id } = req.params;
+    const { status, timeStatus } = req.body;
+    let document = adOfferService.getById(id);
     if (document["adManagerId"].toString() != req.userId) {
       return res
         .status(config.status_code.FORBIDEN)
         .send({ message: "wrong user" });
     }
-    await adOfferService.updateById(_id, {
+    await adOfferService.updateById(id, {
       status,
       timeStatus,
     });
-    document = adOfferService.getById(_id);
+    document = adOfferService.getById(id);
   } catch (error) {
     console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }
 }
 
-async function updateById(req, res) {
+async function updateAdsetOFAdOffer(req, res) {
   try {
-    const {
-      _id,
-      adSetId,
-      bdManagerId,
-      contentId,
-      budget,
-      remaingBudget,
-    } = req.body;
-    let document = adOfferService.getById(_id);
+    const { id } = req.params;
+    const { age, gender, dateOfWeek, hourOfDate } = req.body;
+    let document = adOfferService.getById(id);
     if (document["adManagerId"].toString() != req.userId) {
       return res
         .status(config.status_code.FORBIDEN)
         .send({ message: "wrong user" });
     }
-    await adOfferService.updateById(_id, {
+    await adSetService.updateById(document.adSetId, {
+      age,
+      gender,
+      dateOfWeek,
+      hourOfDate,
+    });
+    document = await adOfferService.getFullInfor(id);
+    return res.status(config.status_code.OK).send({ adSet: document });
+  } catch (error) {
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
+async function updateById(req, res) {
+  try {
+    const { id } = req.params;
+    const { adSetId, bdManagerId, contentId, budget, remaingBudget } = req.body;
+    let document = adOfferService.getById(id);
+    if (document["adManagerId"].toString() != req.userId) {
+      return res
+        .status(config.status_code.FORBIDEN)
+        .send({ message: "wrong user" });
+    }
+
+    await adOfferService.updateById(id, {
       adSetId,
       bdManagerId,
       contentId,
       budget,
       remaingBudget,
     });
-    document = adOfferService.getById(_id);
+    document = adOfferService.getById(id);
     return res.status(config.status_code.OK).send({ adSet: document });
   } catch (error) {
     console.log(error);
@@ -118,14 +168,15 @@ async function updateById(req, res) {
 
 async function deleteById(req, res) {
   try {
-    const { _id } = req.params;
-    let document = adOfferService.getById(_id);
+    const { id } = req.params;
+    let document = adOfferService.getById(id);
     if (document["adManagerId"].toString() != req.userId) {
       return res
         .status(config.status_code.FORBIDEN)
         .send({ message: "wrong user" });
     }
-    await adOfferService.deleteById(_id);
+    await adSetService.deleteById(document.adSetId);
+    await adOfferService.deleteById(id);
     return res.status(config.status_code.OK).send({ adSet: true });
   } catch (error) {
     console.log(error);
@@ -137,9 +188,11 @@ module.exports = {
   insert,
   getAll,
   getById,
+  getFullInfor,
   getByAdManagerId,
   getByBdManagerId,
   updateById,
   updateStatusById,
+  updateAdsetOFAdOffer,
   deleteById,
 };

@@ -50,7 +50,7 @@ function getManyByUserId(userId) {
   });
 }
 
-function createModel(name, duration, size, pathVideo, tag, userId) {
+function createModel(name, duration, size, pathVideo, tag, userId, adSetId) {
   const videoDocument = new Video({
     name: name,
     duration: duration,
@@ -60,6 +60,7 @@ function createModel(name, duration, size, pathVideo, tag, userId) {
     cDate: new Date(),
     mDate: new Date(),
     userId: userId,
+    adSetId: adSetId,
   });
   return videoDocument;
 }

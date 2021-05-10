@@ -6,11 +6,12 @@ const adOfferSchema = new schema({
   adSetId: {
     type: mongoose.Types.ObjectId,
     require: true,
-    ref: "adSets",
+    ref: "adset",
   },
   bdManagerId: {
     type: mongoose.Types.ObjectId,
     require: true,
+    ref: "user",
   },
   contentId: {
     type: mongoose.Types.ObjectId,
@@ -27,6 +28,7 @@ const adOfferSchema = new schema({
   adManagerId: {
     type: mongoose.Types.ObjectId,
     require: true,
+    ref: "user",
   },
   timeDeploy: {
     type: Date,

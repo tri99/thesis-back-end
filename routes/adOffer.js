@@ -4,10 +4,26 @@ const auth = require("./../middlewares/authen_token");
 module.exports = () => {
   router.post("/", auth.isAuthen, adOfferController.insert);
   router.get("/", auth.isAuthen, adOfferController.getAll);
-  router.get("/adManager/:id", auth.isAuthen, adOfferController.getById);
-  router.get("/bdManager/:id", auth.isAuthen, adOfferController.getById);
+  router.get("/fullInfor/:id", auth.isAuthen, adOfferController.getFullInfor);
+  router.get(
+    "/adManager/:id",
+    auth.isAuthen,
+    adOfferController.getByAdManagerId
+  );
+  router.get(
+    "/bdManager/:id",
+    auth.isAuthen,
+    adOfferController.getByBdManagerId
+  );
   router.get("/:id", auth.isAuthen, adOfferController.getById);
   router.delete("/:id", auth.isAuthen, adOfferController.deleteById);
+  router.put(
+    "/adset/:id",
+    auth.isAuthen,
+    adOfferController.updateAdsetOFAdOffer
+  );
+  router.put("/status/:id", auth.isAuthen, adOfferController.updateStatusById);
+
   router.put("/:id", auth.isAuthen, adOfferController.updateById);
 
   return router;

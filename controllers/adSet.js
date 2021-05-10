@@ -31,7 +31,8 @@ async function getAll(req, res) {
 
 async function getById(req, res) {
   try {
-    const document = await adSetService.getById(req.userId);
+    const { id } = req.params;
+    const document = await adSetService.getById(id);
     return res.status(config.status_code.OK).send({ adSets: document });
   } catch (error) {
     console.log(error);
@@ -52,20 +53,21 @@ async function getByAdManagerId(req, res) {
 
 async function updateById(req, res) {
   try {
-    const { _id, age, gender, dateOfWeek, hourOfDate } = req.body;
-    let document = adSetService.getById(_id);
+    const { id } = req.params;
+    const { age, gender, dateOfWeek, hourOfDate } = req.body;
+    let document = adSetService.getById(id);
     if (document["adManagerId"].toString() != req.userId) {
       return res
         .status(config.status_code.FORBIDEN)
         .send({ message: "wrong user" });
     }
-    await adSetService.updateById(_id, {
+    await adSetService.updateById(id, {
       age,
       gender,
       dateOfWeek,
       hourOfDate,
     });
-    document = adSetService.getById(_id);
+    document = adSetService.getById(id);
     return res.status(config.status_code.OK).send({ adSet: document });
   } catch (error) {
     console.log(error);
@@ -75,14 +77,14 @@ async function updateById(req, res) {
 
 async function deleteById(req, res) {
   try {
-    const { _id } = req.params;
-    let document = adSetService.getById(_id);
+    const { id } = req.params;
+    let document = adSetService.getById(id);
     if (document["adManagerId"].toString() != req.userId) {
       return res
         .status(config.status_code.FORBIDEN)
         .send({ message: "wrong user" });
     }
-    await adSetService.deleteById(_id);
+    await adSetService.deleteById(id);
     return res.status(config.status_code.OK).send({ adSet: true });
   } catch (error) {
     console.log(error);
