@@ -19,10 +19,6 @@ const adSetSchema = new Schema({
     type: [],
     require: true,
   },
-  mediaId: {
-    type: mongoose.Types.ObjectId,
-    required: true,
-  },
   adManagerId: {
     type: mongoose.Types.ObjectId,
     required: true,

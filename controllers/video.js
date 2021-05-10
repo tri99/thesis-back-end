@@ -2,11 +2,23 @@ const videoService = require("./../services/video");
 const zoneService = require("./../services/zone");
 const config = require("./../config/config");
 const audio_module = require("./../exports/audio-io");
-
+// const adSetService = require("./../services/adSet");
 const handle = require("./../services/handle");
 async function insert(req, res) {
   try {
     const { name, path, size, duration, tag } = req.body;
+    let tags = (tag) => tag.filter((v, i) => tag.indexOf(v) === i);
+    let age = [];
+    let gender = [];
+    for (let i = 0; i < tags.length; i++) {
+      if (tag[i] >= 10) gender.push(tag[i]);
+      else age.push(tag[i]);
+    }
+    // const newAdSetDoc = adSetService.createModel({
+    //   age: age,
+    //   gender: gender,
+
+    // })
     const newVideoDocument = videoService.createModel(
       name,
       duration,

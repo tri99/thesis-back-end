@@ -6,6 +6,7 @@ const adOfferSchema = new schema({
   adSetId: {
     type: mongoose.Types.ObjectId,
     require: true,
+    ref: "adSets",
   },
   bdManagerId: {
     type: mongoose.Types.ObjectId,

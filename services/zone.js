@@ -1,4 +1,4 @@
-const Zone = require("./../collections/zone");
+const Zone = require("../collections/zone");
 const mongoose = require("mongoose");
 function createModel(
   videoArray,
@@ -95,7 +95,7 @@ function updateById(
 
 function getZoneByDeviceId(deviceId) {
   return new Promise((resolve, reject) => {
-    Zone.find({ deviceArray: { $in: [deviceId] } })
+    Zone.find({ deviceArray: { $in: [mongoose.Types.ObjectId(deviceId)] } })
       .select()
       .exec((error, zoneDocument) => {
         if (error) return reject(error);

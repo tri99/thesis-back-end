@@ -3,13 +3,12 @@ const config = require("./../config/config");
 
 async function insert(req, res) {
   try {
-    const { age, gender, dateOfWeek, hourOfDate, mediaId } = req.body;
+    const { age, gender, dateOfWeek, hourOfDate } = req.body;
     const newDocument = adSetService.createModel({
       age,
       gender,
       dateOfWeek,
       hourOfDate,
-      mediaId,
       adManagerId: req.userId,
     });
     await adSetService.insert(newDocument);

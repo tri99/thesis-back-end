@@ -1,4 +1,4 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
@@ -35,10 +35,18 @@ const zoneSchema = new Schema({
     type: Boolean,
     required: true,
   },
-  userId:{
+  userId: {
     type: Schema.Types.ObjectId,
-    require: true
-  }
+    require: true,
+  },
+  adArray: {
+    type: [],
+    required: true,
+  },
+  adArraySet: {
+    type: [],
+    required: true,
+  },
 });
 
 const Zone = mongoose.model("zone", zoneSchema);

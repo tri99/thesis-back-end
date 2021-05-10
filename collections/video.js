@@ -1,4 +1,4 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
@@ -34,6 +34,11 @@ const videoSchema = new Schema({
   userId: {
     type: Schema.Types.ObjectId,
     require: true,
+  },
+  adSetId: {
+    type: Schema.Types.ObjectId,
+    required: true,
+    ref: "adSets",
   },
 });
 
