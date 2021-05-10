@@ -1,12 +1,20 @@
 const User = require("./../collections/user");
 
-function createModel(username, email, password, adminId, generalZoneId) {
+function createModel(
+  username,
+  email,
+  password,
+  adminId,
+  generalZoneId,
+  typeUser
+) {
   const newUserDocument = new User({
     username: username,
     email: email,
     password: password,
     adminId,
     generalZoneId,
+    typeUser: typeUser,
   });
   return newUserDocument;
 }

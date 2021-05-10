@@ -65,9 +65,9 @@ async function createAdminPermission(adminId, generalZoneId) {
 }
 async function signUp(req, res) {
   try {
-    let { username, email, password } = req.body;
-    console.log(username, email, password);
-    if (!username || !email || !password) {
+    let { username, email, password, typeUser } = req.body;
+    console.log(username, email, password, typeUser);
+    if (!username || !email || !password || !typeUser) {
       return res
         .status(config.status_code.FORBIDEN)
         .send({ message: "missing field" });
@@ -100,7 +100,8 @@ async function signUp(req, res) {
       email,
       password,
       req.userId,
-      generalZoneId
+      generalZoneId,
+      typeUser
     );
     if (!req.userId) {
       generalZone.userId = newUserDocument._id;

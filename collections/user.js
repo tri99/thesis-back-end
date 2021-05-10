@@ -32,6 +32,10 @@ const userSchema = new Schema({
   },
   adminId: Schema.Types.ObjectId,
   generalZoneId: Schema.Types.ObjectId,
+  typeUser: {
+    type: String,
+    required: true,
+  },
 });
 
 // function getBySubuserId(userId) {
