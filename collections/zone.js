@@ -39,14 +39,12 @@ const zoneSchema = new Schema({
     type: Schema.Types.ObjectId,
     require: true,
   },
-  adArray: {
-    type: [],
-    required: true,
-  },
-  adArraySet: {
-    type: [],
-    required: true,
-  },
+  adArray: [
+    {
+      type: mongoose.Types.ObjectId,
+      ref: "adoffer",
+    },
+  ],
 });
 
 const Zone = mongoose.model("zone", zoneSchema);

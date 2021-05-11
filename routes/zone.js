@@ -1,5 +1,6 @@
 const router = require("express").Router();
-const zoneController = require("./../controllers/zone");
+// const zoneController = require("./../controllers/zone");
+const zoneController = require("./../controllers/zone-ver2");
 const auth = require("./../middlewares/authen_token");
 module.exports = () => {
   /**
@@ -28,7 +29,8 @@ module.exports = () => {
    *@param {String} name
    *@param  {Array}  videoArray[{_id:stirng, path: String, duration: Number, size: Number}], playlistArray["String"], deviceArray["String"]
    */
-  router.put("/:id", auth.isAuthen, zoneController.updateById);
+  // router.put("/:id", auth.isAuthen, zoneController.updateById);
+  router.put("/:id", auth.isAuthen, zoneController.changeAdOfferToZone);
 
   /**
    * @param {String} zoneId

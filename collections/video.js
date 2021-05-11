@@ -38,7 +38,7 @@ const videoSchema = new Schema({
   adSetId: {
     type: Schema.Types.ObjectId,
     required: true,
-    ref: "adSets",
+    ref: "adset",
   },
 });
 

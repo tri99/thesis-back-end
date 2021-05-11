@@ -11,6 +11,7 @@ module.exports = () => {
   //   router.post("/users/forget-password", UserController.forgetPassword);
   //   router.post("/current-user/", UserController.)
   router.get("/current-user", auth.isAuthen, UserController.getCurrentUser);
+  router.get("/type-user", auth.isAuthen, UserController.getUserByTypeUser);
   //   router.get("/", UserController.getAllUser);
   router.get("/listid", UserController.getUserByListId);
   router.get("/email", UserController.getUserByEmail);

@@ -1,5 +1,6 @@
 const config = require("./../config/config");
 const zoneService = require("./../services/zone-ver2");
+const userService = require("./../services/user");
 // const videoService = require("./../services/video");
 const deviceService = require("./../services/device");
 // const playlistService = require("./../services/playlist");
@@ -216,6 +217,29 @@ async function getZoneByUserId(req, res) {
   }
 }
 
+async function changeAdOfferToZone(req, res) {
+  try {
+    const zoneId = req.params.id;
+    const { adOfferIds } = req.body;
+    let userDoc = await userService.getUserById(req.userId);
+    let zoneDocument = await zoneService.getById(zoneId);
+    if (
+      userDoc["typeUser"].toString() != "bdManager" ||
+      zoneDocument["userId"].toString() != req.userId
+    )
+      return res
+        .status(config.status_code.FORBIDEN)
+        .send({ message: "NOT_PERMISSION" });
+    zoneDocument["adArray"] = adOfferIds;
+    await zoneService.updateById(zoneId, {
+      adArray: zoneDocument["adArray"],
+    });
+    return res.status(config.status_code.OK).send({ zone: true });
+  } catch (error) {
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
 // async function updateById(req, res) {
 //   try {
 //     const { id } = req.params;
@@ -294,4 +318,5 @@ module.exports = {
   deleteById,
   removeDeviceFromZone,
   addDeviceToZone,
+  changeAdOfferToZone,
 };

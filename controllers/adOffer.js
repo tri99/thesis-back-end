@@ -4,32 +4,18 @@ const userService = require("./../services/user");
 const config = require("./../config/config");
 async function insert(req, res) {
   try {
-    const {
-      bdManagerId,
-      contentId,
-      budget,
-      ages,
-      genders,
-      daysOfWeek,
-      hoursOfDate,
-    } = req.body;
+    const { name, bdManagerId, contentId, budget, adSetId } = req.body;
 
-    let doc = userService.getUserById(req.userId);
-    if (doc["typeUser"] != "adManager")
+    let doc = await userService.getUserById(req.userId);
+    console.log(doc);
+    if (doc["typeUser"].toString() != "adManager")
       return res
         .status(config.status_code.FORBIDEN)
         .send({ message: "NOT_PERMISSION" });
-    const newAdSetDoc = adSetService.createModel({
-      ages,
-      genders,
-      daysOfWeek,
-      hoursOfDate,
-      adManagerId: req.userId,
-    });
-    await adSetService.insert(newAdSetDoc);
 
     const newDocument = adOfferService.createModel({
-      adSetId: newAdSetDoc._id,
+      name,
+      adSetId,
       bdManagerId,
       contentId,
       budget,
@@ -40,7 +26,7 @@ async function insert(req, res) {
       timeStatus: new Date().getTime(),
     });
     await adOfferService.insert(newDocument);
-    return res.status(config.status_code.OK).send({ adSet: newDocument });
+    return res.status(config.status_code.OK).send({ adOffer: newDocument });
   } catch (error) {
     console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
@@ -50,7 +36,7 @@ async function insert(req, res) {
 async function getAll(req, res) {
   try {
     const document = await adOfferService.getAll();
-    return res.status(config.status_code.OK).send({ adOffer: document });
+    return res.status(config.status_code.OK).send({ adOffers: document });
   } catch (error) {
     console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
@@ -72,7 +58,7 @@ async function getFullInfor(req, res) {
   try {
     const { id } = req.params;
     const document = await adOfferService.getFullInfor(id);
-    return res.status(config.status_code.OK).send({ adOffers: document });
+    return res.status(config.status_code.OK).send({ adOffer: document });
   } catch (error) {
     console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
@@ -115,7 +101,7 @@ async function getByBdManagerId(req, res) {
 async function getByArrayStatus(req, res) {
   try {
     const { statuses } = req.query;
-    let doc = userService.getUserById(req.userId);
+    let doc = await userService.getUserById(req.userId);
     let query = {};
     if (doc["typeUser"] == "adManager")
       query = { adManagerId: req.userId, status: { $in: { statuses } } };
@@ -134,7 +120,8 @@ async function updateStatusById(req, res) {
     const { id } = req.params;
     const { status } = req.body;
     let timeStatus = new Date();
-    let document = adOfferService.getById(id);
+    let document = await adOfferService.getById(id);
+    console.log(document);
     if (document["bdManagerId"].toString() != req.userId) {
       return res
         .status(config.status_code.FORBIDEN)
@@ -144,7 +131,8 @@ async function updateStatusById(req, res) {
       status,
       timeStatus,
     });
-    document = adOfferService.getById(id);
+    document = await adOfferService.getById(id);
+    return res.status(config.status_code.OK).send({ adOffer: document });
   } catch (error) {
     console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
@@ -154,8 +142,9 @@ async function updateStatusById(req, res) {
 async function CancelOfferById(req, res) {
   try {
     const { id } = req.params;
+    console.log("canceloffer", id);
     let timeStatus = new Date();
-    let document = adOfferService.getById(id);
+    let document = await adOfferService.getById(id);
     if (document["adManagerId"].toString() != req.userId) {
       return res
         .status(config.status_code.FORBIDEN)
@@ -166,6 +155,7 @@ async function CancelOfferById(req, res) {
       timeStatus,
     });
     document = adOfferService.getById(id);
+    return res.status(config.status_code.OK).send({ adOffer: document });
   } catch (error) {
     console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
@@ -175,8 +165,8 @@ async function CancelOfferById(req, res) {
 async function updateAdsetOFAdOffer(req, res) {
   try {
     const { id } = req.params;
-    const { ages, genders, daysOfWeek, hoursOfDate } = req.body;
-    let document = adOfferService.getById(id);
+    const { ages, genders, daysOfWeek, hoursOfDay } = req.body;
+    let document = await adOfferService.getById(id);
     if (document["adManagerId"].toString() != req.userId) {
       return res
         .status(config.status_code.FORBIDEN)
@@ -186,10 +176,10 @@ async function updateAdsetOFAdOffer(req, res) {
       ages,
       genders,
       daysOfWeek,
-      hoursOfDate,
+      hoursOfDay,
     });
     document = await adOfferService.getFullInfor(id);
-    return res.status(config.status_code.OK).send({ adSet: document });
+    return res.status(config.status_code.OK).send({ adOffer: document });
   } catch (error) {
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }
@@ -198,8 +188,15 @@ async function updateAdsetOFAdOffer(req, res) {
 async function updateById(req, res) {
   try {
     const { id } = req.params;
-    const { adSetId, bdManagerId, contentId, budget, remaingBudget } = req.body;
-    let document = adOfferService.getById(id);
+    const {
+      name,
+      adSetId,
+      bdManagerId,
+      contentId,
+      budget,
+      remaingBudget,
+    } = req.body;
+    let document = await adOfferService.getById(id);
     if (document["adManagerId"].toString() != req.userId) {
       return res
         .status(config.status_code.FORBIDEN)
@@ -207,6 +204,7 @@ async function updateById(req, res) {
     }
 
     await adOfferService.updateById(id, {
+      name,
       adSetId,
       bdManagerId,
       contentId,
@@ -214,7 +212,7 @@ async function updateById(req, res) {
       remaingBudget,
     });
     document = adOfferService.getById(id);
-    return res.status(config.status_code.OK).send({ adSet: document });
+    return res.status(config.status_code.OK).send({ adOffer: document });
   } catch (error) {
     console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
@@ -224,15 +222,15 @@ async function updateById(req, res) {
 async function deleteById(req, res) {
   try {
     const { id } = req.params;
-    let document = adOfferService.getById(id);
+    let document = await adOfferService.getById(id);
     if (document["adManagerId"].toString() != req.userId) {
       return res
         .status(config.status_code.FORBIDEN)
         .send({ message: "wrong user" });
     }
-    await adSetService.deleteById(document.adSetId);
+    // await adSetService.deleteById(document.adSetId);
     await adOfferService.deleteById(id);
-    return res.status(config.status_code.OK).send({ adSet: true });
+    return res.status(config.status_code.OK).send({ adOffer: true });
   } catch (error) {
     console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });

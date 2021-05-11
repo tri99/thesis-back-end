@@ -52,8 +52,8 @@ app.use("/api/playlists", require("./routes/playlist")());
 app.use("/api/users", require("./routes/user")());
 app.use("/api/perm-groups", require("./routes/permissionGroup")());
 app.use("/api/user-perms", require("./routes/userPermission")());
-app.use("/api/ad-sets", require("./routes/adSet")());
-app.use("/api/ad-offers", require("./routes/adOffer")());
+app.use("/api/adsets", require("./routes/adSet")());
+app.use("/api/adoffers", require("./routes/adOffer")());
 
 server.listen(config.port, config.host, () => {
   console.log(1, `SERVER Api ON LISTENING: ${config.host}:${config.port}`);

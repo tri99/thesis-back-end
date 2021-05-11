@@ -3,6 +3,10 @@ const mongoose = require("mongoose");
 const schema = mongoose.Schema;
 
 const adOfferSchema = new schema({
+  name: {
+    type: String,
+    required: true,
+  },
   adSetId: {
     type: mongoose.Types.ObjectId,
     require: true,
@@ -16,6 +20,7 @@ const adOfferSchema = new schema({
   contentId: {
     type: mongoose.Types.ObjectId,
     require: true,
+    ref: "playlist",
   },
   budget: {
     type: Number,

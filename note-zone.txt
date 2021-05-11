@@ -1,0 +1,13 @@
+zone:{
+    videoArray:[],
+    playlistArray:[],
+    deviceArray:[],
+    name: "string",
+    volumeVideo: number,
+    isLoopAllVideo: Boolean,
+    isLoopOneVideo: Boolean,
+    isMuteVideo: Boolean,
+    userId: ObjectId,
+    adArray:[],
+    adArraySet:[]
+}

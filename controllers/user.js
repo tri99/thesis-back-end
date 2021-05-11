@@ -156,6 +156,18 @@ async function getUserByListId(req, res) {
   }
 }
 
+async function getUserByTypeUser(req, res) {
+  try {
+    const typeUser = req.query.typeUser;
+    // console.log(listUserId);
+    const newUserDocument = await UserService.getUserByTypeUser(typeUser);
+
+    return res.status(200).send({ users: newUserDocument });
+  } catch (error) {
+    res.status(500).send({ message: error });
+  }
+}
+
 async function getAllUser(req, res) {
   try {
     const newUserDocument = await UserService.getAllUser();
@@ -203,4 +215,5 @@ module.exports = {
   getUserByListId: getUserByListId,
   updateUserById: updateUserById,
   getCurrentUser: getCurrentUser,
+  getUserByTypeUser: getUserByTypeUser,
 };

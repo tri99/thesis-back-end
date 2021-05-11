@@ -58,7 +58,8 @@ async function getInforVideo(req, res) {
 async function upload(req, res) {
   try {
     const duration = Number.parseInt(req.body.duration);
-    const adset = req.body.adset;
+    const adset = JSON.parse(req.body.adset);
+
     const video = req.file;
     const nameVideo = handle.spliceExtention(video.originalname);
     const videoDocument = await videoService.findOneBy({
@@ -74,11 +75,13 @@ async function upload(req, res) {
       });
     }
     const newAdSetDoc = adSetService.createModel({
-      age: adset.ages,
-      gender: adset.genders,
+      name: nameVideo,
+      ages: adset.ages,
+      genders: adset.genders,
       daysOfWeek: { value: [], strict: true },
-      hoursOfDate: { value: [], strict: false },
+      hoursOfDay: { value: [], strict: false },
       adManagerId: req.userId,
+      isMedia: true,
     });
 
     await adSetService.insert(newAdSetDoc);

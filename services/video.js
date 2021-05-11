@@ -31,7 +31,7 @@ function deleteDocument(VideoId) {
 function getManyByArrayId(videoIds) {
   return new Promise((resolve, reject) => {
     Video.find({ _id: { $in: videoIds } })
-      .select("path name duration size tag")
+      .select("path name duration size adSetId tag")
       .exec((error, videoDocument) => {
         if (error) return reject(error);
         return resolve(videoDocument);
@@ -42,7 +42,8 @@ function getManyByArrayId(videoIds) {
 function getManyByUserId(userId) {
   return new Promise((resolve, reject) => {
     Video.find({ userId: userId })
-      .select("path name duration size tag")
+      .populate("adSetId")
+      .select("path name duration size tag adSetId")
       .exec((error, videoDocument) => {
         if (error) return reject(error);
         return resolve(videoDocument);
@@ -88,6 +89,7 @@ function findOneById(videoId) {
 function findAll() {
   return new Promise((resolve, reject) => {
     Video.find()
+      .populate("adSetId")
       .select()
       .exec((error, videoDocument) => {
         if (error) return reject(error);

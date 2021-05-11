@@ -1,0 +1,3 @@
+adset
+    chỉ update/delete được khi khôn gắn với offer hoặc media
+    -> tạo hàm findAdOffer by adSetId

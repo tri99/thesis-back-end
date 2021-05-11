@@ -61,6 +61,17 @@ function getUserByListId(listuserId) {
   });
 }
 
+function getUserByTypeUser(typeUser) {
+  return new Promise((resolve, reject) => {
+    User.find({ typeUser: typeUser })
+      .select("_id username email ")
+      .exec((error, userDocument) => {
+        if (error) return reject(error);
+        return resolve(userDocument);
+      });
+  });
+}
+
 function getAllUser() {
   return new Promise((resolve, reject) => {
     User.find()
@@ -102,4 +113,5 @@ module.exports = {
   getAllUser: getAllUser,
   updatePermissionUserById: updatePermissionUserById,
   getUserByListId: getUserByListId,
+  getUserByTypeUser: getUserByTypeUser,
 };
