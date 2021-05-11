@@ -3,12 +3,12 @@ const config = require("./../config/config");
 
 async function insert(req, res) {
   try {
-    const { age, gender, dateOfWeek, hourOfDate } = req.body;
+    const { ages, genders, daysOfWeek, hoursOfDate } = req.body;
     const newDocument = adSetService.createModel({
-      age,
-      gender,
-      dateOfWeek,
-      hourOfDate,
+      ages,
+      genders,
+      daysOfWeek,
+      hoursOfDate,
       adManagerId: req.userId,
     });
     await adSetService.insert(newDocument);
@@ -54,7 +54,7 @@ async function getByAdManagerId(req, res) {
 async function updateById(req, res) {
   try {
     const { id } = req.params;
-    const { age, gender, dateOfWeek, hourOfDate } = req.body;
+    const { ages, genders, daysOfWeek, hoursOfDate } = req.body;
     let document = adSetService.getById(id);
     if (document["adManagerId"].toString() != req.userId) {
       return res
@@ -62,10 +62,10 @@ async function updateById(req, res) {
         .send({ message: "wrong user" });
     }
     await adSetService.updateById(id, {
-      age,
-      gender,
-      dateOfWeek,
-      hourOfDate,
+      ages,
+      genders,
+      daysOfWeek,
+      hoursOfDate,
     });
     document = adSetService.getById(id);
     return res.status(config.status_code.OK).send({ adSet: document });

@@ -3,20 +3,20 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const adSetSchema = new Schema({
-  age: {
-    type: [],
+  ages: {
+    type: {},
     require: true,
   },
-  gender: {
-    type: [],
+  genders: {
+    type: {},
     require: true,
   },
-  dateOfWeek: {
-    type: [],
+  daysOfWeek: {
+    type: {},
     require: true,
   },
-  hourOfDay: {
-    type: [],
+  hoursOfDay: {
+    type: {},
     require: true,
   },
   adManagerId: {

@@ -8,10 +8,10 @@ async function insert(req, res) {
       bdManagerId,
       contentId,
       budget,
-      age,
-      gender,
-      dateOfWeek,
-      hourOfDate,
+      ages,
+      genders,
+      daysOfWeek,
+      hoursOfDate,
     } = req.body;
 
     let doc = userService.getUserById(req.userId);
@@ -20,10 +20,10 @@ async function insert(req, res) {
         .status(config.status_code.FORBIDEN)
         .send({ message: "NOT_PERMISSION" });
     const newAdSetDoc = adSetService.createModel({
-      age,
-      gender,
-      dateOfWeek,
-      hourOfDate,
+      ages,
+      genders,
+      daysOfWeek,
+      hoursOfDate,
       adManagerId: req.userId,
     });
     await adSetService.insert(newAdSetDoc);
@@ -112,6 +112,23 @@ async function getByBdManagerId(req, res) {
   }
 }
 
+async function getByArrayStatus(req, res) {
+  try {
+    const { statuses } = req.query;
+    let doc = userService.getUserById(req.userId);
+    let query = {};
+    if (doc["typeUser"] == "adManager")
+      query = { adManagerId: req.userId, status: { $in: { statuses } } };
+    if (doc["typeUser"] == "bdManager")
+      query = { bdManagerId: req.userId, status: { $in: { statuses } } };
+    const document = await adOfferService.findByPipeLine(query, {});
+    return res.status(config.status_code.OK).send({ adOffers: document });
+  } catch (error) {
+    console.log(error);
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
 async function updateStatusById(req, res) {
   try {
     const { id } = req.params;
@@ -158,7 +175,7 @@ async function CancelOfferById(req, res) {
 async function updateAdsetOFAdOffer(req, res) {
   try {
     const { id } = req.params;
-    const { age, gender, dateOfWeek, hourOfDate } = req.body;
+    const { ages, genders, daysOfWeek, hoursOfDate } = req.body;
     let document = adOfferService.getById(id);
     if (document["adManagerId"].toString() != req.userId) {
       return res
@@ -166,10 +183,10 @@ async function updateAdsetOFAdOffer(req, res) {
         .send({ message: "wrong user" });
     }
     await adSetService.updateById(document.adSetId, {
-      age,
-      gender,
-      dateOfWeek,
-      hourOfDate,
+      ages,
+      genders,
+      daysOfWeek,
+      hoursOfDate,
     });
     document = await adOfferService.getFullInfor(id);
     return res.status(config.status_code.OK).send({ adSet: document });
@@ -234,4 +251,5 @@ module.exports = {
   updateAdsetOFAdOffer,
   CancelOfferById,
   deleteById,
+  getByArrayStatus,
 };

@@ -7,6 +7,7 @@ module.exports = () => {
   router.get("/fullInfor/:id", auth.isAuthen, adOfferController.getFullInfor);
   router.get("/adManager/", auth.isAuthen, adOfferController.getByAdManagerId);
   router.get("/bdManager/", auth.isAuthen, adOfferController.getByBdManagerId);
+  router.get("/statuses/", auth.isAuthen, adOfferController.getByArrayStatus);
   router.get("/:id", auth.isAuthen, adOfferController.getById);
   router.delete("/:id", auth.isAuthen, adOfferController.deleteById);
   router.put(
@@ -20,7 +21,6 @@ module.exports = () => {
     auth.isAuthen,
     adOfferController.CancelOfferById
   );
-
   router.put("/:id", auth.isAuthen, adOfferController.updateById);
 
   return router;

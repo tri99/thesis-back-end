@@ -58,7 +58,7 @@ async function getInforVideo(req, res) {
 async function upload(req, res) {
   try {
     const duration = Number.parseInt(req.body.duration);
-    const tags = req.body.tags;
+    const adset = req.body.adset;
     const video = req.file;
     const nameVideo = handle.spliceExtention(video.originalname);
     const videoDocument = await videoService.findOneBy({
@@ -73,19 +73,11 @@ async function upload(req, res) {
             .the_video_has_been_uploaded_before_please_check_back,
       });
     }
-
-    let tag = [...new Set(tags)];
-    let age = [];
-    let gender = [];
-    for (let i = 0; i < tag.length; i++) {
-      if (Number.parseInt(tag[i]) >= 10) gender.push(tag[i]);
-      else age.push(Number.parseInt(tag[i]));
-    }
     const newAdSetDoc = adSetService.createModel({
-      age: age,
-      gender: gender,
-      dateOfWeek: [],
-      hourOfDate: [],
+      age: adset.ages,
+      gender: adset.genders,
+      daysOfWeek: { value: [], strict: true },
+      hoursOfDate: { value: [], strict: false },
       adManagerId: req.userId,
     });
 
@@ -106,7 +98,7 @@ async function upload(req, res) {
       duration,
       videoSize,
       urlVideoGlobal,
-      tags,
+      [],
       req.userId,
       newAdSetDoc._id
     );
