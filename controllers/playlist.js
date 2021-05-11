@@ -1,5 +1,5 @@
 const playlistService = require("./../services/playlist");
-const zoneService = require("./../services/zone");
+const zoneService = require("../services/zone");
 
 const config = require("./../config/config");
 

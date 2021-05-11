@@ -62,10 +62,11 @@ const crudServiceGenerator = (model) => {
   };
 
   let findByPipeLine = (pipeline, selectOption = "_id") => {
+    console.log(pipeline);
     return new Promise((resolve, reject) => {
       return model
         .find(pipeline)
-        .selct(selectOption)
+        .select(selectOption)
         .exec((error, document) => {
           if (error) return reject(error);
           return resolve(document);

@@ -5,16 +5,8 @@ module.exports = () => {
   router.post("/", auth.isAuthen, adOfferController.insert);
   router.get("/", auth.isAuthen, adOfferController.getAll);
   router.get("/fullInfor/:id", auth.isAuthen, adOfferController.getFullInfor);
-  router.get(
-    "/adManager/:id",
-    auth.isAuthen,
-    adOfferController.getByAdManagerId
-  );
-  router.get(
-    "/bdManager/:id",
-    auth.isAuthen,
-    adOfferController.getByBdManagerId
-  );
+  router.get("/adManager/", auth.isAuthen, adOfferController.getByAdManagerId);
+  router.get("/bdManager/", auth.isAuthen, adOfferController.getByBdManagerId);
   router.get("/:id", auth.isAuthen, adOfferController.getById);
   router.delete("/:id", auth.isAuthen, adOfferController.deleteById);
   router.put(
@@ -23,6 +15,11 @@ module.exports = () => {
     adOfferController.updateAdsetOFAdOffer
   );
   router.put("/status/:id", auth.isAuthen, adOfferController.updateStatusById);
+  router.put(
+    "/status-cancel/:id",
+    auth.isAuthen,
+    adOfferController.CancelOfferById
+  );
 
   router.put("/:id", auth.isAuthen, adOfferController.updateById);
 

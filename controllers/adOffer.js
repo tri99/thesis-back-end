@@ -1,7 +1,7 @@
 const adOfferService = require("./../services/adOffer");
 const adSetService = require("./../services/adSet");
+const userService = require("./../services/user");
 const config = require("./../config/config");
-
 async function insert(req, res) {
   try {
     const {
@@ -14,6 +14,11 @@ async function insert(req, res) {
       hourOfDate,
     } = req.body;
 
+    let doc = userService.getUserById(req.userId);
+    if (doc["typeUser"] != "adManager")
+      return res
+        .status(config.status_code.FORBIDEN)
+        .send({ message: "NOT_PERMISSION" });
     const newAdSetDoc = adSetService.createModel({
       age,
       gender,
@@ -76,8 +81,13 @@ async function getFullInfor(req, res) {
 
 async function getByAdManagerId(req, res) {
   try {
-    const { id } = req.params;
-    const document = adOfferService.findByPipeLine({ adManagerId: id });
+    const adManagerId = req.userId;
+    const document = await adOfferService.findByPipeLine(
+      {
+        adManagerId: adManagerId,
+      },
+      {}
+    );
     return res.status(config.status_code.OK).send({ adOffers: document });
   } catch (error) {
     console.log(error);
@@ -87,8 +97,14 @@ async function getByAdManagerId(req, res) {
 
 async function getByBdManagerId(req, res) {
   try {
-    const { id } = req.params;
-    const document = adOfferService.findByPipeLine({ bdManagerId: id });
+    const bdManagerId = req.userId;
+    console.log(bdManagerId);
+    const document = await adOfferService.findByPipeLine(
+      {
+        bdManagerId: bdManagerId,
+      },
+      {}
+    );
     return res.status(config.status_code.OK).send({ adOffers: document });
   } catch (error) {
     console.log(error);
@@ -99,15 +115,37 @@ async function getByBdManagerId(req, res) {
 async function updateStatusById(req, res) {
   try {
     const { id } = req.params;
-    const { status, timeStatus } = req.body;
+    const { status } = req.body;
+    let timeStatus = new Date();
+    let document = adOfferService.getById(id);
+    if (document["bdManagerId"].toString() != req.userId) {
+      return res
+        .status(config.status_code.FORBIDEN)
+        .send({ message: "NOT_PERMISSION" });
+    }
+    await adOfferService.updateById(id, {
+      status,
+      timeStatus,
+    });
+    document = adOfferService.getById(id);
+  } catch (error) {
+    console.log(error);
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
+async function CancelOfferById(req, res) {
+  try {
+    const { id } = req.params;
+    let timeStatus = new Date();
     let document = adOfferService.getById(id);
     if (document["adManagerId"].toString() != req.userId) {
       return res
         .status(config.status_code.FORBIDEN)
-        .send({ message: "wrong user" });
+        .send({ message: "NOT_PERMISSION" });
     }
     await adOfferService.updateById(id, {
-      status,
+      status: "canceled",
       timeStatus,
     });
     document = adOfferService.getById(id);
@@ -194,5 +232,6 @@ module.exports = {
   updateById,
   updateStatusById,
   updateAdsetOFAdOffer,
+  CancelOfferById,
   deleteById,
 };
