@@ -26,7 +26,7 @@ const adOfferSchema = new schema({
     type: Number,
     require: true,
   },
-  remaingBudget: {
+  remainingBudget: {
     type: Number,
     required: true,
   },

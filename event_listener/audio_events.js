@@ -1,5 +1,6 @@
 const jwt = require("./../utils/jwt");
 const deviceService = require("./../services/device");
+const adOfferService = require("./../services/adOffer");
 const socketService = require("./../socket/index");
 const reportVideoLog = require("./../services/reportVideoLog");
 // module.exports.connect = (socket) => {
@@ -152,24 +153,80 @@ function infor_video(event_name, socket) {
     }
   });
 }
-
+function getAgeTag(age) {
+  const si = 0;
+  if (age < 3) {
+    return si;
+  } else if (age < 10) {
+    return si + 1;
+  } else if (age < 20) {
+    return si + 2;
+  } else if (age < 30) {
+    return si + 3;
+  } else if (age < 40) {
+    return si + 4;
+  } else if (age < 50) {
+    return si + 5;
+  } else if (age < 60) {
+    return si + 6;
+  } else if (age < 70) {
+    return si + 7;
+  } else {
+    return si + 8;
+  }
+}
+// const obj = {
+//   adOfferId: null,
+//   zoneId: null,
+//   videoId: null,
+//   durationFull: 300,
+//   timeStamp: 1619946902.3998563,
+//   snapshots: [
+//     {
+//       position: 0,
+//       ages: [31.808628663119606],
+//       genders: ["M"],
+//       number_of_face: 1,
+//       timeSnap: 1619947060.731988,
+//     },
+//   ],
+// };
 function infor_ai_process(event_name, socket) {
   socket.on(event_name, async (infor) => {
     try {
-      infor["deviceId"] = socket.device_id;
-      let userDoc = deviceService.getById(socket.device_id);
-      socketService
-        .getIO()
-        .in(userDoc["userId"].toString())
-        .emit(`/receive/update/socket/infor-ai-process`, infor);
-      let newReportVideoLogDoc = reportVideoLog.createModel(
-        userDoc["userId"],
-        infor[0]["videoId"],
-        infor[0]["zoneId"],
-        infor[0]["timeStamp"],
-        infor.length * 5,
-        infor
-      );
+      // infor["deviceId"] = socket.device_id;
+      // let userDoc = await deviceService.getById(socket.device_id);
+      // socketService
+      //   .getIO()
+      //   .in(userDoc["userId"].toString())
+      //   .emit(`/receive/update/socket/infor-ai-process`, infor);
+
+      const totalAgeCounts = Array(9).fill(0);
+      const totalGenderCounts = [0, 0];
+      let totalFaces = 0;
+      infor["snapshots"].forEach((ele) => {
+        const { ages, genders } = ele;
+        ages.map((age) => (totalAgeCounts[getAgeTag(age)] += 1));
+        genders.map((gender) =>
+          gender === "M" ? totalGenderCounts[0]++ : totalGenderCounts[1]++
+        );
+        totalFaces += ele["number_of_faces"];
+      });
+      const adOffer = await adOfferService.getById(infor["adOfferId"]);
+
+      let newReportVideoLogDoc = reportVideoLog.createModel({
+        adOfferId: infor["adOfferId"],
+        adManagerId: adOffer["adManagerId"],
+        bdManagerId: adOffer["bdManagerId"],
+        videoId: infor["videoId"],
+        zoneId: infor["zoneId"],
+        timeStart: infor["timeStamp"],
+        timeShow: infor["snapshots"].length * 5,
+        totalFaces,
+        ages: totalAgeCounts,
+        genders: totalGenderCounts,
+        raw: infor,
+      });
       await reportVideoLog.insert(newReportVideoLogDoc);
       return;
     } catch (error) {

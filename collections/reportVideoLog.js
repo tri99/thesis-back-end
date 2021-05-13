@@ -3,7 +3,15 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const reportVideoLogSchema = new Schema({
-  userId: {
+  adOfferId: {
+    type: mongoose.Types.ObjectId,
+    required: true,
+  },
+  adManagerId: {
+    type: mongoose.Types.ObjectId,
+    required: true,
+  },
+  bdManagerId: {
     type: mongoose.Types.ObjectId,
     required: true,
   },
@@ -23,8 +31,20 @@ const reportVideoLogSchema = new Schema({
     type: Number,
     required: true,
   },
-  processArray: {
-    type: [],
+  totalFaces: {
+    type: Number,
+    required: true,
+  },
+  ages: {
+    type: [Number],
+    required: true,
+  },
+  genders: {
+    type: [Number],
+    required: true,
+  },
+  raw: {
+    type: Object,
     required: true,
   },
 });

@@ -15,6 +15,18 @@ async function getByUserId(req, res) {
   }
 }
 
+// async function getByAdOffer(req, res) {
+//   try {
+//     const userId = req.userId;
+//     const { value, frequency, timeStart, timeEnd } = req.query;
+//     const logsInPeriod = await reportVideoLogService.findByPipeLine({
+//       adManagerId: userId,
+//       timeStart: { $gte: timeStart, $lte: timeEnd },
+//     });
+//   } catch (error) {
+//     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+//   }
+// }
 async function getByPeriod(req, res) {
   try {
     const userId = req.userId;

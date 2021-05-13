@@ -19,7 +19,7 @@ async function insert(req, res) {
       bdManagerId,
       contentId,
       budget,
-      remaingBudget: budget,
+      remainingBudget: budget,
       adManagerId: req.userId,
       timeDeploy: new Date().getTime(),
       status: "pending",
