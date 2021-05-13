@@ -6,32 +6,37 @@ const reportVideoLogSchema = new Schema({
   adOfferId: {
     type: mongoose.Types.ObjectId,
     required: true,
+    ref: "adoffer",
   },
   adManagerId: {
     type: mongoose.Types.ObjectId,
     required: true,
+    ref: "user",
   },
   bdManagerId: {
     type: mongoose.Types.ObjectId,
     required: true,
+    ref: "user",
   },
   videoId: {
     type: mongoose.Types.ObjectId,
     required: true,
+    ref: "video",
   },
   zoneId: {
     type: mongoose.Types.ObjectId,
     required: true,
+    ref: "zone",
   },
   timeStart: {
     type: Number,
     required: true,
   },
-  timeShow: {
+  runTime: {
     type: Number,
     required: true,
   },
-  totalFaces: {
+  views: {
     type: Number,
     required: true,
   },

@@ -9,6 +9,7 @@ module.exports = () => {
     auth.isAuthen,
     reportVideoLog.getByPeriod
   );
+  router.get("/adOffer", auth.isAuthen, reportVideoLog.getByAdOffer);
   router.delete("/:id", auth.isAuthen, reportVideoLog.deleteByUserId);
   return router;
 };

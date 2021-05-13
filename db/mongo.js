@@ -11,6 +11,7 @@ exports.connectMongo = function () {
     },
     function (err) {
       if (err) {
+        console.log(err);
         return;
       } else {
         console.log(1, "CONNECT DB SUCCESS");

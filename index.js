@@ -54,7 +54,7 @@ app.use("/api/perm-groups", require("./routes/permissionGroup")());
 app.use("/api/user-perms", require("./routes/userPermission")());
 app.use("/api/adsets", require("./routes/adSet")());
 app.use("/api/adoffers", require("./routes/adOffer")());
-
+app.use("/api/analytics", require("./routes/reportVideoLog")());
 server.listen(config.port, config.host, () => {
   console.log(1, `SERVER Api ON LISTENING: ${config.host}:${config.port}`);
 });
