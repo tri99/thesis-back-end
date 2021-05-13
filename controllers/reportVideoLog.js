@@ -28,42 +28,44 @@ function isSameTotal(dateStart, dateLog, frequency) {
 async function getByAdOffer(req, res) {
   try {
     const userId = req.userId;
-    const { value, frequency, timeStart, timeEnd } = req.query;
+    let { value, frequency, timeStart, timeEnd } = req.query;
+    let dateStart = dayjs.unix(timeStart).hour(0).minute(0).second(0);
     const logsInPeriod = await reportVideoLog
       .find({
         adManagerId: userId,
-        timeStart: { $gte: timeStart, $lte: timeEnd },
+        timeStart: {
+          $gte: dateStart.unix(),
+          $lte: dayjs.unix(timeEnd).hour(23).unix(),
+        },
       })
       .sort("timeStart")
       .populate({ path: "adOfferId", select: "name" });
-
-    let dateStart = dayjs.unix(timeStart);
-    const noDataPoints = Math.ceil(
-      (1.0 * dayjs.unix(timeEnd).diff(dateStart, "d")) / frequency
-    );
+    frequency = Number(frequency);
+    const noDataPoints =
+      Math.floor(
+        (1.0 * dayjs.unix(timeEnd).hour(1).diff(dateStart, "d")) / frequency
+      ) + 1;
     const dataMap = new Map();
     let index = 0;
+
     logsInPeriod.forEach((log) => {
-      const dateLog = dayjs.unix(log["timeStart"]);
+      const dateLog = dayjs.unix(log["timeStart"]).hour(0).minute(0).second(0);
       const adName = log["adOfferId"]["name"];
       if (!dataMap.has(adName))
         dataMap.set(adName, {
           name: adName,
           views: 0,
-          runTimes: 0,
+          runTime: 0,
           dataPoint: 0,
           index: 0,
           data: Array(noDataPoints).fill(0),
         });
       const curAd = dataMap.get(adName);
       if (index > curAd.index) {
-        // if (curAd.data[curAd.index] === 0)
-        //   curAd.data[curAd.index] += curAd.dataPoint;
-        // curAd.dataPoint = 0;
         curAd.index = index;
       }
       curAd.views += log["views"];
-      curAd.runTimes += log["runTime"];
+      curAd.runTime += log["runTime"];
       if (isSameTotal(dateStart, dateLog, frequency)) {
         curAd.data[index] += log[value];
       } else {
