@@ -10,6 +10,9 @@ module.exports = () => {
     reportVideoLog.getByPeriod
   );
   router.get("/adOffer", auth.isAuthen, reportVideoLog.getByAdOffer);
+  router.get("/bdManager", auth.isAuthen, reportVideoLog.getByBdManager);
+  router.get("/age", auth.isAuthen, reportVideoLog.getByAge);
+  router.get("/gender", auth.isAuthen, reportVideoLog.getByGender);
   router.delete("/:id", auth.isAuthen, reportVideoLog.deleteByUserId);
   return router;
 };

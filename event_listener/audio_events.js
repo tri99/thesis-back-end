@@ -3,6 +3,7 @@ const deviceService = require("./../services/device");
 const adOfferService = require("./../services/adOffer");
 const socketService = require("./../socket/index");
 const reportVideoLog = require("./../services/reportVideoLog");
+const { getAgeTag } = require("../utils/ageGenders");
 // module.exports.connect = (socket) => {
 //   console.log("????");
 //   socket.emit("send", "aloalo")
@@ -153,28 +154,7 @@ function infor_video(event_name, socket) {
     }
   });
 }
-function getAgeTag(age) {
-  const si = 0;
-  if (age < 3) {
-    return si;
-  } else if (age < 10) {
-    return si + 1;
-  } else if (age < 20) {
-    return si + 2;
-  } else if (age < 30) {
-    return si + 3;
-  } else if (age < 40) {
-    return si + 4;
-  } else if (age < 50) {
-    return si + 5;
-  } else if (age < 60) {
-    return si + 6;
-  } else if (age < 70) {
-    return si + 7;
-  } else {
-    return si + 8;
-  }
-}
+
 // const obj = {
 //   adOfferId: null,
 //   zoneId: null,
