@@ -30,8 +30,10 @@ function getByGenerator(populate, queryCheckCb) {
   return async function (req, res) {
     try {
       const userId = req.userId;
-      let { value, frequency, timeStart, timeEnd } = req.query;
+      let { value, frequency, timeStart, timeEnd, adOffer } = req.query;
       if (queryCheckCb) queryCheckCb(req.query);
+      const adFindOption =
+        !adOffer || adOffer === "all" ? {} : { adOfferId: adOffer };
       let dateStart = dayjs.unix(timeStart).hour(0).minute(0).second(0);
       const logsInPeriod = await reportVideoLog
         .find({
@@ -40,6 +42,7 @@ function getByGenerator(populate, queryCheckCb) {
             $gte: dateStart.unix(),
             $lte: dayjs.unix(timeEnd).hour(23).unix(),
           },
+          ...adFindOption,
         })
         .sort("timeStart")
         .populate(populate);
@@ -101,8 +104,10 @@ function getByEnumGenerator(enumName, getNameCb, queryCheckCb) {
   return async function (req, res) {
     try {
       const userId = req.userId;
-      let { frequency, timeStart, timeEnd } = req.query;
+      let { frequency, timeStart, timeEnd, adOffer } = req.query;
       if (queryCheckCb) queryCheckCb(req.query);
+      const adFindOption =
+        !adOffer || adOffer === "all" ? {} : { adOfferId: adOffer };
       let dateStart = dayjs.unix(timeStart).hour(0).minute(0).second(0);
       const logsInPeriod = await reportVideoLog
         .find({
@@ -111,6 +116,7 @@ function getByEnumGenerator(enumName, getNameCb, queryCheckCb) {
             $gte: dateStart.unix(),
             $lte: dayjs.unix(timeEnd).hour(23).unix(),
           },
+          ...adFindOption,
         })
         .sort("timeStart");
       frequency = Number(frequency);
@@ -199,6 +205,7 @@ const getByGender = getByEnumGenerator(
   (index) => (index === 0 ? "Male" : "Female"),
   checkValidQuery({ values: ["views"] })
 );
+
 async function getByPeriod(req, res) {
   try {
     const userId = req.userId;
