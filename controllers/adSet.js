@@ -1,4 +1,4 @@
-const adSetService = require("./../services/adset");
+const adSetService = require("./../services/adSet");
 const config = require("./../config/config");
 const adSetSupport = require("./../utils/getAdSetStatus");
 async function insert(req, res) {

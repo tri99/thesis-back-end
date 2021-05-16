@@ -3,28 +3,53 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const reportVideoLogSchema = new Schema({
-  userId: {
+  adOfferId: {
     type: mongoose.Types.ObjectId,
     required: true,
+    ref: "adoffer",
+  },
+  adManagerId: {
+    type: mongoose.Types.ObjectId,
+    required: true,
+    ref: "user",
+  },
+  bdManagerId: {
+    type: mongoose.Types.ObjectId,
+    required: true,
+    ref: "user",
   },
   videoId: {
     type: mongoose.Types.ObjectId,
     required: true,
+    ref: "video",
   },
   zoneId: {
     type: mongoose.Types.ObjectId,
     required: true,
+    ref: "zone",
   },
   timeStart: {
     type: Number,
     required: true,
   },
-  timeShow: {
+  runTime: {
     type: Number,
     required: true,
   },
-  processArray: {
-    type: [],
+  views: {
+    type: Number,
+    required: true,
+  },
+  ages: {
+    type: [Number],
+    required: true,
+  },
+  genders: {
+    type: [Number],
+    required: true,
+  },
+  raw: {
+    type: Object,
     required: true,
   },
 });
