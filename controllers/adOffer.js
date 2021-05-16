@@ -7,11 +7,23 @@ async function insert(req, res) {
     const { name, bdManagerId, contentId, budget, adSetId } = req.body;
 
     let doc = await userService.getUserById(req.userId);
-    console.log(doc);
+    let doc2 = await adOfferService.findByPipeLine({ adSetId: adSetId });
     if (doc["typeUser"].toString() != "adManager")
       return res
         .status(config.status_code.FORBIDEN)
         .send({ message: "NOT_PERMISSION" });
+
+    for (let i = 0; i < doc2; i++) {
+      if (
+        doc2[i]["contentId"].toString() == contentId &&
+        doc2[i]["adSetId"].toString() == adSetId &&
+        (doc2[i]["status"].toString() != "rejected" ||
+          doc2[i]["status"].toString() != "canceled")
+      )
+        return res
+          .status(config.status_code.FORBIDEN)
+          .send({ message: "adOffer with the same adSet and content existed" });
+    }
 
     const newDocument = adOfferService.createModel({
       name,

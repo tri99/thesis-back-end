@@ -3,7 +3,7 @@ const adSetController = require("./../controllers/adSet");
 const auth = require("./../middlewares/authen_token");
 module.exports = () => {
   router.post("/", auth.isAuthen, adSetController.insert);
-  router.get("/", auth.isAuthen, adSetController.getAll);
+  router.get("/", auth.isAuthen, adSetController.getAllNotMedia);
   router.get("/adManager/:id", auth.isAuthen, adSetController.getByAdManagerId);
   router.get("/:id", auth.isAuthen, adSetController.getById);
   router.delete("/:id", auth.isAuthen, adSetController.deleteById);

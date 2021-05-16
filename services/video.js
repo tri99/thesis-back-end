@@ -39,6 +39,18 @@ function getManyByArrayId(videoIds) {
   });
 }
 
+function getManyByArrayIdFull(videoIds) {
+  return new Promise((resolve, reject) => {
+    Video.find({ _id: { $in: videoIds } })
+      .populate("adSetId")
+      .select("path name duration size adSetId tag")
+      .exec((error, videoDocument) => {
+        if (error) return reject(error);
+        return resolve(videoDocument);
+      });
+  });
+}
+
 function getManyByUserId(userId) {
   return new Promise((resolve, reject) => {
     Video.find({ userId: userId })
@@ -119,6 +131,7 @@ function updateTagsById(videoId, tags) {
 }
 
 module.exports = {
+  ...videoCRUD,
   insertMany: insertMany,
   deleteDocument: deleteDocument,
   getManyByArrayId: getManyByArrayId,
@@ -130,4 +143,5 @@ module.exports = {
   findAll: findAll,
   findOneBy: videoCRUD.findOneBy,
   updateTagsById: updateTagsById,
+  getManyByArrayIdFull: getManyByArrayIdFull,
 };

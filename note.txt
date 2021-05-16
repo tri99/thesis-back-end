@@ -1,3 +1,7 @@
 adset
     chỉ update/delete được khi khôn gắn với offer hoặc media
     -> tạo hàm findAdOffer by adSetId
+
+    chỉ update khi media ko được gắn vào bất cứ offer nào
+    -> tìm video chứa adset có trong playlist thuộc adOffer nào ko?
+    -> message: đang thuộc offer XXX
