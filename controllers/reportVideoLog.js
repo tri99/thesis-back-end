@@ -232,7 +232,7 @@ async function getOverview(req, res) {
         },
       })
       .sort("timeStart")
-      .populate({ path: "adOfferId", select: "name" });
+      .populate({ path: "adOfferId", select: "name _id" });
     const frequency = 1;
     let totalViews = 0;
     let totalRunTime = 0;
@@ -246,6 +246,7 @@ async function getOverview(req, res) {
       const eleName = log["adOfferId"]["name"];
       if (!dataMap.has(eleName))
         dataMap.set(eleName, {
+          id: log["adOfferId"]["_id"],
           name: eleName,
           views: 0,
           runTime: 0,
