@@ -26,6 +26,17 @@ function isSameTotal(dateStart, dateLog, frequency) {
     dateLog.isSameOrBefore(dateStart.add(frequency - 1, "d"), "d")
   );
 }
+
+function getNoDataPoint(timeStart, timeEnd, freq = 1) {
+  return (
+    Math.floor(
+      (1.0 *
+        dayjs.unix(timeEnd).hour(1).diff(dayjs.unix(timeStart).hour(0), "d")) /
+        freq
+    ) + 1
+  );
+}
+
 function getByGenerator(populate, queryCheckCb) {
   return async function (req, res) {
     try {
@@ -206,6 +217,77 @@ const getByGender = getByEnumGenerator(
   checkValidQuery({ values: ["views"] })
 );
 
+async function getOverview(req, res) {
+  try {
+    const userId = req.userId;
+    let { timeStart, timeEnd } = req.query;
+
+    let dateStart = dayjs.unix(timeStart).hour(0).minute(0).second(0);
+    const logsInPeriod = await reportVideoLog
+      .find({
+        adManagerId: userId,
+        timeStart: {
+          $gte: dateStart.unix(),
+          $lte: dayjs.unix(timeEnd).hour(23).unix(),
+        },
+      })
+      .sort("timeStart")
+      .populate({ path: "adOfferId", select: "name" });
+    const frequency = 1;
+    let totalViews = 0;
+    let totalRunTime = 0;
+    const noDataPoint = getNoDataPoint(timeStart, timeEnd);
+    const views = new Array(noDataPoint).fill(0);
+    const runTime = new Array(noDataPoint).fill(0);
+    const dataMap = new Map();
+    let index = 0;
+    logsInPeriod.forEach((log) => {
+      const dateLog = dayjs.unix(log["timeStart"]).hour(0).minute(0).second(0);
+      const eleName = log["adOfferId"]["name"];
+      if (!dataMap.has(eleName))
+        dataMap.set(eleName, {
+          name: eleName,
+          views: 0,
+          runTime: 0,
+        });
+      const curAd = dataMap.get(eleName);
+
+      curAd.views += log["views"];
+      curAd.runTime += log["runTime"];
+      totalViews += log["views"];
+      totalRunTime += log["runTime"];
+      if (isSameTotal(dateStart, dateLog, frequency)) {
+        views[index] += log["views"];
+        runTime[index] += log["runTime"];
+      } else {
+        const dayDiff = dateLog.diff(dateStart, "d");
+        for (let i = 0; i + frequency <= dayDiff; i += frequency) {
+          index += 1;
+          curAd.index += 1;
+          dateStart = dateStart.add(frequency, "d");
+        }
+        views[index] += log["views"];
+        runTime[index] += log["runTime"];
+      }
+    });
+    const topAds = [];
+    dataMap.forEach((data) => topAds.push(data));
+    const data = {
+      totalViews,
+      totalRunTime,
+      views,
+      runTime,
+      topAds,
+    };
+    return res.status(config.status_code.OK).send({ data });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(config.status_code.SERVER_ERROR)
+      .send({ message: error.message });
+  }
+}
+
 async function getByPeriod(req, res) {
   try {
     const userId = req.userId;
@@ -251,4 +333,5 @@ module.exports = {
   getByBdManager,
   getByAge,
   getByGender,
+  getOverview,
 };
