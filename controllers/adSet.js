@@ -1,6 +1,6 @@
 const adSetService = require("./../services/adSet");
 const config = require("./../config/config");
-
+const adSetSupport = require("./../utils/getAdSetStatus");
 async function insert(req, res) {
   try {
     const { name, ages, genders, daysOfWeek, hoursOfDay } = req.body;
@@ -31,6 +31,19 @@ async function getAll(req, res) {
   }
 }
 
+async function getAllNotMedia(req, res) {
+  try {
+    const document = await adSetService.findByPipeLine({
+      userId: req.userId,
+      isMedia: false,
+    });
+    return res.status(config.status_code.OK).send({ adsets: document });
+  } catch (error) {
+    console.log(error);
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
 async function getById(req, res) {
   try {
     const { id } = req.params;
@@ -45,7 +58,10 @@ async function getById(req, res) {
 async function getByAdManagerId(req, res) {
   try {
     const { id } = req.params;
-    const document = adSetService.findByPipeLine({ adManagerId: id });
+    const document = adSetService.findByPipeLine({
+      adManagerId: id,
+      isMedia: false,
+    });
     return res.status(config.status_code.OK).send({ adsets: document });
   } catch (error) {
     console.log(error);
@@ -62,6 +78,13 @@ async function updateById(req, res) {
       return res
         .status(config.status_code.FORBIDEN)
         .send({ message: "wrong user" });
+    }
+    let { result, adOfferDoc } = adSetSupport.getAdSetStatus(id);
+    if (result == false) {
+      return res.status(config.status_code.FORBIDEN).send({
+        message: "adSet is using by some adOffer or playlist in adOffer",
+        adOffers: adOfferDoc,
+      });
     }
     await adSetService.updateById(id, {
       ages,
@@ -99,6 +122,7 @@ module.exports = {
   getAll,
   getById,
   getByAdManagerId,
+  getAllNotMedia,
   updateById,
   deleteById,
 };

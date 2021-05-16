@@ -38,7 +38,7 @@ async function addDevice(req, res) {
     if (!deviceDocumentCheck) {
       return res
         .status(config.status_code.FORBIDEN)
-        .send({ message: config.status_message.DEVICE_EXIST });
+        .send({ message: "DEVICE_NOT_EXIST" });
     }
     deviceDocumentCheck["name"] = name;
     deviceDocumentCheck["zoneId"] = null;

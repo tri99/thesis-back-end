@@ -6,6 +6,7 @@ const deviceService = require("./../services/device");
 // const playlistService = require("./../services/playlist");
 const audio_module = require("./../exports/audio-io");
 const mongoose = require("mongoose");
+const zoneSupport = require("./../utils/convertZoneDataForDevice");
 
 async function insert(req, res) {
   try {
@@ -107,7 +108,8 @@ async function getByIdforDevice(req, res) {
         adArray: [],
         adArraySet: [],
       };
-    return res.status(config.status_code.OK).send({ zone: ZoneDocument });
+    let doc = await zoneSupport.convertZoneData(ZoneDocument);
+    return res.status(config.status_code.OK).send({ zone: doc });
   } catch (error) {
     console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
@@ -120,7 +122,8 @@ async function getZoneByDeviceId(req, res) {
     let zoneDocument = await zoneService.findByPipeLine({
       deviceArray: { $in: [mongoose.Types.ObjectId(deviceId)] },
     });
-    return res.status(config.status_code.OK).send({ zone: zoneDocument });
+    let doc = await zoneSupport.convertZoneData(zoneDocument);
+    return res.status(config.status_code.OK).send({ zone: doc });
   } catch (error) {
     console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
@@ -207,9 +210,12 @@ async function getZoneByUserId(req, res) {
   try {
     const userId = req.userId;
     // console.log(videoIds);
-    let zoneDocument = await zoneService.findByPipeLine({
-      userId: mongoose.Types.ObjectId(userId),
-    });
+    let zoneDocument = await zoneService.findByPipeLine(
+      {
+        userId: mongoose.Types.ObjectId(userId),
+      },
+      "_id name"
+    );
     return res.status(config.status_code.OK).send({ zones: zoneDocument });
   } catch (error) {
     // console.log(error);
@@ -220,7 +226,8 @@ async function getZoneByUserId(req, res) {
 async function changeAdOfferToZone(req, res) {
   try {
     const zoneId = req.params.id;
-    const { adOfferIds } = req.body;
+    const { adArray } = req.body;
+    console.log(req.body);
     let userDoc = await userService.getUserById(req.userId);
     let zoneDocument = await zoneService.getById(zoneId);
     if (
@@ -230,11 +237,12 @@ async function changeAdOfferToZone(req, res) {
       return res
         .status(config.status_code.FORBIDEN)
         .send({ message: "NOT_PERMISSION" });
-    zoneDocument["adArray"] = adOfferIds;
+    zoneDocument["adArray"] = adArray;
     await zoneService.updateById(zoneId, {
       adArray: zoneDocument["adArray"],
     });
-    return res.status(config.status_code.OK).send({ zone: true });
+    zoneDocument = await zoneService.getById(zoneId);
+    return res.status(config.status_code.OK).send({ zone: zoneDocument });
   } catch (error) {
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }

@@ -11,3 +11,8 @@ zone:{
     adArray:[],
     adArraySet:[]
 }
+
+1. await getMediaContentByadOfferId -> mediaId(playlistVideo)
+2. playlistArray.push(mediaId)
+3. add all video from playlistArray
+4. 
