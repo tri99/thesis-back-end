@@ -4,9 +4,9 @@ const crudServiceGenerator = (model) => {
   };
   const insert = (newDocument) => {
     return new Promise((resolve, reject) => {
-      newDocument.save((error) => {
+      newDocument.save((error, doc) => {
         if (error) return reject(error);
-        return resolve(true);
+        return resolve(doc);
       });
     });
   };

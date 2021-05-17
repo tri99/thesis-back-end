@@ -67,7 +67,7 @@ async function createAdminPermission(adminId, generalZoneId) {
 async function signUp(req, res) {
   try {
     let { username, email, password, typeUser } = req.body;
-    console.log(username, email, password, typeUser);
+
     if (!username || !email || !password || !typeUser) {
       return res
         .status(config.status_code.FORBIDEN)
@@ -138,7 +138,7 @@ async function getCurrentUser(req, res) {
     currentUser.zonePermissionGroups = await newUserDocument[
       "zonePermissionGroups"
     ];
-    console.log("currenuser", currentUser);
+
     return res.status(200).send({ user: currentUser });
   } catch (error) {
     res.status(500).send({ message: error });
@@ -209,12 +209,11 @@ async function updateUserById(req, res) {
 
 async function readNotifications(req, res) {
   try {
-    console.log("cool1");
     await NotificationService.updateManyBy(
       { userId: req.userId },
       { isRead: true }
     );
-    console.log("cool");
+
     return res.status(config.status_code.OK).send({ notification: true });
   } catch (error) {
     console.log(error);
@@ -226,9 +225,19 @@ async function getNotifications(req, res) {
   try {
     const notis = await NotificationService.findBy(
       { userId: req.userId },
-      { sort: "cTime" }
+      { sort: "-cTime" }
     );
     return res.status(config.status_code.OK).send({ notifications: notis });
+  } catch (error) {
+    console.log(error);
+    res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
+async function testNotification(req, res) {
+  try {
+    const { text } = req.body;
+    await NotificationService.insertNotification(text, req.userId);
   } catch (error) {
     console.log(error);
     res.status(config.status_code.SERVER_ERROR).send({ message: error });
@@ -246,4 +255,5 @@ module.exports = {
   getUserByTypeUser: getUserByTypeUser,
   readNotifications,
   getNotifications,
+  testNotification,
 };

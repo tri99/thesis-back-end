@@ -22,6 +22,6 @@ module.exports = () => {
   // router.get("/subusers/:id", auth.isAuthen, UserController);
   router.get("/subusers", auth.isAuthen, SubuserController.getAll);
   router.get("/notifications", auth.isAuthen, UserController.getNotifications);
-
+  router.post("/notifications", auth.isAuthen, UserController.testNotification);
   return router;
 };

@@ -88,9 +88,11 @@ function infor_ai_process(event_name, socket) {
   });
 }
 
+var currentSocket = null;
 function connection() {
   io.on("connection", (socket) => {
     console.log("1111");
+    currentSocket = socket;
     socket.on("auth", async (token) => {
       console.log(token);
       if (!token) return socket.disconnect();
@@ -108,9 +110,12 @@ function connection() {
     infor_ai_process("test", socket);
   });
 }
-
+function getCurrentSocket() {
+  return currentSocket;
+}
 module.exports = {
   connection: connection,
   getIO: getIO,
   setIO: setIO,
+  getCurrentSocket,
 };
