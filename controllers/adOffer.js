@@ -1,6 +1,7 @@
 const adOfferService = require("./../services/adOffer");
 const adSetService = require("./../services/adSet");
 const userService = require("./../services/user");
+const NotificationService = require("./../services/notification");
 const config = require("./../config/config");
 async function insert(req, res) {
   try {
@@ -143,7 +144,16 @@ async function updateStatusById(req, res) {
       status,
       timeStatus,
     });
+
     document = await adOfferService.getById(id);
+    await NotificationService.insertNotification(
+      `Your ad offer ${document["name"]} has been ${document["status"]}`,
+      document["adManagerId"],
+      {
+        type: document["status"] === "deployed" ? "success" : "warn",
+        link: `/ads/${document["_id"].toString()}`,
+      }
+    );
     return res.status(config.status_code.OK).send({ adOffer: document });
   } catch (error) {
     console.log(error);

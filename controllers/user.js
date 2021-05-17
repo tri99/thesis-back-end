@@ -1,5 +1,6 @@
 const UserService = require("./../services/user");
 const ZoneService = require("../services/zone");
+const NotificationService = require("./../services/notification");
 const permGroupService = require("../services/permissionGroup");
 const UserPermService = require("../services/userPermission");
 const config = require("./../config/config");
@@ -206,6 +207,33 @@ async function updateUserById(req, res) {
   }
 }
 
+async function readNotifications(req, res) {
+  try {
+    console.log("cool1");
+    await NotificationService.updateManyBy(
+      { userId: req.userId },
+      { isRead: true }
+    );
+    console.log("cool");
+    return res.status(config.status_code.OK).send({ notification: true });
+  } catch (error) {
+    console.log(error);
+    res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
+async function getNotifications(req, res) {
+  try {
+    const notis = await NotificationService.findBy(
+      { userId: req.userId },
+      { sort: "cTime" }
+    );
+    return res.status(config.status_code.OK).send({ notifications: notis });
+  } catch (error) {
+    console.log(error);
+    res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
 module.exports = {
   signIn: signIn,
   signUp: signUp,
@@ -216,4 +244,6 @@ module.exports = {
   updateUserById: updateUserById,
   getCurrentUser: getCurrentUser,
   getUserByTypeUser: getUserByTypeUser,
+  readNotifications,
+  getNotifications,
 };
