@@ -11,6 +11,11 @@ const zoneSupport = require("./../utils/convertZoneDataForDevice");
 async function insert(req, res) {
   try {
     const { name } = req.body;
+    if (name.toLowerCase() === "General") {
+      return res
+        .status(config.status_code.FORBIDEN)
+        .send({ message: "'general' is a reserved name" });
+    }
     const videoArray = [];
     const playlistArray = [];
     const deviceArray = [];
