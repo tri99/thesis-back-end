@@ -33,8 +33,8 @@ async function getAll(req, res) {
 
 async function getAllNotMedia(req, res) {
   try {
-    const document = await adSetService.findByPipeLine({
-      userId: req.userId,
+    const document = await adSetService.getAll({
+      adManagerId: req.userId,
       isMedia: false,
     });
     return res.status(config.status_code.OK).send({ adsets: document });

@@ -3,6 +3,7 @@ const deviceService = require("./../services/device");
 const adOfferService = require("./../services/adOffer");
 const socketService = require("./../socket/index");
 const reportVideoLog = require("./../services/reportVideoLog");
+const NotificationService = require("./../services/notification");
 const { getAgeTag } = require("../utils/ageGenders");
 // module.exports.connect = (socket) => {
 //   console.log("????");
@@ -31,6 +32,14 @@ module.exports.connect = (socket) => {
       .getIO()
       .in(deviceDoc["userId"].toString())
       .emit(`/receive/update/socket/disconnect`, deviceDoc);
+    await NotificationService.insertNotification(
+      `Device **${deviceDoc["name"]}** has just disconnected`,
+      deviceDoc["userId"],
+      {
+        type: "warn",
+        link: `/`,
+      }
+    );
   });
   socket.on("authentication", async (data_authen) => {
     /**
@@ -63,6 +72,14 @@ module.exports.connect = (socket) => {
         .getIO()
         .in(deviceDocument["userId"].toString())
         .emit(`/receive/update/socket/connect`, deviceDocument);
+      await NotificationService.insertNotification(
+        `Device **${deviceDocument["name"]}** just connected`,
+        deviceDocument["userId"],
+        {
+          type: "info",
+          link: `/`,
+        }
+      );
       initFunction(socket, payload);
     } catch (error) {
       console.log(error);

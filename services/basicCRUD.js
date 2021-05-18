@@ -4,9 +4,9 @@ const crudServiceGenerator = (model) => {
   };
   const insert = (newDocument) => {
     return new Promise((resolve, reject) => {
-      newDocument.save((error) => {
+      newDocument.save((error, doc) => {
         if (error) return reject(error);
-        return resolve(true);
+        return resolve(doc);
       });
     });
   };
@@ -48,7 +48,14 @@ const crudServiceGenerator = (model) => {
       });
     });
   };
-
+  const updateManyBy = (filterOption, updateOption) => {
+    return new Promise((resolve, reject) => {
+      model.updateMany(filterOption, updateOption).exec((error, result) => {
+        if (error) reject(error);
+        return resolve(result);
+      });
+    });
+  };
   const findOneBy = (findOption, selectOption = "_id") => {
     return new Promise((resolve, reject) => {
       return model
@@ -61,17 +68,13 @@ const crudServiceGenerator = (model) => {
     });
   };
   const findBy = (findOption, extra) => {
-    const { select = "_id", sort = "" } = extra;
-    return new Promise((resolve, reject) => {
-      return model
-        .find(findOption)
-        .select(select)
-        .sort(sort)
-        .exec((error, documents) => {
-          if (error) return reject(error);
-          return resolve(documents);
-        });
-    });
+    const query = model.find(findOption);
+    if (extra) {
+      const { select, sort } = extra;
+      if (select) query.select(select);
+      if (sort) query.sort(sort);
+    }
+    return query.exec();
   };
   let findByPipeLine = (pipeline, selectOption = "_id") => {
     console.log(pipeline);
@@ -94,6 +97,7 @@ const crudServiceGenerator = (model) => {
     getById,
     getAll,
     updateById,
+    updateManyBy,
     deleteBy,
     createModel,
     deleteById,

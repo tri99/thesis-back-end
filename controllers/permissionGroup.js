@@ -8,6 +8,11 @@ const userPermService = require("../services/userPermission");
 async function insert(req, res) {
   try {
     const { name, permissions, desc } = req.body;
+    if (name.toLowerCase() === "admin") {
+      return res
+        .status(config.status_code.FORBIDEN)
+        .send({ message: "'admin' is a reserved name" });
+    }
     const newDocument = permGroupService.createModel({
       name,
       permissions,

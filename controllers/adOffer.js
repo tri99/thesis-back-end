@@ -1,6 +1,7 @@
 const adOfferService = require("./../services/adOffer");
 const adSetService = require("./../services/adSet");
 const userService = require("./../services/user");
+const NotificationService = require("./../services/notification");
 const config = require("./../config/config");
 async function insert(req, res) {
   try {
@@ -37,7 +38,16 @@ async function insert(req, res) {
       status: "pending",
       timeStatus: new Date().getTime(),
     });
-    await adOfferService.insert(newDocument);
+    const newAd = await adOfferService.insert(newDocument);
+
+    await NotificationService.insertNotification(
+      `You received an ad offer **${newAd["name"]}** from **${doc["username"]}**`,
+      bdManagerId,
+      {
+        type: "info",
+        link: `/buildingads/${newAd["_id"].toString()}`,
+      }
+    );
     return res.status(config.status_code.OK).send({ adOffer: newDocument });
   } catch (error) {
     console.log(error);
@@ -143,7 +153,16 @@ async function updateStatusById(req, res) {
       status,
       timeStatus,
     });
+
     document = await adOfferService.getById(id);
+    await NotificationService.insertNotification(
+      `Your ad offer **${document["name"]}** has been **${document["status"]}**`,
+      document["adManagerId"],
+      {
+        type: document["status"] === "deployed" ? "success" : "warn",
+        link: `/ads/${document["_id"].toString()}`,
+      }
+    );
     return res.status(config.status_code.OK).send({ adOffer: document });
   } catch (error) {
     console.log(error);
@@ -166,7 +185,15 @@ async function CancelOfferById(req, res) {
       status: "canceled",
       timeStatus,
     });
-    document = adOfferService.getById(id);
+    document = await adOfferService.getById(id);
+    await NotificationService.insertNotification(
+      `Your ad **${document["name"]}** has been **canceled**`,
+      document["bdManagerId"],
+      {
+        type: "warn",
+        link: `/buildingads/${document["_id"].toString()}`,
+      }
+    );
     return res.status(config.status_code.OK).send({ adOffer: document });
   } catch (error) {
     console.log(error);
