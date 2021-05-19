@@ -24,7 +24,6 @@ async function insert(req, res) {
       videoVolume,
       req.userId
     );
-    console.log(newZoneDocument);
     await zoneService.insert(newZoneDocument);
     return res.status(config.status_code.OK).send({ zone: newZoneDocument });
   } catch (error) {

@@ -29,8 +29,8 @@ module.exports = () => {
    *@param {String} name
    *@param  {Array}  videoArray[{_id:stirng, path: String, duration: Number, size: Number}], playlistArray["String"], deviceArray["String"]
    */
-  // router.put("/:id", auth.isAuthen, zoneController.updateById);
-  router.put("/:id", auth.isAuthen, zoneController.changeAdOfferToZone);
+  router.put("/:id", auth.isAuthen, zoneController.updateById);
+  // router.put("/:id", auth.isAuthen, zoneController.changeAdOfferToZone);
 
   /**
    * @param {String} zoneId

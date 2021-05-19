@@ -27,7 +27,6 @@ module.exports.connect = (socket) => {
     console.log(socket.device_id, " disconnected");
     await deviceService.updateStatusDevice(socket.device_id, false);
     let deviceDoc = await deviceService.getById(socket.device_id);
-    console.log(deviceDoc["userId"]);
     socketService
       .getIO()
       .in(deviceDoc["userId"].toString())
@@ -58,7 +57,6 @@ module.exports.connect = (socket) => {
 
       // ============= CHECK DEVICE ==================================
       const deviceDocument = await deviceService.getById(decode_data["id"]);
-      console.log(decode_data["id"]);
       if (!deviceDocument) socket.disconnect();
 
       socket.join(deviceDocument["_id"]);
@@ -158,15 +156,20 @@ function infor_video(event_name, socket) {
   socket.on(event_name, async (infor) => {
     try {
       infor["deviceId"] = socket.device_id;
-      let userDoc = deviceService.getById(socket.device_id);
+      console.log(socket.device_id);
+      let userDoc = await deviceService.getById(socket.device_id);
 
       const zoneId = infor["zoneId"];
+      console.log(userDoc);
       socketService
         .getIO()
         .in(userDoc["userId"].toString())
         .emit(`/receive/update/${zoneId}/infor-video`, infor);
+      console.log("video infor ++++++++++++++++++: ", infor);
+
       return;
     } catch (error) {
+      console.log("infor video: ", error);
       return;
     }
   });
@@ -197,7 +200,7 @@ function infor_ai_process(event_name, socket) {
       //   .getIO()
       //   .in(userDoc["userId"].toString())
       //   .emit(`/receive/update/socket/infor-ai-process`, infor);
-
+      console.log("process ai infor -------------------------- ", infor);
       const totalAgeCounts = Array(9).fill(0);
       const totalGenderCounts = [0, 0];
       let totalFaces = 0;
@@ -207,7 +210,7 @@ function infor_ai_process(event_name, socket) {
         genders.map((gender) =>
           gender === "M" ? totalGenderCounts[0]++ : totalGenderCounts[1]++
         );
-        totalFaces += ele["number_of_faces"];
+        totalFaces += ele["number_of_face"];
       });
       const adOffer = await adOfferService.getById(infor["adOfferId"]);
 
@@ -224,9 +227,11 @@ function infor_ai_process(event_name, socket) {
         genders: totalGenderCounts,
         raw: infor,
       });
+      console.log(newReportVideoLogDoc);
       await reportVideoLog.insert(newReportVideoLogDoc);
       return;
     } catch (error) {
+      console.log("ai infor: ", error);
       return;
     }
   });

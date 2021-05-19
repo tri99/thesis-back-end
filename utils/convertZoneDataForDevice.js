@@ -10,9 +10,17 @@ async function convertZoneData(data) {
   }
   let videos = [...new Set(videoArray)];
   let videoDoc = await videoService.getManyByArrayIdFull(videos[0]);
-  console.log(videoDoc);
+  videoDoc = JSON.stringify(videoDoc);
+  videoDoc = JSON.parse(videoDoc);
+  for (let i = 0; i < videoDoc.length; i++) {
+    videoDoc[i]["point"] = 0;
+    videoDoc[i]["played"] = false;
+  }
+  data = JSON.stringify(data);
+  data = JSON.parse(data);
   data["adArray"] = adOfferDoc;
   data["videoArray"] = videoDoc;
+  console.log(data["videoArray"]);
   return data;
 }
 

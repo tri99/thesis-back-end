@@ -106,7 +106,6 @@ async function getByAdManagerId(req, res) {
 async function getByBdManagerId(req, res) {
   try {
     const bdManagerId = req.userId;
-    console.log(bdManagerId);
     const document = await adOfferService.findByPipeLine(
       {
         bdManagerId: bdManagerId,
@@ -143,7 +142,6 @@ async function updateStatusById(req, res) {
     const { status } = req.body;
     let timeStatus = new Date();
     let document = await adOfferService.getById(id);
-    console.log(document);
     if (document["bdManagerId"].toString() != req.userId) {
       return res
         .status(config.status_code.FORBIDEN)
@@ -173,7 +171,6 @@ async function updateStatusById(req, res) {
 async function CancelOfferById(req, res) {
   try {
     const { id } = req.params;
-    console.log("canceloffer", id);
     let timeStatus = new Date();
     let document = await adOfferService.getById(id);
     if (document["adManagerId"].toString() != req.userId) {

@@ -75,7 +75,7 @@ async function deleteById(req, res) {
 async function getById(req, res) {
   try {
     const { id } = req.params;
-    const newZoneDocument = await zoneService.getById(id);
+    const newZoneDocument = await zoneService.getByIdwithAdName(id);
     const deviceDocument = await deviceService.getManyByArrayId(
       newZoneDocument["deviceArray"]
     );
@@ -232,7 +232,6 @@ async function changeAdOfferToZone(req, res) {
   try {
     const zoneId = req.params.id;
     const { adArray } = req.body;
-    console.log(req.body);
     let userDoc = await userService.getUserById(req.userId);
     let zoneDocument = await zoneService.getById(zoneId);
     if (
@@ -253,73 +252,47 @@ async function changeAdOfferToZone(req, res) {
   }
 }
 
-// async function updateById(req, res) {
-//   try {
-//     const { id } = req.params;
+async function updateById(req, res) {
+  try {
+    const { id } = req.params;
+    let userDoc = await userService.getUserById(req.userId);
+    let zoneDocument = await zoneService.getById(id);
+    if (
+      userDoc["typeUser"].toString() != "bdManager" ||
+      zoneDocument["userId"].toString() != req.userId
+    ) {
+      return res
+        .status(config.status_code.FORBIDEN)
+        .send({ message: "wrong user" });
+    }
 
-//     let zoneDocument = await zoneService.getById(id);
-//     if (zoneDocument["userId"].toString() != req.userId) {
-//       return res
-//         .status(config.status_code.FORBIDEN)
-//         .send({ message: "wrong user" });
-//     }
+    let {
+      name,
+      volumeVideo,
+      isMuteVideo,
+      isLoopOneVideo,
+      isLoopAllVideo,
+      adArray,
+    } = req.body;
 
-//     let {
-//       videoArray,
-//       playlistArray,
-//       deviceArray,
-//       name,
-//       volumeVideo,
-//       isMuteVideo,
-//       isLoopOneVideo,
-//       isLoopAllVideo,
-//       adArray,
-//     } = req.body;
-//     let adArraySet = [];
-//     for (let i = 0; i < adArray.length; i++) {
-//       const element = adArray[i];
-//     }
+    zoneDocument = await zoneService.updateById(id, {
+      name,
+      volumeVideo,
+      isMuteVideo,
+      isLoopOneVideo,
+      isLoopAllVideo,
+      adArray,
+    });
+    zoneDocument = await zoneService.getByIdwithAdName(id);
 
-//     // let plId = [];
-//     // for (let i = 0; i < playlistArray.length; i++) {
-//     //   plId.push(playlistArray[i]["_id"]);
-//     // }
-//     // let playlistDocument = await playlistService.getManyByArrayId(plId);
-//     // let videoIds = [];
-//     // for (let i = 0; i < videoArray.length; i++) {
-//     //   videoIds.push(videoArray[i]["_id"]);
-//     // }
-//     // for (let i = 0; i < playlistDocument.length; i++) {
-//     //   videoIds.push.apply(videoIds, playlistArray[i]["mediaArray"]);
-//     // }
-//     // videoIds = videoIds.filter(function (elem, pos) {
-//     //   return videoIds.indexOf(elem) == pos;
-//     // });
-//     // let videoDocument = await videoService.getManyByArrayId(videoIds);
-//     // videoArray = videoDocument;
+    audio_module.get_audio_io().to(id).emit("update-zone", { zoneId: id });
 
-//     // await zoneService.updateById(
-//     //   id,
-//     //   videoArray,
-//     //   playlistArray,
-//     //   deviceArray,
-//     //   name,
-//     //   volumeVideo,
-//     //   isMuteVideo,
-//     //   isLoopOneVideo,
-//     //   isLoopAllVideo
-//     // );
-
-//     // zoneDocument = await zoneService.getById(id);
-
-//     audio_module.get_audio_io().to(id).emit("update-zone", { zoneId: id });
-
-//     return res.status(config.status_code.OK).send({ zone: zoneDocument });
-//   } catch (error) {
-//     console.log(error);
-//     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
-//   }
-// }
+    return res.status(config.status_code.OK).send({ zone: zoneDocument });
+  } catch (error) {
+    console.log(error);
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
 
 module.exports = {
   insert,
@@ -332,4 +305,5 @@ module.exports = {
   removeDeviceFromZone,
   addDeviceToZone,
   changeAdOfferToZone,
+  updateById,
 };

@@ -63,7 +63,6 @@ async function getInforVideo(req, res) {
   try {
     const { zoneId } = req.body;
     const data_to_send = { to: zoneId };
-    console.log(data_to_send);
     audio_module
       .get_audio_io()
       .to(data_to_send.to)
@@ -80,7 +79,6 @@ async function getInforVideo(req, res) {
 async function control(req, res) {
   try {
     const { eventName, payload } = req.body;
-    console.log(req.body);
     console.log(eventName, payload);
     audio_module.get_audio_io().to(payload["zoneId"]).emit(eventName, payload);
 

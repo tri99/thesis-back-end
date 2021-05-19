@@ -24,7 +24,6 @@ const userSchema = new Schema({
     required: true,
     validate: {
       validator: function (p) {
-        console.log(p);
         return p.length >= 8;
       },
       message: () => `your password is not long enough, 8 or more plzz`,

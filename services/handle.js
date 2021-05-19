@@ -1,13 +1,13 @@
 // const mm = require("music-metadata");
 const fs = require("fs");
 const path = require("path");
-const config = require("./../config/config");
+// const config = require("./../config/config");
 // const mongoose = require("mongoose");
 // const sharp = require("sharp");
 // const FormData = require("form-data");
 // const request = require("request");
 const uuid = require("uuid");
-const jwt = require("./../utils/jwt");
+// const jwt = require("./../utils/jwt");
 
 function spliceExtention(name) {
   var fileName = path.parse(name).name;
@@ -33,7 +33,6 @@ function moveFile(oldPath, newPath) {
 }
 
 function getTypeFile(typeFile) {
-  console.log(typeFile);
   const strings = typeFile.split("/");
 
   if (strings[1] == "mp4") {

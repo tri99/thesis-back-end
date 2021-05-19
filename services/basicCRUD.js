@@ -42,9 +42,9 @@ const crudServiceGenerator = (model) => {
   };
   const updateById = (_id, updatedDocument) => {
     return new Promise((resolve, reject) => {
-      model.updateOne({ _id: _id }, updatedDocument).exec((error) => {
+      model.updateOne({ _id: _id }, updatedDocument).exec((error, doc) => {
         if (error) reject(error);
-        return resolve(error);
+        return resolve(doc);
       });
     });
   };
