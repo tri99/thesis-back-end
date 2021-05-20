@@ -67,13 +67,19 @@ const crudServiceGenerator = (model) => {
         });
     });
   };
-  const findBy = (findOption, extra) => {
+  const findBy = (findOption, { select, sort, populate, limit }) => {
     const query = model.find(findOption);
-    if (extra) {
-      const { select, sort } = extra;
-      if (select) query.select(select);
-      if (sort) query.sort(sort);
+
+    if (select) query.select(select);
+    if (sort) query.sort(sort);
+    if (populate) {
+      if (Array.isArray(populate)) {
+        populate.forEach((option) => query.populate(option));
+      } else {
+        query.populate(populate);
+      }
     }
+    if (limit) query.limit(limit);
     return query.exec();
   };
   let findByPipeLine = (pipeline, selectOption = "_id") => {

@@ -221,6 +221,7 @@ function infor_ai_process(event_name, socket) {
         videoId: infor["videoId"],
         zoneId: infor["zoneId"],
         timeStart: infor["timeStamp"],
+        deviceId: infor["deviceId"],
         runTime: infor["snapshots"].length * 5,
         views: totalFaces,
         ages: totalAgeCounts,

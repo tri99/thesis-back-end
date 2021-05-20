@@ -13,6 +13,7 @@ const deviceSchema = new Schema({
   },
   zoneId: {
     type: Schema.Types.ObjectId,
+    ref: "zone",
   },
   status: {
     type: Boolean,
@@ -20,6 +21,10 @@ const deviceSchema = new Schema({
   },
   userId: {
     type: Schema.Types.ObjectId,
+  },
+  timeStatusChange: {
+    type: Date,
+    required: true,
   },
 });
 

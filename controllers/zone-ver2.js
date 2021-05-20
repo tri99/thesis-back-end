@@ -7,7 +7,8 @@ const deviceService = require("./../services/device");
 const audio_module = require("./../exports/audio-io");
 const mongoose = require("mongoose");
 const zoneSupport = require("./../utils/convertZoneDataForDevice");
-
+const reportVideoLogService = require("./../services/reportVideoLog");
+const dayjs = require("dayjs");
 async function insert(req, res) {
   try {
     const { name } = req.body;
@@ -294,6 +295,31 @@ async function updateById(req, res) {
   }
 }
 
+async function getLogsByZoneId(req, res) {
+  try {
+    const today = dayjs();
+    const yesterday = today.subtract(1, "d");
+    const logs = await reportVideoLogService.findBy(
+      {
+        zoneId: req.params.id,
+        timeStart: { $gte: yesterday.unix(), $lte: today.unix() },
+      },
+      {
+        select: "_id videoId timeStart adOfferId",
+        populate: [
+          { path: "videoId", select: "name" },
+          { path: "adOfferId", select: "_id name" },
+          { path: "deviceId", select: "name" },
+        ],
+        sort: "-timeStart",
+      }
+    );
+    return res.status(config.status_code.OK).send({ logs });
+  } catch (error) {
+    console.log(error);
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
 module.exports = {
   insert,
   getAll,
@@ -301,6 +327,7 @@ module.exports = {
   getByIdforDevice,
   getZoneByDeviceId,
   getZoneByUserId,
+  getLogsByZoneId,
   deleteById,
   removeDeviceFromZone,
   addDeviceToZone,

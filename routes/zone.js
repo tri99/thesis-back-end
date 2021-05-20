@@ -18,6 +18,7 @@ module.exports = () => {
    *  @param {String} _id
    */
   router.get("/:id", auth.isAuthen, zoneController.getById);
+  router.get("/:id/logs", auth.isAuthen, zoneController.getLogsByZoneId);
   // router.get("/", auth.isAuthen,zoneController.getAll);
   /**
    *  @param {String} name

@@ -28,6 +28,11 @@ const reportVideoLogSchema = new Schema({
     required: true,
     ref: "zone",
   },
+  deviceId: {
+    type: mongoose.Types.ObjectId,
+    required: true,
+    ref: "device",
+  },
   timeStart: {
     type: Number,
     required: true,
