@@ -277,6 +277,9 @@ async function updateById(req, res) {
       isLoopOneVideo,
       isLoopAllVideo,
       adArray,
+      location,
+      locationDesc,
+      pricePerTimePeriod,
     } = req.body;
 
     zoneDocument = await zoneService.updateById(id, {
@@ -286,6 +289,9 @@ async function updateById(req, res) {
       isLoopOneVideo,
       isLoopAllVideo,
       adArray,
+      location,
+      locationDesc,
+      pricePerTimePeriod,
     });
     zoneDocument = await zoneService.getByIdwithAdName(id);
 

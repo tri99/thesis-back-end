@@ -15,6 +15,10 @@ function getFullInfor(_id) {
       .populate({ path: "adManagerId", select: "_id username email" })
       .populate({ path: "contentId" })
       .populate({ path: "adSetId" })
+      .populate({
+        path: "zoneIds",
+        select: "name locationDesc location pricePerTimePeriod",
+      })
       .exec((error, document) => {
         if (error) return reject(error);
         console.log(document);

@@ -17,10 +17,12 @@ const adOfferSchema = new schema({
     require: true,
     ref: "user",
   },
-  zoneIds: {
-    type: [mongoose.Types.ObjectId],
-    require: true,
-  },
+  zoneIds: [
+    {
+      type: mongoose.Types.ObjectId,
+      ref: "zone",
+    },
+  ],
   contentId: {
     type: mongoose.Types.ObjectId,
     require: true,
