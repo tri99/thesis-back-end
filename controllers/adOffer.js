@@ -1,6 +1,7 @@
 const adOfferService = require("./../services/adOffer");
 const adSetService = require("./../services/adSet");
 const userService = require("./../services/user");
+const videoService = require("./../services/video");
 const NotificationService = require("./../services/notification");
 const config = require("./../config/config");
 async function insert(req, res) {
@@ -273,6 +274,19 @@ async function deleteById(req, res) {
   }
 }
 
+async function getMediaPreview(req, res) {
+  try {
+    const { videoIds } = req.query;
+    const videos = await videoService.findBy(
+      { _id: { $in: videoIds } },
+      { populate: { path: "adSetId", select: "ages genders" } }
+    );
+    return res.status(config.status_code.OK).send({ videos });
+  } catch (error) {
+    console.log(error);
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
 module.exports = {
   insert,
   getAll,
@@ -286,4 +300,5 @@ module.exports = {
   CancelOfferById,
   deleteById,
   getByArrayStatus,
+  getMediaPreview,
 };
