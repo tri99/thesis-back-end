@@ -1,5 +1,5 @@
 const UserService = require("./../services/user");
-const ZoneService = require("../services/zone");
+const ZoneService = require("../services/zone-ver2");
 const NotificationService = require("./../services/notification");
 const permGroupService = require("../services/permissionGroup");
 const UserPermService = require("../services/userPermission");
@@ -91,7 +91,22 @@ async function signUp(req, res) {
     password = await encrypt.encryptPassword(password);
     let generalZone, generalZoneId;
     if (!req.userId) {
-      generalZone = ZoneService.createModel([], [], [], "General", 0);
+      generalZone = ZoneService.createModel({
+        videoArray: [],
+        playlistArray: [],
+        deviceArray: [],
+        name: "General",
+        videoVolume: 0,
+        isMuteVideo: false,
+        isLoopOneVideo: false,
+        isLoopAllVideo: false,
+        userId: req.userId,
+        adArray: [],
+        adArraySet: [],
+        location: { lat: 0, lng: 0 },
+        locationDesc: "Reserved general zone",
+        pricePerTimePeriod: 0,
+      });
       generalZoneId = generalZone._id;
     } else {
       generalZoneId = (await UserService.getUserById(req.userId)).generalZoneId;

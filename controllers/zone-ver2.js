@@ -11,7 +11,7 @@ const reportVideoLogService = require("./../services/reportVideoLog");
 const dayjs = require("dayjs");
 async function insert(req, res) {
   try {
-    const { name } = req.body;
+    const { name, location, locationDesc, pricePerTimePeriod } = req.body;
     if (name.toLowerCase() === "General") {
       return res
         .status(config.status_code.FORBIDEN)
@@ -33,9 +33,12 @@ async function insert(req, res) {
       userId: req.userId,
       adArray: [],
       adArraySet: [],
+      location,
+      locationDesc,
+      pricePerTimePeriod,
     });
-    await zoneService.insert(newZoneDocument);
-    return res.status(config.status_code.OK).send({ zone: newZoneDocument });
+    const insertedZone = await zoneService.insert(newZoneDocument);
+    return res.status(config.status_code.OK).send({ zone: insertedZone });
   } catch (error) {
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }
@@ -220,7 +223,7 @@ async function getZoneByUserId(req, res) {
       {
         userId: mongoose.Types.ObjectId(userId),
       },
-      "_id name"
+      "_id name location locationDesc pricePerTimePeriod"
     );
     return res.status(config.status_code.OK).send({ zones: zoneDocument });
   } catch (error) {
