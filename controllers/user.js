@@ -258,6 +258,20 @@ async function testNotification(req, res) {
     res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }
 }
+
+async function getBdManagerZoneInfo(req, res) {
+  try {
+    const { id } = req.params;
+    const zones = await ZoneService.findBy(
+      { userId: id, name: { $ne: "General" } },
+      { select: "_id name location locationDesc pricePerTimePeriod" }
+    );
+    res.status(config.status_code.OK).send({ zones });
+  } catch (error) {
+    console.log(error);
+    res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
 module.exports = {
   signIn: signIn,
   signUp: signUp,
@@ -271,4 +285,5 @@ module.exports = {
   readNotifications,
   getNotifications,
   testNotification,
+  getBdManagerZoneInfo,
 };

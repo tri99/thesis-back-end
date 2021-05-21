@@ -35,6 +35,8 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
+  desc: String,
+  avatar: String,
 });
 
 // function getBySubuserId(userId) {

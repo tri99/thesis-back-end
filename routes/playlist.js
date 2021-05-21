@@ -1,15 +1,16 @@
 const router = require("express").Router();
 const playlistController = require("./../controllers/playlist");
-const auth = require("./../middlewares/authen_token")
+const auth = require("./../middlewares/authen_token");
 module.exports = () => {
   /**
    * @param {String} name
    * @param {String} type
    * @param {ArrayString} mediaArray
    */
-  router.post("/",auth.isAuthen, playlistController.insert);
+  router.post("/", auth.isAuthen, playlistController.insert);
   router.get("/get-many", auth.isAuthen, playlistController.getManyByArrayId);
   router.get("/", auth.isAuthen, playlistController.getPlaylistByUserId);
+  router.get("/:id", auth.isAuthen, playlistController.getById);
   /**
    * @param {String} _id
    */
@@ -21,5 +22,6 @@ module.exports = () => {
    * @param {ArrayString} mediaArray
    */
   router.delete("/:id", auth.isAuthen, playlistController.deleteById);
+  router.get("/:id/preview", auth.isAuthen, playlistController.getPreview);
   return router;
-}
+};

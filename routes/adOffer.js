@@ -9,11 +9,6 @@ module.exports = () => {
   router.get("/bd-manager/", auth.isAuthen, adOfferController.getByBdManagerId);
   router.get("/statuses/", auth.isAuthen, adOfferController.getByArrayStatus);
   router.get("/:id", auth.isAuthen, adOfferController.getById);
-  router.get(
-    "/:id/media-preview",
-    auth.isAuthen,
-    adOfferController.getMediaPreview
-  );
   router.delete("/:id", auth.isAuthen, adOfferController.deleteById);
   router.put(
     "/adset/:id",

@@ -48,7 +48,7 @@ async function getById(req, res) {
   try {
     const { id } = req.params;
     const document = await adSetService.getById(id);
-    return res.status(config.status_code.OK).send({ adsets: document });
+    return res.status(config.status_code.OK).send({ adset: document });
   } catch (error) {
     console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });

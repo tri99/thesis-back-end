@@ -21,6 +21,11 @@ module.exports = () => {
   router.delete("/subusers/:id", auth.isAuthen, SubuserController.deleteById);
   // router.get("/subusers/:id", auth.isAuthen, UserController);
   router.get("/subusers", auth.isAuthen, SubuserController.getAll);
+  router.get(
+    "/bd-managers/:id/zone-info",
+    auth.isAuthen,
+    UserController.getBdManagerZoneInfo
+  );
   router.get("/notifications", auth.isAuthen, UserController.getNotifications);
   router.post("/notifications", auth.isAuthen, UserController.testNotification);
   return router;
