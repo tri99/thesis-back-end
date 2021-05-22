@@ -21,6 +21,12 @@ module.exports = () => {
     auth.isAuthen,
     adOfferController.CancelOfferById
   );
+  router.put("/:id/send", auth.isAuthen, adOfferController.sendOfferById);
+  router.put(
+    "/:id/redeploy",
+    auth.isAuthen,
+    adOfferController.redeployOfferById
+  );
   router.put("/:id", auth.isAuthen, adOfferController.updateById);
 
   return router;

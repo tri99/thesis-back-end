@@ -17,6 +17,12 @@ const adOfferSchema = new schema({
     require: true,
     ref: "user",
   },
+  zoneIds: [
+    {
+      type: mongoose.Types.ObjectId,
+      ref: "zone",
+    },
+  ],
   contentId: {
     type: mongoose.Types.ObjectId,
     require: true,
@@ -47,6 +53,8 @@ const adOfferSchema = new schema({
     type: Date,
     require: true,
   },
+  deletedByBdManager: Boolean,
+  deletedByAdManager: Boolean,
 });
 
 const adOffer = mongoose.model("adoffer", adOfferSchema);

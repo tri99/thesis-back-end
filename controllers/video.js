@@ -112,6 +112,10 @@ async function upload(req, res) {
       path: urlVideoGlobal,
       _id: newVideo._id,
       duration: duration,
+      adSetId: {
+        ages: adset.ages,
+        genders: adset.genders,
+      },
     });
   } catch (error) {
     console.log(error);

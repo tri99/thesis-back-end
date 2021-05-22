@@ -132,7 +132,10 @@ async function getDevicesByUserId(req, res) {
   try {
     const userId = req.userId;
     // console.log(videoIds);
-    let deviceDocument = await deviceService.getManyByUserId(userId);
+    let deviceDocument = await deviceService.findBy(
+      { userId },
+      { populate: { path: "zoneId", select: "_id name" } }
+    );
     // console.log(videoDocument);
     return res.status(config.status_code.OK).send({ devices: deviceDocument });
   } catch (error) {

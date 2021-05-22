@@ -7,10 +7,11 @@ const deviceService = require("./../services/device");
 const audio_module = require("./../exports/audio-io");
 const mongoose = require("mongoose");
 const zoneSupport = require("./../utils/convertZoneDataForDevice");
-
+const reportVideoLogService = require("./../services/reportVideoLog");
+const dayjs = require("dayjs");
 async function insert(req, res) {
   try {
-    const { name } = req.body;
+    const { name, location, locationDesc, pricePerTimePeriod } = req.body;
     if (name.toLowerCase() === "General") {
       return res
         .status(config.status_code.FORBIDEN)
@@ -32,9 +33,12 @@ async function insert(req, res) {
       userId: req.userId,
       adArray: [],
       adArraySet: [],
+      location,
+      locationDesc,
+      pricePerTimePeriod,
     });
-    await zoneService.insert(newZoneDocument);
-    return res.status(config.status_code.OK).send({ zone: newZoneDocument });
+    const insertedZone = await zoneService.insert(newZoneDocument);
+    return res.status(config.status_code.OK).send({ zone: insertedZone });
   } catch (error) {
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }
@@ -219,7 +223,7 @@ async function getZoneByUserId(req, res) {
       {
         userId: mongoose.Types.ObjectId(userId),
       },
-      "_id name"
+      "_id name location locationDesc pricePerTimePeriod"
     );
     return res.status(config.status_code.OK).send({ zones: zoneDocument });
   } catch (error) {
@@ -273,6 +277,9 @@ async function updateById(req, res) {
       isLoopOneVideo,
       isLoopAllVideo,
       adArray,
+      location,
+      locationDesc,
+      pricePerTimePeriod,
     } = req.body;
 
     zoneDocument = await zoneService.updateById(id, {
@@ -282,6 +289,9 @@ async function updateById(req, res) {
       isLoopOneVideo,
       isLoopAllVideo,
       adArray,
+      location,
+      locationDesc,
+      pricePerTimePeriod,
     });
     zoneDocument = await zoneService.getByIdwithAdName(id);
 
@@ -294,6 +304,31 @@ async function updateById(req, res) {
   }
 }
 
+async function getLogsByZoneId(req, res) {
+  try {
+    const today = dayjs();
+    const yesterday = today.subtract(1, "d");
+    const logs = await reportVideoLogService.findBy(
+      {
+        zoneId: req.params.id,
+        timeStart: { $gte: yesterday.unix(), $lte: today.unix() },
+      },
+      {
+        select: "_id videoId timeStart adOfferId",
+        populate: [
+          { path: "videoId", select: "name" },
+          { path: "adOfferId", select: "_id name" },
+          { path: "deviceId", select: "name" },
+        ],
+        sort: "-timeStart",
+      }
+    );
+    return res.status(config.status_code.OK).send({ logs });
+  } catch (error) {
+    console.log(error);
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
 module.exports = {
   insert,
   getAll,
@@ -301,6 +336,7 @@ module.exports = {
   getByIdforDevice,
   getZoneByDeviceId,
   getZoneByUserId,
+  getLogsByZoneId,
   deleteById,
   removeDeviceFromZone,
   addDeviceToZone,

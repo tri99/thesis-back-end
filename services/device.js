@@ -1,4 +1,6 @@
 const Device = require("./../collections/device");
+const basicCRUDGenerator = require("./basicCRUD");
+const deviceCRUD = basicCRUDGenerator(Device);
 
 function createModel(name, serialNumber, zoneId, userId) {
   const deviceDocument = new Device({
@@ -7,6 +9,7 @@ function createModel(name, serialNumber, zoneId, userId) {
     zoneId: zoneId,
     status: false,
     userId: userId,
+    timeStatusChange: new Date(),
   });
   return deviceDocument;
 }
@@ -38,7 +41,7 @@ function updateZoneDevice(deviceId, zoneId) {
   });
 }
 
-function updateDevice(deviceId, name, zoneId) {
+function updateDevice(deviceId, name) {
   return new Promise((resolve, reject) => {
     Device.update({ _id: deviceId }, { name: name }).exec((error) => {
       if (error) return reject(error);
@@ -49,13 +52,15 @@ function updateDevice(deviceId, name, zoneId) {
 
 function updateStatusDevice(deviceId, status) {
   return new Promise((resolve, reject) => {
-    Device.update({ _id: deviceId }, { status: status }).exec((error) => {
+    Device.update(
+      { _id: deviceId },
+      { status: status, timeStatusChange: new Date() }
+    ).exec((error) => {
       if (error) return reject(error);
       return resolve(error);
     });
   });
 }
-
 
 function getAll() {
   return new Promise((resolve, reject) => {
@@ -86,12 +91,14 @@ function getBySerialNumber(key) {
   });
 }
 
-function getManyByArrayId(deviceIds){
+function getManyByArrayId(deviceIds) {
   return new Promise((resolve, reject) => {
-    Device.find({_id: deviceIds}).select("_id name").exec((error, deviceDocument) => {
-      if(error) return reject(error);
-      return resolve(deviceDocument);
-    })
+    Device.find({ _id: deviceIds })
+      .select("_id name")
+      .exec((error, deviceDocument) => {
+        if (error) return reject(error);
+        return resolve(deviceDocument);
+      });
   });
 }
 
@@ -106,8 +113,8 @@ function getManyByUserId(userId) {
   });
 }
 
-
 module.exports = {
+  ...deviceCRUD,
   createModel: createModel,
   insert: insert,
   deleteDevice: deleteDevice,
