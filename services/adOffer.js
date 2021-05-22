@@ -7,10 +7,10 @@ module.exports = {
   getManyFullInfor,
 };
 
-function getFullInfor(_id) {
+function getFullInfor(findOption) {
   return new Promise((resolve, reject) => {
     adOffer
-      .findOne({ _id: _id })
+      .findOne(findOption)
       .populate({ path: "bdManagerId", select: "_id username email" })
       .populate({ path: "adManagerId", select: "_id username email" })
       .populate({ path: "contentId" })

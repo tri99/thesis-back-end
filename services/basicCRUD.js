@@ -42,9 +42,9 @@ const crudServiceGenerator = (model) => {
   };
   const updateById = (_id, updatedDocument) => {
     return new Promise((resolve, reject) => {
-      model.updateOne({ _id: _id }, updatedDocument).exec((error, doc) => {
+      model.updateOne({ _id: _id }, updatedDocument).exec((error, info) => {
         if (error) reject(error);
-        return resolve(doc);
+        return resolve(info);
       });
     });
   };
@@ -67,8 +67,10 @@ const crudServiceGenerator = (model) => {
         });
     });
   };
-  const findBy = (findOption, { select, sort, populate, limit }) => {
-    const query = model.find(findOption);
+  const findBy = (findOption, { select, sort, populate, limit, isFindOne }) => {
+    const query = isFindOne
+      ? model.findOne(findOption)
+      : model.find(findOption);
 
     if (select) query.select(select);
     if (sort) query.sort(sort);
