@@ -1,37 +1,11 @@
 const User = require("./../collections/user");
-
-function createModel(
-  username,
-  email,
-  password,
-  adminId,
-  generalZoneId,
-  typeUser
-) {
-  const newUserDocument = new User({
-    username: username,
-    email: email,
-    password: password,
-    adminId,
-    generalZoneId,
-    typeUser: typeUser,
-  });
-  return newUserDocument;
-}
-
-function insert(newUserDocument) {
-  return new Promise((resolve, reject) => {
-    newUserDocument.save((error) => {
-      if (error) return reject(error);
-      return resolve(true);
-    });
-  });
-}
+const basicCRUDGenerator = require("./basicCRUD");
+const userCRUD = basicCRUDGenerator(User);
 
 function getUserByEmail(email) {
   return new Promise((resolve, reject) => {
     User.findOne({ email: email })
-      .select("username email password adminId typeUser generalZoneId")
+      .select()
       .exec((error, userDocument) => {
         if (error) return reject(error);
         return resolve(userDocument);
@@ -42,7 +16,7 @@ function getUserByEmail(email) {
 function getUserById(_id) {
   return new Promise((resolve, reject) => {
     User.findById(_id)
-      .select("_id username email adminId typeUser generalZoneId")
+      .select()
       .exec((error, userDocument) => {
         if (error) return reject(error);
         return resolve(userDocument);
@@ -63,8 +37,8 @@ function getUserByListId(listuserId) {
 
 function getUserByTypeUser(typeUser) {
   return new Promise((resolve, reject) => {
-    User.find({ typeUser: typeUser })
-      .select("_id username email ")
+    User.find({ typeUser: typeUser, adminId: null })
+      .select("_id username email desc avatar")
       .exec((error, userDocument) => {
         if (error) return reject(error);
         return resolve(userDocument);
@@ -83,12 +57,9 @@ function getAllUser() {
   });
 }
 
-function updateUserById(_id, username, password) {
+function updateUserById(_id, username, desc) {
   return new Promise((resolve, reject) => {
-    User.updateOne(
-      { _id: _id },
-      { username: username, password: password }
-    ).exec((error) => {
+    User.updateOne({ _id }, { username, desc }).exec((error) => {
       if (error) return reject(error);
       return resolve(true);
     });
@@ -105,8 +76,7 @@ function updatePermissionUserById(_id, permission) {
 }
 
 module.exports = {
-  createModel: createModel,
-  insert: insert,
+  ...userCRUD,
   getUserByEmail: getUserByEmail,
   getUserById: getUserById,
   updateUserById: updateUserById,

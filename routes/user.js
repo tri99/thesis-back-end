@@ -16,7 +16,7 @@ module.exports = () => {
   router.get("/listid", UserController.getUserByListId);
   router.get("/email", UserController.getUserByEmail);
   router.put("/notifications", auth.isAuthen, UserController.readNotifications);
-  router.put("/:id", UserController.updateUserById);
+  router.put("/update", auth.isAuthen, UserController.updateUserById);
   router.post("/subusers", auth.isAuthen, UserController.signUp);
   router.delete("/subusers/:id", auth.isAuthen, SubuserController.deleteById);
   // router.get("/subusers/:id", auth.isAuthen, UserController);
