@@ -73,7 +73,7 @@ async function updateById(req, res) {
   try {
     const { id } = req.params;
     const { daysOfWeek, hoursOfDay } = req.body;
-    let document = adSetService.getById(id);
+    let document = await adSetService.getById(id);
     if (document["adManagerId"].toString() != req.userId) {
       return res
         .status(config.status_code.FORBIDEN)
@@ -90,7 +90,7 @@ async function updateById(req, res) {
       daysOfWeek,
       hoursOfDay,
     });
-    document = adSetService.getById(id);
+    document = await adSetService.getById(id);
     return res.status(config.status_code.OK).send({ adset: document });
   } catch (error) {
     console.log(error);

@@ -61,6 +61,16 @@ async function updateById(req, res) {
         .status(config.status_code.FORBIDEN)
         .send({ message: "wrong user" });
     }
+    const adOffersCount = await adOfferService.count({
+      contentId: playlistId,
+      status: { $nin: ["idle", "finished"] },
+      adManagerId: req.userId,
+    });
+    if (adOffersCount > 0) {
+      return res
+        .status(config.status_code.FORBIDEN)
+        .send({ message: "Some active ads include this playlist" });
+    }
     const { name, mediaArray, volume } = req.body;
     await playlistService.updateById(playlistId, name, mediaArray, volume);
     return res.status(config.status_code.OK).send({ playlist: true });
@@ -82,6 +92,7 @@ async function deleteById(req, res) {
     const adOffersCount = await adOfferService.count({
       contentId: playlistId,
       status: { $nin: ["idle", "finished"] },
+      adManagerId: req.userId,
     });
     if (adOffersCount > 0) {
       return res

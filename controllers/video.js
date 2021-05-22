@@ -4,9 +4,9 @@ const config = require("./../config/config");
 const audio_module = require("./../exports/audio-io");
 const adSetService = require("./../services/adSet");
 const handle = require("./../services/handle");
-const playlistService = require("./../services/playlist");
-const adOfferService = require("./../services/adOffer");
+
 const trunk = require("../utils/trunk");
+
 async function insert(req, res) {
   try {
     const { name, path, size, duration, tag } = req.body;
@@ -143,15 +143,7 @@ async function deleteById(req, res) {
         message: `Some Zone include video ${trunk(videoDocument.name)}`,
       });
     }
-    const playlistIds = await playlistService.findBy(
-      { mediaArray: videoId },
-      { select: "_id" }
-    );
-    const adCount = await adOfferService.count({
-      contentId: { $in: playlistIds },
-      adManagerId: req.userId,
-      status: { $nin: ["idle", "finished"] },
-    });
+    const adCount = await videoService.countAdContainVid(videoId, req.userId);
     if (adCount > 0) {
       return res.status(config.status_code.FORBIDEN).send({
         message: `Some active ad include video ${trunk(videoDocument.name)}`,
@@ -210,6 +202,34 @@ async function updateTagsById(req, res) {
   }
 }
 
+async function updateById(req, res) {
+  try {
+    const { id } = req.params;
+    const { ages, genders } = req.body;
+    let document = await videoService.getById(id);
+    if (document["userId"].toString() != req.userId) {
+      return res
+        .status(config.status_code.FORBIDEN)
+        .send({ message: "wrong user" });
+    }
+    const adCount = await videoService.countAdContainVid(id, req.userId);
+
+    if (adCount > 0) {
+      return res.status(config.status_code.FORBIDEN).send({
+        message: `Some active ad include video ${trunk(document.name)}`,
+      });
+    }
+    await adSetService.updateById(document.adSetId, {
+      ages,
+      genders,
+    });
+    const updatedVideo = await videoService.getById(id);
+    return res.status(config.status_code.OK).send({ video: updatedVideo });
+  } catch (error) {
+    console.log(error);
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
 module.exports = {
   insert: insert,
   deleteById: deleteById,
@@ -219,4 +239,5 @@ module.exports = {
   getAll: getAll,
   getVideosByUserId: getVideosByUserId,
   updateTagsById: updateTagsById,
+  updateById,
 };
