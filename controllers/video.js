@@ -4,6 +4,9 @@ const config = require("./../config/config");
 const audio_module = require("./../exports/audio-io");
 const adSetService = require("./../services/adSet");
 const handle = require("./../services/handle");
+const playlistService = require("./../services/playlist");
+const adOfferService = require("./../services/adOffer");
+const trunk = require("../utils/trunk");
 async function insert(req, res) {
   try {
     const { name, path, size, duration, tag } = req.body;
@@ -136,11 +139,24 @@ async function deleteById(req, res) {
         .send({ message: "wrong user" });
     }
     if (zoneDocument.length > 0) {
-      return res
-        .status(config.status_code.FORBIDEN)
-        .send({ message: "Some Zone include this video" });
+      return res.status(config.status_code.FORBIDEN).send({
+        message: `Some Zone include video ${trunk(videoDocument.name)}`,
+      });
     }
-
+    const playlistIds = await playlistService.findBy(
+      { mediaArray: videoId },
+      { select: "_id" }
+    );
+    const adCount = await adOfferService.count({
+      contentId: { $in: playlistIds },
+      adManagerId: req.userId,
+      status: { $nin: ["idle", "finished"] },
+    });
+    if (adCount > 0) {
+      return res.status(config.status_code.FORBIDEN).send({
+        message: `Some active ad include video ${trunk(videoDocument.name)}`,
+      });
+    }
     if (!videoDocument) {
       return res.status(403).send({
         message: config.status_message.SOMETHING_WRONG,

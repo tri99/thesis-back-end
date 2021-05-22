@@ -1,5 +1,6 @@
 const Playlist = require("./../collections/playlist");
-
+const basicCRUDGenerator = require("./basicCRUD");
+const playlistCRUD = basicCRUDGenerator(Playlist);
 function createModel(mediaArray, name, type, userId) {
   const playlistDocument = new Playlist({
     mediaArray: mediaArray,
@@ -103,6 +104,7 @@ function getManyByUserId(userId) {
 }
 
 module.exports = {
+  ...playlistCRUD,
   createModel: createModel,
   insert: insert,
   getManyByArrayId: getManyByArrayId,
