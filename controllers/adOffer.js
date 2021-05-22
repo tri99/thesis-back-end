@@ -108,6 +108,47 @@ async function sendOfferById(req, res) {
   }
 }
 
+async function redeployOfferById(req, res) {
+  try {
+    const { id } = req.params;
+    const { budget } = req.body;
+    let timeStatus = new Date();
+    let document = await adOfferService.getById(id);
+    if (!isBelongToAdManager(document, req.userId)) {
+      return res
+        .status(config.status_code.FORBIDEN)
+        .send({ message: "NOT_PERMISSION" });
+    } else if (budget <= 0) {
+      return res
+        .status(config.status_code.WRONG)
+        .send({ message: "New budget has to be larger than 0" });
+    } else if (document["status"] !== "empty") {
+      return res.status(config.status_code.WRONG).send({
+        message: "Your ad has been canceled or doesnt have an empty status",
+      });
+    }
+    let user = await userService.getUserById(req.userId);
+    await adOfferService.updateById(id, {
+      status: "deployed",
+      timeStatus,
+      budget: document["budget"] + budget,
+    });
+    document = await adOfferService.getById(id);
+    await NotificationService.insertNotification(
+      `Ad **${document["name"]}** from **${user["username"]}** has been redeployed`,
+      document["bdManagerId"],
+      {
+        type: "info",
+        link: `/buildingads/${document["_id"].toString()}`,
+      }
+    );
+    return res.status(config.status_code.OK).send({ adOffer: document });
+  } catch (error) {
+    console.log(error);
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
 async function getAll(req, res) {
   try {
     const document = await adOfferService.getAll(
@@ -257,9 +298,10 @@ async function CancelOfferById(req, res) {
     const isBdManager = isBelongToBdManager(document, req.userId);
     const status = document["status"];
     const isPending = status === "pending";
+    const isNonPending = status === "deployed" || status === "empty";
     const isCancelable =
-      (isAdManager && (isPending || status === "deployed")) ||
-      (isBdManager && status === "deployed");
+      (isAdManager && (isPending || isNonPending)) ||
+      (isBdManager && isNonPending);
     if (!isCancelable) {
       return res
         .status(config.status_code.FORBIDEN)
@@ -415,4 +457,5 @@ module.exports = {
   sendOfferById,
   deleteById,
   getByArrayStatus,
+  redeployOfferById,
 };
