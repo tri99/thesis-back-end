@@ -55,6 +55,9 @@ const adOfferSchema = new schema({
   },
   deletedByBdManager: Boolean,
   deletedByAdManager: Boolean,
+  tempBudget: {
+    type: Number,
+  },
 });
 
 const adOffer = mongoose.model("adoffer", adOfferSchema);
