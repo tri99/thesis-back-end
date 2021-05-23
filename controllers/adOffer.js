@@ -3,9 +3,36 @@ const adSetService = require("./../services/adSet");
 const userService = require("./../services/user");
 const NotificationService = require("./../services/notification");
 const config = require("./../config/config");
+const socketService = require("../socket");
+function isBelongToUserFindOption(userId) {
+  return {
+    $or: [
+      {
+        bdManagerId: userId,
+        deletedByBdManager: false,
+        status: { $ne: "idle" },
+      },
+      { adManagerId: userId, deletedByAdManager: false },
+    ],
+  };
+}
+
+function isBelongToAdManager(document, userId) {
+  return (
+    document["adManagerId"].toString() === userId &&
+    !document["deletedByAdManager"]
+  );
+}
+
+function isBelongToBdManager(document, userId) {
+  return (
+    document["bdManagerId"].toString() === userId &&
+    !document["deletedByBdManager"]
+  );
+}
 async function insert(req, res) {
   try {
-    const { name, bdManagerId, contentId, budget, adSetId } = req.body;
+    const { name, bdManagerId, contentId, budget, adSetId, zoneIds } = req.body;
 
     let doc = await userService.getUserById(req.userId);
     let doc2 = await adOfferService.findByPipeLine({ adSetId: adSetId });
@@ -31,24 +58,91 @@ async function insert(req, res) {
       adSetId,
       bdManagerId,
       contentId,
+      zoneIds,
       budget,
       remainingBudget: budget,
       adManagerId: req.userId,
       timeDeploy: new Date().getTime(),
-      status: "pending",
+      status: "idle",
       timeStatus: new Date().getTime(),
+      deletedByAdManager: false,
+      deletedByBdManager: false,
     });
-    const newAd = await adOfferService.insert(newDocument);
+    await adOfferService.insert(newDocument);
 
+    return res.status(config.status_code.OK).send({ adOffer: newDocument });
+  } catch (error) {
+    console.log(error);
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
+async function sendOfferById(req, res) {
+  try {
+    const { id } = req.params;
+    let timeStatus = new Date();
+    let document = await adOfferService.getById(id);
+    if (!isBelongToAdManager(document, req.userId)) {
+      return res
+        .status(config.status_code.FORBIDEN)
+        .send({ message: "NOT_PERMISSION" });
+    }
+    let user = await userService.getUserById(req.userId);
+    await adOfferService.updateById(id, {
+      status: "pending",
+      timeStatus,
+    });
+    document = await adOfferService.getById(id);
     await NotificationService.insertNotification(
-      `You received an ad offer **${newAd["name"]}** from **${doc["username"]}**`,
-      bdManagerId,
+      `You received an ad offer **${document["name"]}** from **${user["username"]}**`,
+      document["bdManagerId"],
       {
         type: "info",
-        link: `/buildingads/${newAd["_id"].toString()}`,
+        link: `/buildingads/${document["_id"].toString()}`,
       }
     );
-    return res.status(config.status_code.OK).send({ adOffer: newDocument });
+    return res.status(config.status_code.OK).send({ adOffer: document });
+  } catch (error) {
+    console.log(error);
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
+async function redeployOfferById(req, res) {
+  try {
+    const { id } = req.params;
+    const { budget } = req.body;
+    let timeStatus = new Date();
+    let document = await adOfferService.getById(id);
+    if (!isBelongToAdManager(document, req.userId)) {
+      return res
+        .status(config.status_code.FORBIDEN)
+        .send({ message: "NOT_PERMISSION" });
+    } else if (budget <= 0) {
+      return res
+        .status(config.status_code.WRONG)
+        .send({ message: "New budget has to be larger than 0" });
+    } else if (document["status"] !== "empty") {
+      return res.status(config.status_code.WRONG).send({
+        message: "Your ad has been canceled or doesnt have an empty status",
+      });
+    }
+    let user = await userService.getUserById(req.userId);
+    await adOfferService.updateById(id, {
+      status: "deployed",
+      timeStatus,
+      budget: document["budget"] + budget,
+    });
+    document = await adOfferService.getById(id);
+    await NotificationService.insertNotification(
+      `Ad **${document["name"]}** from **${user["username"]}** has been redeployed`,
+      document["bdManagerId"],
+      {
+        type: "info",
+        link: `/buildingads/${document["_id"].toString()}`,
+      }
+    );
+    return res.status(config.status_code.OK).send({ adOffer: document });
   } catch (error) {
     console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
@@ -57,7 +151,9 @@ async function insert(req, res) {
 
 async function getAll(req, res) {
   try {
-    const document = await adOfferService.getAll();
+    const document = await adOfferService.getAll(
+      isBelongToUserFindOption(req.userId)
+    );
     return res.status(config.status_code.OK).send({ adOffers: document });
   } catch (error) {
     console.log(error);
@@ -68,7 +164,18 @@ async function getAll(req, res) {
 async function getById(req, res) {
   try {
     const { id } = req.params;
-    const document = await adOfferService.getById(id);
+    const document = await adOfferService.findBy(
+      {
+        _id: id,
+        ...isBelongToUserFindOption(req.userId),
+      },
+      { isFindOne: true }
+    );
+    if (!document) {
+      return res
+        .status(config.status_code.NOT_FOUND)
+        .send({ message: "NOT FOUND" });
+    }
     return res.status(config.status_code.OK).send({ adOffer: document });
   } catch (error) {
     console.log(error);
@@ -79,7 +186,15 @@ async function getById(req, res) {
 async function getFullInfor(req, res) {
   try {
     const { id } = req.params;
-    const document = await adOfferService.getFullInfor(id);
+    const document = await adOfferService.getFullInfor({
+      _id: id,
+      ...isBelongToUserFindOption(req.userId),
+    });
+    if (!document) {
+      return res
+        .status(config.status_code.NOT_FOUND)
+        .send({ message: "NOT FOUND" });
+    }
     return res.status(config.status_code.OK).send({ adOffer: document });
   } catch (error) {
     console.log(error);
@@ -93,6 +208,7 @@ async function getByAdManagerId(req, res) {
     const document = await adOfferService.findByPipeLine(
       {
         adManagerId: adManagerId,
+        deletedByAdManager: false,
       },
       {}
     );
@@ -109,6 +225,8 @@ async function getByBdManagerId(req, res) {
     const document = await adOfferService.findByPipeLine(
       {
         bdManagerId: bdManagerId,
+        deletedByBdManager: false,
+        status: { $ne: "idle" },
       },
       {}
     );
@@ -142,7 +260,7 @@ async function updateStatusById(req, res) {
     const { status } = req.body;
     let timeStatus = new Date();
     let document = await adOfferService.getById(id);
-    if (document["bdManagerId"].toString() != req.userId) {
+    if (!isBelongToBdManager(document, req.userId)) {
       return res
         .status(config.status_code.FORBIDEN)
         .send({ message: "NOT_PERMISSION" });
@@ -153,11 +271,14 @@ async function updateStatusById(req, res) {
     });
 
     document = await adOfferService.getById(id);
+    const isDeployed = document["status"] === "deployed";
     await NotificationService.insertNotification(
-      `Your ad offer **${document["name"]}** has been **${document["status"]}**`,
+      `Your ad offer **${document["name"]}** has been **${
+        isDeployed ? "deployed" : "rejected"
+      }**`,
       document["adManagerId"],
       {
-        type: document["status"] === "deployed" ? "success" : "warn",
+        type: isDeployed ? "success" : "warn",
         link: `/ads/${document["_id"].toString()}`,
       }
     );
@@ -173,25 +294,49 @@ async function CancelOfferById(req, res) {
     const { id } = req.params;
     let timeStatus = new Date();
     let document = await adOfferService.getById(id);
-    if (document["adManagerId"].toString() != req.userId) {
+    const isAdManager = isBelongToAdManager(document, req.userId);
+    const isBdManager = isBelongToBdManager(document, req.userId);
+    const status = document["status"];
+    const isPending = status === "pending";
+    const isNonPending = status === "deployed" || status === "empty";
+    const isCancelable =
+      (isAdManager && (isPending || isNonPending)) ||
+      (isBdManager && isNonPending);
+    if (!isCancelable) {
       return res
         .status(config.status_code.FORBIDEN)
         .send({ message: "NOT_PERMISSION" });
     }
+    const newStatus = isAdManager
+      ? isPending
+        ? "idle"
+        : "finished"
+      : "finished";
     await adOfferService.updateById(id, {
-      status: "canceled",
+      status: newStatus,
       timeStatus,
     });
     document = await adOfferService.getById(id);
     await NotificationService.insertNotification(
-      `Your ad **${document["name"]}** has been **canceled**`,
-      document["bdManagerId"],
+      `Your ${isPending ? "pending ad offer" : "ad"}  **${
+        document["name"]
+      }** has been **canceled**`,
+      isAdManager ? document["bdManagerId"] : document["adManagerId"],
       {
         type: "warn",
-        link: `/buildingads/${document["_id"].toString()}`,
+        link: `/${isAdManager ? "buildingads" : "ads"}/${document[
+          "_id"
+        ].toString()}`,
       }
     );
-    return res.status(config.status_code.OK).send({ adOffer: document });
+
+    if (isAdManager && isPending) {
+      socketService
+        .getIO()
+        .in(document["bdManagerId"].toString())
+        .emit("cancel-pending-offer", { id });
+    }
+    return res.status(config.status_code.OK).send({ status: newStatus });
   } catch (error) {
     console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
@@ -203,7 +348,7 @@ async function updateAdsetOFAdOffer(req, res) {
     const { id } = req.params;
     const { ages, genders, daysOfWeek, hoursOfDay } = req.body;
     let document = await adOfferService.getById(id);
-    if (document["adManagerId"].toString() != req.userId) {
+    if (!isBelongToAdManager(document, req.userId)) {
       return res
         .status(config.status_code.FORBIDEN)
         .send({ message: "wrong user" });
@@ -230,24 +375,30 @@ async function updateById(req, res) {
       bdManagerId,
       contentId,
       budget,
-      remaingBudget,
+      remainingBudget,
+      zoneIds,
     } = req.body;
     let document = await adOfferService.getById(id);
-    if (document["adManagerId"].toString() != req.userId) {
+    if (!isBelongToAdManager(document, req.userId)) {
       return res
         .status(config.status_code.FORBIDEN)
         .send({ message: "wrong user" });
     }
-
+    if (document["status"] !== "idle") {
+      return res
+        .status(config.status_code.FORBIDEN)
+        .send({ message: "You can only edit an idle ad" });
+    }
     await adOfferService.updateById(id, {
       name,
       adSetId,
       bdManagerId,
       contentId,
       budget,
-      remaingBudget,
+      remainingBudget,
+      zoneIds,
     });
-    document = adOfferService.getById(id);
+    document = await adOfferService.getById(id);
     return res.status(config.status_code.OK).send({ adOffer: document });
   } catch (error) {
     console.log(error);
@@ -259,13 +410,32 @@ async function deleteById(req, res) {
   try {
     const { id } = req.params;
     let document = await adOfferService.getById(id);
-    if (document["adManagerId"].toString() != req.userId) {
+    const isAdManager = isBelongToAdManager(document, req.userId);
+    const isBdManager = isBelongToBdManager(document, req.userId);
+    if (!isAdManager && !isBdManager) {
       return res
         .status(config.status_code.FORBIDEN)
-        .send({ message: "wrong user" });
+        .send({ message: "You don't have permission to delete this" });
+    } else if (
+      document["status"] !== "idle" &&
+      document["status"] !== "finished"
+    ) {
+      return res
+        .status(config.status_code.FORBIDEN)
+        .send({ message: "Can only delete a idle or finished ad" });
     }
     // await adSetService.deleteById(document.adSetId);
-    await adOfferService.deleteById(id);
+    if (isAdManager) {
+      document["status"] !== "idle"
+        ? await adOfferService.updateById(id, { deletedByAdManager: true })
+        : await adOfferService.deleteById(id);
+    } else if (isBdManager) {
+      await adOfferService.updateById(id, { deletedByBdManager: true });
+    }
+    // } else {
+    //   await adOfferService.deleteById(id);
+    // }
+
     return res.status(config.status_code.OK).send({ adOffer: true });
   } catch (error) {
     console.log(error);
@@ -284,6 +454,8 @@ module.exports = {
   updateStatusById,
   updateAdsetOFAdOffer,
   CancelOfferById,
+  sendOfferById,
   deleteById,
   getByArrayStatus,
+  redeployOfferById,
 };

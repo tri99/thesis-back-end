@@ -35,6 +35,18 @@ const zoneSchema = new Schema({
     type: Boolean,
     required: true,
   },
+  location: {
+    type: { lat: Number, lng: Number },
+    required: true,
+  },
+  locationDesc: {
+    type: String,
+    required: true,
+  },
+  pricePerTimePeriod: {
+    type: Number,
+    required: true,
+  },
   userId: {
     type: Schema.Types.ObjectId,
     require: true,

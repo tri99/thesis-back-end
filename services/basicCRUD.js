@@ -42,9 +42,9 @@ const crudServiceGenerator = (model) => {
   };
   const updateById = (_id, updatedDocument) => {
     return new Promise((resolve, reject) => {
-      model.updateOne({ _id: _id }, updatedDocument).exec((error, doc) => {
+      model.updateOne({ _id: _id }, updatedDocument).exec((error, info) => {
         if (error) reject(error);
-        return resolve(doc);
+        return resolve(info);
       });
     });
   };
@@ -67,13 +67,21 @@ const crudServiceGenerator = (model) => {
         });
     });
   };
-  const findBy = (findOption, extra) => {
-    const query = model.find(findOption);
-    if (extra) {
-      const { select, sort } = extra;
-      if (select) query.select(select);
-      if (sort) query.sort(sort);
+  const findBy = (findOption, { select, sort, populate, limit, isFindOne }) => {
+    const query = isFindOne
+      ? model.findOne(findOption)
+      : model.find(findOption);
+
+    if (select) query.select(select);
+    if (sort) query.sort(sort);
+    if (populate) {
+      if (Array.isArray(populate)) {
+        populate.forEach((option) => query.populate(option));
+      } else {
+        query.populate(populate);
+      }
     }
+    if (limit) query.limit(limit);
     return query.exec();
   };
   let findByPipeLine = (pipeline, selectOption = "_id") => {

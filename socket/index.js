@@ -71,6 +71,7 @@ function infor_ai_process(event_name, socket) {
           bdManagerId: adOffer["bdManagerId"],
           videoId: infor["videoId"],
           zoneId: infor["zoneId"],
+          deviceId: infor["deviceId"],
           timeStart: infor["timeStamp"],
           runTime: infor["snapshots"].length * 5,
           views: totalFaces,

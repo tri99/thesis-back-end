@@ -1,6 +1,6 @@
 const playlistService = require("./../services/playlist");
 const zoneService = require("../services/zone");
-
+const videoService = require("./../services/video");
 const config = require("./../config/config");
 
 async function insert(req, res) {
@@ -106,6 +106,29 @@ async function getPlaylistByUserId(req, res) {
   }
 }
 
+async function getPreview(req, res) {
+  try {
+    const { videoIds } = req.query;
+    const videos = await videoService.findBy(
+      { _id: { $in: videoIds } },
+      { populate: { path: "adSetId", select: "ages genders" } }
+    );
+    return res.status(config.status_code.OK).send({ videos });
+  } catch (error) {
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
+async function getById(req, res) {
+  try {
+    const { id } = req.params;
+    const playlist = await playlistService.getById(id);
+    return res.status(config.status_code.OK).send({ playlist });
+  } catch (error) {
+    console.log(error);
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
 module.exports = {
   insert: insert,
   getManyByArrayId: getManyByArrayId,
@@ -113,4 +136,6 @@ module.exports = {
   getPlaylistByUserId: getPlaylistByUserId,
   updateById: updateById,
   deleteById: deleteById,
+  getPreview,
+  getById,
 };
