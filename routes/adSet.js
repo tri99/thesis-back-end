@@ -8,6 +8,5 @@ module.exports = () => {
   router.get("/:id", auth.isAuthen, adSetController.getById);
   router.delete("/:id", auth.isAuthen, adSetController.deleteById);
   router.put("/:id", auth.isAuthen, adSetController.updateById);
-
   return router;
 };

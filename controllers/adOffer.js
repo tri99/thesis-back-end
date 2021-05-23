@@ -450,6 +450,29 @@ async function deleteById(req, res) {
   }
 }
 
+async function getBelongToAds(req, res) {
+  try {
+    const { id, key } = req.query;
+    let ads = [];
+    console.log("inside");
+    if (key === "adSet" || key === "playlist") {
+      let newKey;
+      if (key === "adSet") newKey = "adSetId";
+      if (key === "playlist") newKey = "contentId";
+      ads = await adOfferService.findBy(
+        {
+          [newKey]: id,
+          status: { $in: ["pending", "deployed", "empty"] },
+        },
+        { select: "name _id", limit: 3 }
+      );
+    }
+    return res.status(config.status_code.OK).send({ ads });
+  } catch (error) {
+    console.log(error);
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
 module.exports = {
   insert,
   getAll,
@@ -465,4 +488,5 @@ module.exports = {
   deleteById,
   getByArrayStatus,
   redeployOfferById,
+  getBelongToAds,
 };
