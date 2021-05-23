@@ -5,10 +5,10 @@ const videoService = require("./../services/video");
 async function getAdSetStatus(adSetId) {
   let adOfferDoc = await adOfferService.findByPipeLine({
     adSetId: adSetId,
-    $or: [{ status: "pending" }, { status: "accepted" }],
+    $or: [{ status: "pending" }, { status: "deployed" }, { status: "empty" }],
   });
   if (adOfferDoc != []) {
-    return { res: false, adOffers: adOfferDoc };
+    return { result: false, adOfferDoc: adOfferDoc };
   }
   let videoDoc = await videoService.findByPipeLine({ adSetId: adSetId });
   const videoIdArray = videoDoc.map((x) => x.toString());
@@ -19,9 +19,9 @@ async function getAdSetStatus(adSetId) {
     contentId: { $in: playlistDoc },
   });
   if (adOfferDoc.length != []) {
-    return { res: false, adOffers: adOfferDoc };
+    return { result: false, adOfferDoc: adOfferDoc };
   }
-  return { res: true, adOffers: [] };
+  return { result: true, adOfferDoc: [] };
 }
 
 module.exports = {

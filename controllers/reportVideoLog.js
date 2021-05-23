@@ -6,6 +6,7 @@ const config = require("./../config/config");
 const { getAgeTagName, getAgeTag } = require("../utils/ageGenders");
 const handle = require("./../services/handle");
 const dayjs = require("dayjs");
+const audio_module = require("./../exports/audio-io");
 var isSameOrAfter = require("dayjs/plugin/isSameOrAfter");
 var isSameOrBefore = require("dayjs/plugin/isSameOrBefore");
 dayjs.extend(isSameOrAfter);
@@ -352,7 +353,7 @@ async function insert(req, res) {
       );
       totalFaces += ele["number_of_face"];
     });
-    const adOffer = await adOfferService.getById(infor["adOfferId"]);
+    let adOffer = await adOfferService.getById(infor["adOfferId"]);
     const zoneDoc = await zoneService.getById(infor["zoneId"]);
     let newReportVideoLogDoc = reportVideoLog.createModel({
       adOfferId: infor["adOfferId"],
@@ -370,7 +371,16 @@ async function insert(req, res) {
       moneyCharge:
         infor["snapshots"].length * 30 * zoneDoc["pricePerTimePeriod"],
     });
+    adOffer["remainingBudget"] -=
+      infor["snapshots"].length * 30 * zoneDoc["pricePerTimePeriod"];
     await reportVideoLog.insert(newReportVideoLogDoc);
+    await adOfferService.updateById(adOffer["_id"], {
+      remainingBudget: adOffer["remainingBudget"],
+    });
+    audio_module
+      .get_audio_io()
+      .to(infor["zoneId"])
+      .emit("update-zone", { zoneId: infor["zoneId"] });
     return res.status(200).send({
       reportVideoLog: "success",
     });

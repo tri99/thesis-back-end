@@ -58,7 +58,7 @@ async function getById(req, res) {
 async function getByAdManagerId(req, res) {
   try {
     const { id } = req.params;
-    const document = adSetService.findByPipeLine({
+    const document = await adSetService.findByPipeLine({
       adManagerId: id,
       isMedia: false,
     });
@@ -73,17 +73,17 @@ async function updateById(req, res) {
   try {
     const { id } = req.params;
     const { daysOfWeek, hoursOfDay } = req.body;
-    let document = adSetService.getById(id);
+    let document = await adSetService.getById(id);
     if (document["adManagerId"].toString() != req.userId) {
       return res
         .status(config.status_code.FORBIDEN)
         .send({ message: "wrong user" });
     }
-    let { result, adOfferDoc } = adSetSupport.getAdSetStatus(id);
+    let { result, adOffers } = await adSetSupport.getAdSetStatus(id);
     if (result == false) {
       return res.status(config.status_code.FORBIDEN).send({
         message: "adSet is using by some adOffer or playlist in adOffer",
-        adOffers: adOfferDoc,
+        adOffers: adOffers,
       });
     }
     await adSetService.updateById(id, {
@@ -101,7 +101,7 @@ async function updateById(req, res) {
 async function deleteById(req, res) {
   try {
     const { id } = req.params;
-    let document = adSetService.getById(id);
+    let document = await adSetService.getById(id);
     if (document["adManagerId"].toString() != req.userId) {
       return res
         .status(config.status_code.FORBIDEN)

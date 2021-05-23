@@ -443,14 +443,6 @@ async function deleteById(req, res) {
   }
 }
 
-// async function chargeMoney(req, res) {
-//   try {
-//     const { adOfferId, videoId, moneyCharge, zoneId, runtime } = req.body;
-
-//     let adOfferDoc = await adOfferService.getById(adOfferId);
-//   } catch (error) {}
-// }
-
 module.exports = {
   insert,
   getAll,
