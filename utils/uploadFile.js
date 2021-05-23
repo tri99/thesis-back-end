@@ -22,7 +22,14 @@ const imageStorage = multer.diskStorage({
   },
 });
 
-const uploadImage = imageStorage.upload("image");
+var imageUpload = multer({
+  storage: imageStorage,
+  limits: {
+    fileSize: 314572800,
+  },
+});
+
+const uploadImage = imageUpload.single("image");
 
 function catchErrorImage() {
   return (req, res, next) => {

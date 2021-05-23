@@ -1,11 +1,5 @@
-const io = require("socket.io-client");
+let a = [1, 2, 3, 45, 2, 1, 3];
 
-const socket = io("ws://192.168.43.154:3000", {
-  reconnectionDelayMax: 10000,
-  auth: {
-    token: "123",
-  },
-  query: {
-    "my-key": "my-value",
-  },
-});
+a = [...new Set(a)];
+
+console.log(a);
