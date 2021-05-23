@@ -57,10 +57,6 @@ const zoneSchema = new Schema({
       ref: "adoffer",
     },
   ],
-  price: {
-    type: Number,
-    require: true,
-  },
   formula: {
     type: String,
     require: true,

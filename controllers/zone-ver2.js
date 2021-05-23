@@ -36,6 +36,7 @@ async function insert(req, res) {
       location,
       locationDesc,
       pricePerTimePeriod,
+      formula: "",
     });
     const insertedZone = await zoneService.insert(newZoneDocument);
     return res.status(config.status_code.OK).send({ zone: insertedZone });
@@ -280,6 +281,7 @@ async function updateById(req, res) {
       location,
       locationDesc,
       pricePerTimePeriod,
+      formula,
     } = req.body;
 
     zoneDocument = await zoneService.updateById(id, {
@@ -292,6 +294,7 @@ async function updateById(req, res) {
       location,
       locationDesc,
       pricePerTimePeriod,
+      formula,
     });
     zoneDocument = await zoneService.getByIdwithAdName(id);
 
