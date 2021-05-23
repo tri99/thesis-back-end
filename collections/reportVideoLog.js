@@ -60,6 +60,9 @@ const reportVideoLogSchema = new Schema({
   imagePath: {
     type: String,
   },
+  moneyCharge: {
+    type: Number,
+  },
 });
 
 const reportVideoLog = mongoose.model("reportVideoLog", reportVideoLogSchema);

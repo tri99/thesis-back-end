@@ -1,7 +1,9 @@
 const reportVideoLogService = require("./../services/reportVideoLog");
 const reportVideoLog = require("./../collections/reportVideoLog");
+const adOfferService = require("./../services/adOffer");
+const zoneService = require("./../services/zone-ver2");
 const config = require("./../config/config");
-const { getAgeTagName } = require("../utils/ageGenders");
+const { getAgeTagName, getAgeTag } = require("../utils/ageGenders");
 const handle = require("./../services/handle");
 const dayjs = require("dayjs");
 var isSameOrAfter = require("dayjs/plugin/isSameOrAfter");
@@ -351,7 +353,7 @@ async function insert(req, res) {
       totalFaces += ele["number_of_face"];
     });
     const adOffer = await adOfferService.getById(infor["adOfferId"]);
-
+    const zoneDoc = await zoneService.getById(infor["zoneId"]);
     let newReportVideoLogDoc = reportVideoLog.createModel({
       adOfferId: infor["adOfferId"],
       adManagerId: adOffer["adManagerId"],
@@ -359,12 +361,14 @@ async function insert(req, res) {
       videoId: infor["videoId"],
       zoneId: infor["zoneId"],
       timeStart: infor["timeStamp"],
-      runTime: infor["snapshots"].length * 5,
+      runTime: infor["snapshots"].length * 30,
       views: totalFaces,
       ages: totalAgeCounts,
       genders: totalGenderCounts,
       raw: infor,
       imagePath: urlImageGlobal,
+      moneyCharge:
+        infor["snapshots"].length * 30 * zoneDoc["pricePerTimePeriod"],
     });
     await reportVideoLog.insert(newReportVideoLogDoc);
     return res.status(200).send({
