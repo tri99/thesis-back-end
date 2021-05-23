@@ -62,6 +62,7 @@ async function insert(req, res) {
       budget,
       remainingBudget: budget,
       adManagerId: req.userId,
+      tempBudget: budget,
       timeDeploy: new Date().getTime(),
       status: "idle",
       timeStatus: new Date().getTime(),
@@ -443,6 +444,32 @@ async function deleteById(req, res) {
   }
 }
 
+async function checkBudgetToRun(req, res) {
+  try {
+    const { adOfferId, duration, price } = req.body;
+    let adOfferDoc = await adOfferService.getById(adOfferId);
+    if (!adOfferDoc) {
+      return res
+        .status_code(404)
+        .send({ allow: false, message: "adOffer not found" });
+    }
+    let tempBudget = adOfferDoc["tempBudget"];
+    tempBudget -= duration * price;
+    if (tempBudget <= 0) {
+      return res
+        .status_code(403)
+        .send({ allow: false, message: "out of money" });
+    }
+    await adOfferService.updateById(adOfferId, { tempBudget: tempBudget });
+    return res.status_code(200).send({ allow: true, message: "you can run" });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(config.status_code.SERVER_ERROR)
+      .send({ allow: true, message: error });
+  }
+}
+
 module.exports = {
   insert,
   getAll,
@@ -458,4 +485,5 @@ module.exports = {
   deleteById,
   getByArrayStatus,
   redeployOfferById,
+  checkBudgetToRun,
 };
