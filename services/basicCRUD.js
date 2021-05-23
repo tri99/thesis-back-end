@@ -100,6 +100,10 @@ const crudServiceGenerator = (model) => {
   const deleteById = (_id) => {
     return deleteBy({ _id });
   };
+
+  const count = (findOption) => {
+    return model.countDocuments(findOption).exec();
+  };
   return {
     insert,
     getById,
@@ -112,6 +116,7 @@ const crudServiceGenerator = (model) => {
     findOneBy,
     findBy,
     findByPipeLine,
+    count,
   };
 };
 module.exports = crudServiceGenerator;
