@@ -1,7 +1,8 @@
 const reportVideoLogService = require("./../services/reportVideoLog");
+const adOfferService = require("../services/adOffer");
 const reportVideoLog = require("./../collections/reportVideoLog");
 const config = require("./../config/config");
-const { getAgeTagName } = require("../utils/ageGenders");
+const { getAgeTagName, getAgeTag } = require("../utils/ageGenders");
 const handle = require("./../services/handle");
 const dayjs = require("dayjs");
 var isSameOrAfter = require("dayjs/plugin/isSameOrAfter");
