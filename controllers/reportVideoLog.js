@@ -1,7 +1,9 @@
 const reportVideoLogService = require("./../services/reportVideoLog");
 const reportVideoLog = require("./../collections/reportVideoLog");
+const tempVideoChargeService = require("./../services/tempVideoCharge");
 const adOfferService = require("./../services/adOffer");
 const zoneService = require("./../services/zone-ver2");
+const videoService = require("./../services/video");
 const config = require("./../config/config");
 const { getAgeTagName, getAgeTag } = require("../utils/ageGenders");
 const handle = require("./../services/handle");
@@ -355,6 +357,7 @@ async function insert(req, res) {
     });
     let adOffer = await adOfferService.getById(infor["adOfferId"]);
     const zoneDoc = await zoneService.getById(infor["zoneId"]);
+    const videoDoc = await videoService.getById(infor["videoId"]);
     let newReportVideoLogDoc = reportVideoLog.createModel({
       adOfferId: infor["adOfferId"],
       adManagerId: adOffer["adManagerId"],
@@ -368,19 +371,40 @@ async function insert(req, res) {
       genders: totalGenderCounts,
       raw: infor,
       imagePath: urlImageGlobal,
-      moneyCharge:
-        infor["snapshots"].length * 30 * zoneDoc["pricePerTimePeriod"],
+      moneyCharge: videoDoc["duration"] * zoneDoc["pricePerTimePeriod"],
     });
-    adOffer["remainingBudget"] -=
-      infor["snapshots"].length * 30 * zoneDoc["pricePerTimePeriod"];
+
+    let tempCharge = tempVideoChargeService.findOneBy({
+      videoId: infor["videoId"],
+      deviceId: infor["deviceId"],
+      timeStamp: infor["timeStamp"],
+      zoneId: infor["zoneId"],
+    });
+
+    if (!tempCharge) {
+      return res.status(403).send({
+        message: "video didnt recognize",
+      });
+    }
+
+    let remainingBudget =
+      adOffer["remainingBudget"] -
+      videoDoc["duration"] * zoneDoc["pricePerTimePeriod"];
     await reportVideoLog.insert(newReportVideoLogDoc);
     await adOfferService.updateById(adOffer["_id"], {
-      remainingBudget: adOffer["remainingBudget"],
+      remainingBudget: remainingBudget,
     });
-    audio_module
-      .get_audio_io()
-      .to(infor["zoneId"])
-      .emit("update-zone", { zoneId: infor["zoneId"] });
+
+    let zones = await zoneService.findByPipeLine({
+      adArray: { $in: [adOffer["_id"]] },
+    });
+    for (let i = 0; i < zones.length; i++) {
+      audio_module.get_audio_io().to(infor["zoneId"]).emit("update-budget", {
+        zoneId: infor["zoneId"],
+        remainingBudget: adOffer["remainingBudget"],
+      });
+    }
+
     return res.status(200).send({
       reportVideoLog: "success",
     });

@@ -23,6 +23,18 @@ module.exports.connect = (socket) => {
   socket.on("audio-joined-zone", async (zoneId) => {
     socket.join(zoneId);
   });
+
+  socket.on("change-adOffer-status-empty", async (data) => {
+    let adOfferDoc = await adOfferService.getById(data["adOfferId"]);
+    if (!adOfferDoc) {
+      console.log("no adOffer");
+      return;
+    }
+    await adOfferService.updateById(data["adOfferId"], {
+      status: "empty",
+    });
+  });
+
   socket.on("disconnect", async () => {
     console.log(socket.device_id, " disconnected");
     await deviceService.updateStatusDevice(socket.device_id, false);

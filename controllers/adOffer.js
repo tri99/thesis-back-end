@@ -4,6 +4,7 @@ const userService = require("./../services/user");
 const NotificationService = require("./../services/notification");
 const config = require("./../config/config");
 const socketService = require("../socket");
+const tempVideoChargeService = require("./../services/tempVideoCharge");
 function isBelongToUserFindOption(userId) {
   return {
     $or: [
@@ -446,7 +447,15 @@ async function deleteById(req, res) {
 
 async function checkBudgetToRun(req, res) {
   try {
-    const { adOfferId, duration, price } = req.body;
+    const {
+      adOfferId,
+      duration,
+      price,
+      videoId,
+      zoneId,
+      timeStamp,
+      deviceId,
+    } = req.body;
     let adOfferDoc = await adOfferService.getById(adOfferId);
     if (!adOfferDoc) {
       return res
@@ -460,6 +469,16 @@ async function checkBudgetToRun(req, res) {
         .status_code(403)
         .send({ allow: false, message: "out of money" });
     }
+
+    let tempChargeDoc = tempVideoChargeService.createModel({
+      videoId,
+      zoneId,
+      deviceId,
+      timeStamp,
+      duration,
+      moneyCharge: duration * price,
+    });
+    await tempVideoChargeService.insert(tempChargeDoc);
     await adOfferService.updateById(adOfferId, { tempBudget: tempBudget });
     return res.status_code(200).send({ allow: true, message: "you can run" });
   } catch (error) {

@@ -65,6 +65,6 @@ const reportVideoLogSchema = new Schema({
   },
 });
 
-const reportVideoLog = mongoose.model("reportVideoLog", reportVideoLogSchema);
+const reportVideoLog = mongoose.model("reportvideolog", reportVideoLogSchema);
 
 module.exports = reportVideoLog;
