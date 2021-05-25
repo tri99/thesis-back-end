@@ -21,5 +21,6 @@ module.exports = () => {
   router.get("/gender", auth.isAuthen, reportVideoLog.getByGender);
   router.get("/overview", auth.isAuthen, reportVideoLog.getOverview);
   router.delete("/:id", auth.isAuthen, reportVideoLog.deleteByUserId);
+  router.get("/", auth.isAuthen, reportVideoLog.getAllByPeriod);
   return router;
 };

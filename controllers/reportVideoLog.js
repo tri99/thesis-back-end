@@ -291,6 +291,45 @@ async function getOverview(req, res) {
   }
 }
 
+async function getAllByPeriod(req, res) {
+  try {
+    const userId = req.userId;
+    let { timeStart, timeEnd } = req.query;
+
+    let dateStart = dayjs.unix(timeStart).hour(0).minute(0).second(0);
+    const logsInPeriod = await reportVideoLog
+      .find({
+        adManagerId: userId,
+        timeStart: {
+          $gte: dateStart.unix(),
+          $lte: dayjs.unix(timeEnd).hour(23).unix(),
+        },
+      })
+      .sort("timeStart")
+      .populate({ path: "adOfferId", select: "name _id" })
+      .populate({ path: "bdManagerId", select: "username _id" })
+      .populate({ path: "videoId", select: "name _id path" })
+      .populate({ path: "zoneId", select: "name _id pricePerTimePeriod" })
+      .populate({ path: "deviceId", select: "name _id" })
+      .select("-raw");
+    const logs = logsInPeriod.map((log) => ({
+      ...log.toObject(),
+      ad: log.adOfferId,
+      bdManager: log.bdManagerId,
+      video: log.videoId,
+      zone: log.zoneId,
+      device: log.deviceId,
+      cost: log.zoneId.pricePerTimePeriod * log.runTime,
+    }));
+    console.log("logs", logs[0]);
+    return res.status(config.status_code.OK).send({ logs });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(config.status_code.SERVER_ERROR)
+      .send({ message: error.message });
+  }
+}
 async function getByPeriod(req, res) {
   try {
     const userId = req.userId;
@@ -387,4 +426,5 @@ module.exports = {
   getByGender,
   getOverview,
   insert,
+  getAllByPeriod,
 };
