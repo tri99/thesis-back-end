@@ -6,14 +6,22 @@ const tempVideoChargeSchema = new Schema({
   videoId: {
     type: mongoose.Types.ObjectId,
     require: true,
+    ref: "video",
   },
   zoneId: {
     type: mongoose.Types.ObjectId,
     require: true,
+    ref: "zone",
   },
   deviceId: {
     type: mongoose.Types.ObjectId,
     require: true,
+    ref: "device",
+  },
+  adOfferId: {
+    type: mongoose.Types.ObjectId,
+    require: true,
+    ref: "adoffer",
   },
   timeStamp: {
     type: Number,

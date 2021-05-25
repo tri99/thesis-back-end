@@ -25,14 +25,18 @@ module.exports.connect = (socket) => {
   });
 
   socket.on("change-adOffer-status-empty", async (data) => {
-    let adOfferDoc = await adOfferService.getById(data["adOfferId"]);
-    if (!adOfferDoc) {
-      console.log("no adOffer");
-      return;
+    try {
+      let adOfferDoc = await adOfferService.getById(data["adOfferId"]);
+      if (!adOfferDoc) {
+        console.log("no adOffer");
+        return;
+      }
+      await adOfferService.updateById(data["adOfferId"], {
+        status: "empty",
+      });
+    } catch (error) {
+      console.log(error);
     }
-    await adOfferService.updateById(data["adOfferId"], {
-      status: "empty",
-    });
   });
 
   socket.on("disconnect", async () => {
@@ -168,11 +172,10 @@ function infor_video(event_name, socket) {
   socket.on(event_name, async (infor) => {
     try {
       infor["deviceId"] = socket.device_id;
-      console.log(socket.device_id);
       let userDoc = await deviceService.getById(socket.device_id);
 
       const zoneId = infor["zoneId"];
-      console.log(userDoc);
+      // console.log(userDoc);
       socketService
         .getIO()
         .in(userDoc["userId"].toString())
@@ -240,7 +243,7 @@ function infor_ai_process(event_name, socket) {
         genders: totalGenderCounts,
         raw: infor,
       });
-      console.log(newReportVideoLogDoc);
+      // console.log(newReportVideoLogDoc);
       await reportVideoLog.insert(newReportVideoLogDoc);
       return;
     } catch (error) {

@@ -3,6 +3,7 @@ const adOfferService = require("./../services/adOffer");
 
 async function convertZoneData(data) {
   let adOfferDoc = await adOfferService.getManyFullInfor(data["adArray"]);
+
   let videoArray = [];
   adOfferDoc = JSON.stringify(adOfferDoc);
   adOfferDoc = JSON.parse(adOfferDoc);
@@ -13,14 +14,17 @@ async function convertZoneData(data) {
     let Atags = [];
     let Gtags = [];
     for (let j = 0; j < videos.length; j++) {
-      Atags.push(videos[j]["adSetId"]["ages"]);
-      Gtags.push(videos[j]["adSetId"]["genders"]);
+      Atags.push.apply(Atags, videos[j]["adSetId"]["ages"]["value"]);
+      Gtags.push.apply(Gtags, videos[j]["adSetId"]["genders"]["value"]);
     }
-    adOfferDoc[i]["adSetId"]["ages"] = Atags;
-    adOfferDoc[i]["adSetId"]["genders"] = Gtags;
+    Atags = [...new Set(Atags)];
+    Gtags = [...new Set(Gtags)];
+    adOfferDoc[i]["adSetId"]["ages"]["value"] = Atags;
+    adOfferDoc[i]["adSetId"]["genders"]["value"] = Gtags;
     videoArray.push(adOfferDoc[i]["contentId"]["mediaArray"]);
     data["playlistArray"].push(adOfferDoc[i]["contentId"]);
   }
+
   let videos = [...new Set(videoArray)];
   let videoDoc = await videoService.getManyByArrayIdFull(videos[0]);
   videoDoc = JSON.stringify(videoDoc);

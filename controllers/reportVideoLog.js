@@ -334,12 +334,23 @@ async function deleteByUserId(req, res) {
 
 async function insert(req, res) {
   try {
-    const { infor } = req.body;
+    // console.log(req.body);
+    let { infor } = req.body;
+    infor = {
+      adOfferId: req.body.adOfferId,
+      deviceId: req.body.deviceId,
+      zoneId: req.body.zoneId,
+      videoId: req.body.videoId,
+      durationFull: req.body.durationFull,
+      position: req.body.position,
+      timeStamp: req.body.timeStamp,
+      snapshots: req.body.snapshots,
+    };
     const image = req.file;
     let urlImageGlobal = null;
-    const typeImage = handle.getTypeFile(image.mimetype);
+    // const typeImage = handle.getTypeFile(image.mimetype);
     const signatureName = handle.getSignatureName();
-    const nameImageInPath = signatureName + "." + typeImage;
+    const nameImageInPath = signatureName + "." + "jpg";
     const pathImageStorage = `${config.upload_folder}${config.image_folder}${nameImageInPath}`;
     await handle.moveFile(image.path, pathImageStorage);
     urlImageGlobal = `${config.host}:${config.port}/${nameImageInPath}`;
@@ -348,6 +359,8 @@ async function insert(req, res) {
     const totalGenderCounts = [0, 0];
     let totalFaces = 0;
     infor["snapshots"].forEach((ele) => {
+      ele = ele.split("'").join('"');
+      ele = JSON.parse(ele);
       const { ages, genders } = ele;
       ages.map((age) => (totalAgeCounts[getAgeTag(age)] += 1));
       genders.map((gender) =>
@@ -358,8 +371,9 @@ async function insert(req, res) {
     let adOffer = await adOfferService.getById(infor["adOfferId"]);
     const zoneDoc = await zoneService.getById(infor["zoneId"]);
     const videoDoc = await videoService.getById(infor["videoId"]);
-    let newReportVideoLogDoc = reportVideoLog.createModel({
+    let newReportVideoLogDoc = reportVideoLogService.createModel({
       adOfferId: infor["adOfferId"],
+      deviceId: infor["deviceId"],
       adManagerId: adOffer["adManagerId"],
       bdManagerId: adOffer["bdManagerId"],
       videoId: infor["videoId"],
@@ -390,7 +404,7 @@ async function insert(req, res) {
     let remainingBudget =
       adOffer["remainingBudget"] -
       videoDoc["duration"] * zoneDoc["pricePerTimePeriod"];
-    await reportVideoLog.insert(newReportVideoLogDoc);
+    await reportVideoLogService.insert(newReportVideoLogDoc);
     await adOfferService.updateById(adOffer["_id"], {
       remainingBudget: remainingBudget,
     });
@@ -409,7 +423,7 @@ async function insert(req, res) {
       reportVideoLog: "success",
     });
   } catch (error) {
-    console.log(error);
+    console.log("insert", error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }
 }

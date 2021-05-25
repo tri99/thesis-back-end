@@ -129,9 +129,12 @@ async function getByIdforDevice(req, res) {
 async function getZoneByDeviceId(req, res) {
   try {
     const { deviceId } = req.body;
-    let zoneDocument = await zoneService.findByPipeLine({
-      deviceArray: { $in: [mongoose.Types.ObjectId(deviceId)] },
-    });
+    let zoneDocument = await zoneService.findByPipeLine(
+      {
+        deviceArray: { $in: [mongoose.Types.ObjectId(deviceId)] },
+      },
+      {}
+    );
     let doc = await zoneSupport.convertZoneData(zoneDocument);
     return res.status(config.status_code.OK).send({ zone: doc });
   } catch (error) {

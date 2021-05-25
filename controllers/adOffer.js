@@ -445,6 +445,30 @@ async function deleteById(req, res) {
   }
 }
 
+async function getBelongToAds(req, res) {
+  try {
+    const { id, key } = req.query;
+    let ads = [];
+    console.log("inside");
+    if (key === "adSet" || key === "playlist") {
+      let newKey;
+      if (key === "adSet") newKey = "adSetId";
+      if (key === "playlist") newKey = "contentId";
+      ads = await adOfferService.findBy(
+        {
+          [newKey]: id,
+          status: { $in: ["pending", "deployed", "empty"] },
+        },
+        { select: "name _id", limit: 3 }
+      );
+    }
+    return res.status(config.status_code.OK).send({ ads });
+  } catch (error) {
+    console.log(error);
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
 async function checkBudgetToRun(req, res) {
   try {
     const {
@@ -458,29 +482,32 @@ async function checkBudgetToRun(req, res) {
     } = req.body;
     let adOfferDoc = await adOfferService.getById(adOfferId);
     if (!adOfferDoc) {
+      console.log(1);
       return res
-        .status_code(404)
+        .status(404)
         .send({ allow: false, message: "adOffer not found" });
     }
     let tempBudget = adOfferDoc["tempBudget"];
     tempBudget -= duration * price;
     if (tempBudget <= 0) {
-      return res
-        .status_code(403)
-        .send({ allow: false, message: "out of money" });
+      console.log(2);
+      return res.status(403).send({ allow: false, message: "out of money" });
     }
 
     let tempChargeDoc = tempVideoChargeService.createModel({
-      videoId,
-      zoneId,
-      deviceId,
+      videoId: videoId,
+      zoneId: zoneId,
+      deviceId: deviceId,
+      adOfferId: adOfferId,
       timeStamp,
       duration,
       moneyCharge: duration * price,
     });
+    console.log(tempChargeDoc);
     await tempVideoChargeService.insert(tempChargeDoc);
     await adOfferService.updateById(adOfferId, { tempBudget: tempBudget });
-    return res.status_code(200).send({ allow: true, message: "you can run" });
+    console.log(3);
+    return res.status(200).send({ allow: true, message: "you can run" });
   } catch (error) {
     console.log(error);
     return res
@@ -504,5 +531,6 @@ module.exports = {
   deleteById,
   getByArrayStatus,
   redeployOfferById,
+  getBelongToAds,
   checkBudgetToRun,
 };
