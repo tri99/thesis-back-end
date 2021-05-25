@@ -348,6 +348,7 @@ async function insert(req, res) {
     };
     const image = req.file;
     let urlImageGlobal = null;
+    console.log(infor["snapshots"]);
     // const typeImage = handle.getTypeFile(image.mimetype);
     const signatureName = handle.getSignatureName();
     const nameImageInPath = signatureName + "." + "jpg";
