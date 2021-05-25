@@ -41,7 +41,7 @@ const adOfferSchema = new schema({
     require: true,
     ref: "user",
   },
-  timeDeploy: {
+  timeCreate: {
     type: Date,
     require: true,
   },

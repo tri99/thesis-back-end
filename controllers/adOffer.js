@@ -67,7 +67,7 @@ async function insert(req, res) {
       remainingBudget: budget,
       adManagerId: req.userId,
       tempBudget: budget,
-      timeDeploy: new Date().getTime(),
+      timeCreate: new Date().getTime(),
       status: "idle",
       timeStatus: new Date().getTime(),
       deletedByAdManager: false,
@@ -88,6 +88,50 @@ async function getAll(req, res) {
       isBelongToUserFindOption(req.userId)
     );
     return res.status(config.status_code.OK).send({ adOffers: document });
+  } catch (error) {
+    console.log(error);
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
+async function getAllTableFormat(req, res) {
+  try {
+    const allAds = await adOfferService.findBy(
+      { adManagerId: req.userId, deletedByAdManager: false },
+      {
+        select:
+          "-deleteByAdManager -deleteByBdManager -tempBudget -zoneIds -adManagerId",
+        populate: [
+          { path: "bdManagerId", select: "_id username" },
+          { path: "adSetId", select: "_id name" },
+          { path: "contentId", select: "_id name" },
+        ],
+        sort: "-timeCreate",
+      }
+    );
+    const allAdIds = allAds.map((ad) => ad._id);
+    console.log(allAdIds, typeof allAdIds[0]);
+    const tableData = await adOfferService.getTable(allAdIds);
+    let result = [];
+    for (const ad of allAds) {
+      const tableDataRow = tableData.find(
+        (tableAd) => ad._id.toString() === tableAd._id.toString()
+      );
+      const adObject = ad.toObject();
+      if (tableDataRow) {
+        result.push({ ...tableDataRow, ...adObject });
+      } else {
+        result.push({
+          views: 0,
+          runTime: 0,
+          cost: 0,
+          avgViews: 0,
+          avgRunTime: 0,
+          ...adObject,
+        });
+      }
+    }
+    return res.status(config.status_code.OK).send({ adOffers: result });
   } catch (error) {
     console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
@@ -612,4 +656,5 @@ module.exports = {
   getByArrayStatus,
   getBelongToAds,
   checkBudgetToRun,
+  getAllTableFormat,
 };
