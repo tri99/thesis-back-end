@@ -35,7 +35,7 @@ function catchErrorImage() {
   return (req, res, next) => {
     uploadImage(req, res, (error) => {
       if (error) {
-        console.log(error);
+        console.log("image: ", error);
         return res.status(413).send({
           message: "upload image error",
         });

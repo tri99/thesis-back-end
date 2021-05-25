@@ -3,22 +3,28 @@ const adOfferService = require("./../services/adOffer");
 
 async function convertZoneData(data) {
   let adOfferDoc = await adOfferService.getManyFullInfor(data["adArray"]);
+
   let videoArray = [];
+  adOfferDoc = JSON.stringify(adOfferDoc);
+  adOfferDoc = JSON.parse(adOfferDoc);
   for (let i = 0; i < adOfferDoc.length; i++) {
-    let videos = videoService.getManyByArrayIdFull(
+    let videos = await videoService.getManyByArrayIdFull(
       adOfferDoc[i]["contentId"]["mediaArray"]
     );
     let Atags = [];
     let Gtags = [];
     for (let j = 0; j < videos.length; j++) {
-      Atags.push(videos["adSetId"]["ages"]);
-      Gtags.push(videos["adSetId"]["genders"]);
+      Atags.push.apply(Atags, videos[j]["adSetId"]["ages"]["value"]);
+      Gtags.push.apply(Gtags, videos[j]["adSetId"]["genders"]["value"]);
     }
-    adOfferDoc[i]["adSetId"]["ages"] = Atags;
-    adOfferDoc[i]["adSetId"]["genders"] = Gtags;
+    Atags = [...new Set(Atags)];
+    Gtags = [...new Set(Gtags)];
+    adOfferDoc[i]["adSetId"]["ages"]["value"] = Atags;
+    adOfferDoc[i]["adSetId"]["genders"]["value"] = Gtags;
     videoArray.push(adOfferDoc[i]["contentId"]["mediaArray"]);
     data["playlistArray"].push(adOfferDoc[i]["contentId"]);
   }
+
   let videos = [...new Set(videoArray)];
   let videoDoc = await videoService.getManyByArrayIdFull(videos[0]);
   videoDoc = JSON.stringify(videoDoc);
@@ -33,32 +39,6 @@ async function convertZoneData(data) {
   data["videoArray"] = videoDoc;
   return data;
 }
-
-// let data = {
-//   videoArray: [],
-//   playlistArray: [],
-//   deviceArray: [
-//     {
-//       _id: "609e41d701fe2c188863f392",
-//     },
-//   ],
-//   adArray: [
-//     {
-//       _id: "60a36ed2d35e6e11c8a15abe",
-//     },
-//   ],
-//   name: "cool",
-//   volumeVideo: 0,
-//   isMuteVideo: false,
-//   isLoopOneVideo: false,
-//   isLoopAllVideo: false,
-//   userId: {
-//     $oid: "609a303a8e271a3e806dc072",
-//   },
-//   __v: 1,
-// };
-// let x = await convertZoneData(data);
-// console.log(x);
 
 module.exports = {
   convertZoneData,

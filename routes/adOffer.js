@@ -3,6 +3,11 @@ const adOfferController = require("./../controllers/adOffer");
 const auth = require("./../middlewares/authen_token");
 module.exports = () => {
   router.post("/", auth.isAuthen, adOfferController.insert);
+  router.post(
+    "/checkBudget/",
+    auth.deviceAuthen,
+    adOfferController.checkBudgetToRun
+  );
   router.get("/", auth.isAuthen, adOfferController.getAll);
   router.get("/full-infor/:id", auth.isAuthen, adOfferController.getFullInfor);
   router.get("/ad-manager/", auth.isAuthen, adOfferController.getByAdManagerId);

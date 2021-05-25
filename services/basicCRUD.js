@@ -85,7 +85,6 @@ const crudServiceGenerator = (model) => {
     return query.exec();
   };
   let findByPipeLine = (pipeline, selectOption = "_id") => {
-    console.log(pipeline);
     return new Promise((resolve, reject) => {
       return model
         .find(pipeline)

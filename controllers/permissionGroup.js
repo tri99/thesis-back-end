@@ -19,7 +19,7 @@ async function insert(req, res) {
       desc,
       adminId: req.userId,
     });
-    console.log(newDocument);
+    // console.log(newDocument);
     await permGroupService.insert(newDocument);
     return res.status(config.status_code.OK).send({ permGroup: newDocument });
   } catch (error) {

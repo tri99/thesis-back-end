@@ -24,7 +24,6 @@ function getFullInfor(findOption) {
       })
       .exec((error, document) => {
         if (error) return reject(error);
-        console.log(document);
         return resolve(document);
       });
   });
@@ -40,7 +39,6 @@ function getManyFullInfor(ids) {
       .populate({ path: "adSetId" })
       .exec((error, document) => {
         if (error) return reject(error);
-        console.log(document);
         return resolve(document);
       });
   });

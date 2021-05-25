@@ -5,7 +5,7 @@ const upload = require("./../utils/uploadFile");
 module.exports = () => {
   router.post(
     "/deivce/infor-ai",
-    auth.deviceAuthen,
+    // auth.deviceAuthen,
     upload.catchErrorImage(),
     reportVideoLog.insert
   );

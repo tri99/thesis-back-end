@@ -5,6 +5,7 @@ const userService = require("./../services/user");
 const NotificationService = require("./../services/notification");
 const config = require("./../config/config");
 const socketService = require("../socket");
+const tempVideoChargeService = require("./../services/tempVideoCharge");
 function isBelongToUserFindOption(userId) {
   return {
     $or: [
@@ -63,6 +64,7 @@ async function insert(req, res) {
       budget,
       remainingBudget: budget,
       adManagerId: req.userId,
+      tempBudget: budget,
       timeDeploy: new Date().getTime(),
       status: "idle",
       timeStatus: new Date().getTime(),
@@ -473,6 +475,54 @@ async function getBelongToAds(req, res) {
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }
 }
+
+async function checkBudgetToRun(req, res) {
+  try {
+    const {
+      adOfferId,
+      duration,
+      price,
+      videoId,
+      zoneId,
+      timeStamp,
+      deviceId,
+    } = req.body;
+    let adOfferDoc = await adOfferService.getById(adOfferId);
+    if (!adOfferDoc) {
+      console.log(1);
+      return res
+        .status(404)
+        .send({ allow: false, message: "adOffer not found" });
+    }
+    let tempBudget = adOfferDoc["tempBudget"];
+    tempBudget -= duration * price;
+    if (tempBudget <= 0) {
+      console.log(2);
+      return res.status(403).send({ allow: false, message: "out of money" });
+    }
+
+    let tempChargeDoc = tempVideoChargeService.createModel({
+      videoId: videoId,
+      zoneId: zoneId,
+      deviceId: deviceId,
+      adOfferId: adOfferId,
+      timeStamp,
+      duration,
+      moneyCharge: duration * price,
+    });
+    console.log(tempChargeDoc);
+    await tempVideoChargeService.insert(tempChargeDoc);
+    await adOfferService.updateById(adOfferId, { tempBudget: tempBudget });
+    console.log(3);
+    return res.status(200).send({ allow: true, message: "you can run" });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(config.status_code.SERVER_ERROR)
+      .send({ allow: true, message: error });
+  }
+}
+
 module.exports = {
   insert,
   getAll,
@@ -489,4 +539,5 @@ module.exports = {
   getByArrayStatus,
   redeployOfferById,
   getBelongToAds,
+  checkBudgetToRun,
 };

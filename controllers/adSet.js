@@ -59,7 +59,7 @@ async function getById(req, res) {
 async function getByAdManagerId(req, res) {
   try {
     const { id } = req.params;
-    const document = adSetService.findByPipeLine({
+    const document = await adSetService.findByPipeLine({
       adManagerId: id,
       isMedia: false,
     });

@@ -60,8 +60,11 @@ const reportVideoLogSchema = new Schema({
   imagePath: {
     type: String,
   },
+  moneyCharge: {
+    type: Number,
+  },
 });
 
-const reportVideoLog = mongoose.model("reportVideoLog", reportVideoLogSchema);
+const reportVideoLog = mongoose.model("reportvideolog", reportVideoLogSchema);
 
 module.exports = reportVideoLog;

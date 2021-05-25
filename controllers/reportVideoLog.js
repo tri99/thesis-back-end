@@ -1,10 +1,15 @@
 const reportVideoLogService = require("./../services/reportVideoLog");
 const adOfferService = require("../services/adOffer");
 const reportVideoLog = require("./../collections/reportVideoLog");
+const tempVideoChargeService = require("./../services/tempVideoCharge");
+const adOfferService = require("./../services/adOffer");
+const zoneService = require("./../services/zone-ver2");
+const videoService = require("./../services/video");
 const config = require("./../config/config");
 const { getAgeTagName, getAgeTag } = require("../utils/ageGenders");
 const handle = require("./../services/handle");
 const dayjs = require("dayjs");
+const audio_module = require("./../exports/audio-io");
 var isSameOrAfter = require("dayjs/plugin/isSameOrAfter");
 var isSameOrBefore = require("dayjs/plugin/isSameOrBefore");
 dayjs.extend(isSameOrAfter);
@@ -369,12 +374,24 @@ async function deleteByUserId(req, res) {
 
 async function insert(req, res) {
   try {
-    const { infor } = req.body;
+    // console.log(req.body);
+    let { infor } = req.body;
+    infor = {
+      adOfferId: req.body.adOfferId,
+      deviceId: req.body.deviceId,
+      zoneId: req.body.zoneId,
+      videoId: req.body.videoId,
+      durationFull: req.body.durationFull,
+      position: req.body.position,
+      timeStamp: req.body.timeStamp,
+      snapshots: req.body.snapshots,
+    };
     const image = req.file;
     let urlImageGlobal = null;
-    const typeImage = handle.getTypeFile(image.mimetype);
+    console.log(infor["snapshots"]);
+    // const typeImage = handle.getTypeFile(image.mimetype);
     const signatureName = handle.getSignatureName();
-    const nameImageInPath = signatureName + "." + typeImage;
+    const nameImageInPath = signatureName + "." + "jpg";
     const pathImageStorage = `${config.upload_folder}${config.image_folder}${nameImageInPath}`;
     await handle.moveFile(image.path, pathImageStorage);
     urlImageGlobal = `${config.host}:${config.port}/${nameImageInPath}`;
@@ -383,6 +400,8 @@ async function insert(req, res) {
     const totalGenderCounts = [0, 0];
     let totalFaces = 0;
     infor["snapshots"].forEach((ele) => {
+      ele = ele.split("'").join('"');
+      ele = JSON.parse(ele);
       const { ages, genders } = ele;
       ages.map((age) => (totalAgeCounts[getAgeTag(age)] += 1));
       genders.map((gender) =>
@@ -390,28 +409,62 @@ async function insert(req, res) {
       );
       totalFaces += ele["number_of_face"];
     });
-    const adOffer = await adOfferService.getById(infor["adOfferId"]);
-
-    let newReportVideoLogDoc = reportVideoLog.createModel({
+    let adOffer = await adOfferService.getById(infor["adOfferId"]);
+    const zoneDoc = await zoneService.getById(infor["zoneId"]);
+    const videoDoc = await videoService.getById(infor["videoId"]);
+    let newReportVideoLogDoc = reportVideoLogService.createModel({
       adOfferId: infor["adOfferId"],
+      deviceId: infor["deviceId"],
       adManagerId: adOffer["adManagerId"],
       bdManagerId: adOffer["bdManagerId"],
       videoId: infor["videoId"],
       zoneId: infor["zoneId"],
       timeStart: infor["timeStamp"],
-      runTime: infor["snapshots"].length * 5,
+      runTime: infor["snapshots"].length * 30,
       views: totalFaces,
       ages: totalAgeCounts,
       genders: totalGenderCounts,
       raw: infor,
       imagePath: urlImageGlobal,
+      moneyCharge: videoDoc["duration"] * zoneDoc["pricePerTimePeriod"],
     });
-    await reportVideoLog.insert(newReportVideoLogDoc);
+
+    let tempCharge = tempVideoChargeService.findOneBy({
+      videoId: infor["videoId"],
+      deviceId: infor["deviceId"],
+      timeStamp: infor["timeStamp"],
+      zoneId: infor["zoneId"],
+    });
+
+    if (!tempCharge) {
+      return res.status(403).send({
+        message: "video didnt recognize",
+      });
+    }
+
+    let remainingBudget =
+      adOffer["remainingBudget"] -
+      videoDoc["duration"] * zoneDoc["pricePerTimePeriod"];
+    await reportVideoLogService.insert(newReportVideoLogDoc);
+    await adOfferService.updateById(adOffer["_id"], {
+      remainingBudget: remainingBudget,
+    });
+
+    let zones = await zoneService.findByPipeLine({
+      adArray: { $in: [adOffer["_id"]] },
+    });
+    for (let i = 0; i < zones.length; i++) {
+      audio_module.get_audio_io().to(infor["zoneId"]).emit("update-budget", {
+        zoneId: infor["zoneId"],
+        remainingBudget: adOffer["remainingBudget"],
+      });
+    }
+
     return res.status(200).send({
       reportVideoLog: "success",
     });
   } catch (error) {
-    console.log(error);
+    console.log("insert", error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }
 }
