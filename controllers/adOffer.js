@@ -6,6 +6,7 @@ const NotificationService = require("./../services/notification");
 const config = require("./../config/config");
 const socketService = require("../socket");
 const tempVideoChargeService = require("./../services/tempVideoCharge");
+const audio_module = require("./../exports/audio-io");
 function isBelongToUserFindOption(userId) {
   return {
     $or: [
@@ -280,6 +281,12 @@ async function updateStatusById(req, res) {
         "ads in zone",
         await zoneService.pushAdInZones(document._id, document.zoneIds)
       );
+      for (let i = 0; i < document.zoneIds.length; i++) {
+        audio_module
+          .get_audio_io()
+          .to(document.zoneIds[i].toString())
+          .emit("update-zone", { zoneId: id });
+      }
     }
     await NotificationService.insertNotification(
       `Your ad offer **${document["name"]}** has been **${
@@ -456,7 +463,6 @@ async function getBelongToAds(req, res) {
   try {
     const { id, key } = req.query;
     let ads = [];
-    console.log("inside");
     if (key === "adSet" || key === "playlist") {
       let newKey;
       if (key === "adSet") newKey = "adSetId";
@@ -510,7 +516,6 @@ async function checkBudgetToRun(req, res) {
       duration,
       moneyCharge: duration * price,
     });
-    console.log(tempChargeDoc);
     await tempVideoChargeService.insert(tempChargeDoc);
     await adOfferService.updateById(adOfferId, { tempBudget: tempBudget });
     console.log(3);

@@ -10,9 +10,9 @@ async function checkPermission(req, { permission, zone }) {
       select: "permissions",
     });
 
-    console.log("uper", userPerms);
+    // console.log("uper", userPerms);
     const permGroups = userPerms.map((up) => up.permissionGroup.permissions);
-    console.log("permgroups", permGroups);
+    // console.log("permgroups", permGroups);
     for (const pg of permGroups) {
       if (pg.includes(permission)) return true;
     }
