@@ -2,7 +2,6 @@ const reportVideoLogService = require("./../services/reportVideoLog");
 const adOfferService = require("../services/adOffer");
 const reportVideoLog = require("./../collections/reportVideoLog");
 const tempVideoChargeService = require("./../services/tempVideoCharge");
-const adOfferService = require("./../services/adOffer");
 const zoneService = require("./../services/zone-ver2");
 const videoService = require("./../services/video");
 const config = require("./../config/config");
