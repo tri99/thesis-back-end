@@ -28,7 +28,7 @@ async function isAuthen(req, res, next) {
 async function deviceAuthen(req, res, next) {
   try {
     let token = req.headers.token || req.body.token;
-    console.log(token);
+    // console.log(token);
     if (!token)
       return res
         .status(config.status_code.TOKEN_ERROR)

@@ -18,7 +18,7 @@ function getUserPermissions(
         const result = [];
         try {
           documents.forEach((doc) => {
-            console.log(doc, firstPath, secondPath);
+            // console.log(doc, firstPath, secondPath);
 
             const key = doc[firstPath]._id.toString();
 
@@ -39,7 +39,7 @@ function getUserPermissions(
           for (const [key] of map.entries()) {
             result.push(map.get(key));
           }
-          console.log("result:", result);
+          // console.log("result:", result);
           return resolve(result);
         } catch (err) {
           console.log(err);

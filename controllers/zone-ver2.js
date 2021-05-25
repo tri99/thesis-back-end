@@ -329,6 +329,7 @@ async function getLogsByZoneId(req, res) {
         sort: "-timeStart",
       }
     );
+    console.log(logs);
     return res.status(config.status_code.OK).send({ logs });
   } catch (error) {
     console.log(error);

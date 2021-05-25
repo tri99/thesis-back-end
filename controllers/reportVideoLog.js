@@ -325,7 +325,7 @@ async function getAllByPeriod(req, res) {
       device: log.deviceId,
       cost: log.zoneId.pricePerTimePeriod * log.runTime,
     }));
-    console.log("logs", logs[0]);
+    // console.log("logs", logs[0]);
     return res.status(config.status_code.OK).send({ logs });
   } catch (error) {
     console.log(error);
