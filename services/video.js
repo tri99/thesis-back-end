@@ -1,6 +1,8 @@
 const Video = require("./../collections/video");
 const basiCRUD = require("./basicCRUD");
 const videoCRUD = basiCRUD(Video);
+const playlistService = require("./playlist");
+const adOfferService = require("./adOffer");
 /**
  *
  * @param {Array} newVideos
@@ -130,6 +132,18 @@ function updateTagsById(videoId, tags) {
   });
 }
 
+async function countAdContainVid(videoId, userId) {
+  const playlistIds = await playlistService.findBy(
+    { mediaArray: videoId },
+    { select: "_id" }
+  );
+  const adCount = await adOfferService.count({
+    contentId: { $in: playlistIds },
+    adManagerId: userId,
+    status: { $nin: ["idle", "finished"] },
+  });
+  return adCount;
+}
 module.exports = {
   ...videoCRUD,
   insertMany: insertMany,
@@ -144,4 +158,5 @@ module.exports = {
   findOneBy: videoCRUD.findOneBy,
   updateTagsById: updateTagsById,
   getManyByArrayIdFull: getManyByArrayIdFull,
+  countAdContainVid,
 };

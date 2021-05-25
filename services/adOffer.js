@@ -11,7 +11,10 @@ function getFullInfor(findOption) {
   return new Promise((resolve, reject) => {
     adOffer
       .findOne(findOption)
-      .populate({ path: "bdManagerId", select: "_id username email" })
+      .populate({
+        path: "bdManagerId",
+        select: "_id username email avatar desc",
+      })
       .populate({ path: "adManagerId", select: "_id username email" })
       .populate({ path: "contentId" })
       .populate({ path: "adSetId" })

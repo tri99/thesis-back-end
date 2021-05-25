@@ -2,7 +2,7 @@ const playlistService = require("./../services/playlist");
 const zoneService = require("../services/zone");
 const videoService = require("./../services/video");
 const config = require("./../config/config");
-
+const adOfferService = require("./../services/adOffer");
 async function insert(req, res) {
   try {
     const { mediaArray, name, type } = req.body;
@@ -61,6 +61,16 @@ async function updateById(req, res) {
         .status(config.status_code.FORBIDEN)
         .send({ message: "wrong user" });
     }
+    const adOffersCount = await adOfferService.count({
+      contentId: playlistId,
+      status: { $nin: ["idle", "finished"] },
+      adManagerId: req.userId,
+    });
+    if (adOffersCount > 0) {
+      return res
+        .status(config.status_code.FORBIDEN)
+        .send({ message: "Some active ads include this playlist" });
+    }
     const { name, mediaArray, volume } = req.body;
     await playlistService.updateById(playlistId, name, mediaArray, volume);
     return res.status(config.status_code.OK).send({ playlist: true });
@@ -77,7 +87,17 @@ async function deleteById(req, res) {
     if (zoneDocument.length > 0) {
       return res
         .status(config.status_code.FORBIDEN)
-        .send({ message: "Some Zone include this playlist" });
+        .send({ message: "Some zone include this playlist" });
+    }
+    const adOffersCount = await adOfferService.count({
+      contentId: playlistId,
+      status: { $nin: ["idle", "finished"] },
+      adManagerId: req.userId,
+    });
+    if (adOffersCount > 0) {
+      return res
+        .status(config.status_code.FORBIDEN)
+        .send({ message: "Some active ads include this playlist" });
     }
     let playlistDocument = await playlistService.getById(playlistId);
     if (playlistDocument["userId"].toString() != req.userId) {

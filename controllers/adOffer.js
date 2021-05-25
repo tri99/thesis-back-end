@@ -1,4 +1,5 @@
 const adOfferService = require("./../services/adOffer");
+const zoneService = require("./../services/zone-ver2");
 const adSetService = require("./../services/adSet");
 const userService = require("./../services/user");
 const NotificationService = require("./../services/notification");
@@ -36,23 +37,23 @@ async function insert(req, res) {
     const { name, bdManagerId, contentId, budget, adSetId, zoneIds } = req.body;
 
     let doc = await userService.getUserById(req.userId);
-    let doc2 = await adOfferService.findByPipeLine({ adSetId: adSetId });
+    // let doc2 = await adOfferService.findByPipeLine({ adSetId: adSetId });
     if (doc["typeUser"].toString() != "adManager")
       return res
         .status(config.status_code.FORBIDEN)
         .send({ message: "NOT_PERMISSION" });
 
-    for (let i = 0; i < doc2; i++) {
-      if (
-        doc2[i]["contentId"].toString() == contentId &&
-        doc2[i]["adSetId"].toString() == adSetId &&
-        (doc2[i]["status"].toString() != "rejected" ||
-          doc2[i]["status"].toString() != "canceled")
-      )
-        return res
-          .status(config.status_code.FORBIDEN)
-          .send({ message: "adOffer with the same adSet and content existed" });
-    }
+    // for (let i = 0; i < doc2; i++) {
+    //   if (
+    //     doc2[i]["contentId"].toString() == contentId &&
+    //     doc2[i]["adSetId"].toString() == adSetId &&
+    //     (doc2[i]["status"].toString() != "rejected" ||
+    //       doc2[i]["status"].toString() != "canceled")
+    //   )
+    //     return res
+    //       .status(config.status_code.FORBIDEN)
+    //       .send({ message: "adOffer with the same adSet and content existed" });
+    // }
 
     const newDocument = adOfferService.createModel({
       name,
@@ -70,9 +71,9 @@ async function insert(req, res) {
       deletedByAdManager: false,
       deletedByBdManager: false,
     });
-    await adOfferService.insert(newDocument);
+    const newAd = await adOfferService.insert(newDocument);
 
-    return res.status(config.status_code.OK).send({ adOffer: newDocument });
+    return res.status(config.status_code.OK).send({ adOffer: newAd });
   } catch (error) {
     console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
@@ -274,6 +275,12 @@ async function updateStatusById(req, res) {
 
     document = await adOfferService.getById(id);
     const isDeployed = document["status"] === "deployed";
+    if (isDeployed) {
+      console.log(
+        "ads in zone",
+        await zoneService.pushAdInZones(document._id, document.zoneIds)
+      );
+    }
     await NotificationService.insertNotification(
       `Your ad offer **${document["name"]}** has been **${
         isDeployed ? "deployed" : "rejected"

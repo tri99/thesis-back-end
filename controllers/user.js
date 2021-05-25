@@ -66,7 +66,7 @@ async function createAdminPermission(adminId, generalZoneId) {
 }
 async function signUp(req, res) {
   try {
-    let { username, email, password, typeUser } = req.body;
+    let { username, email, password, typeUser, desc, avatar } = req.body;
 
     if (!username || !email || !password || !typeUser) {
       return res
@@ -111,14 +111,20 @@ async function signUp(req, res) {
     } else {
       generalZoneId = (await UserService.getUserById(req.userId)).generalZoneId;
     }
-    const newUserDocument = UserService.createModel(
+    const newUserDocument = UserService.createModel({
       username,
       email,
       password,
-      req.userId,
+      adminId: req.userId,
       generalZoneId,
-      typeUser
-    );
+      typeUser,
+      desc,
+      avatar: avatar
+        ? avatar
+        : typeUser === "bdManager"
+        ? "https://image.freepik.com/free-vector/x-letter-stripe-sphere-ball-circle-corporate-generic-logo-template_8580-28.jpg"
+        : "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/1024px-User-avatar.svg.png",
+    });
     if (!req.userId) {
       generalZone.userId = newUserDocument._id;
       await createAdminPermission(newUserDocument._id, generalZone._id);
@@ -210,10 +216,9 @@ async function getUserByEmail(req, res) {
 async function updateUserById(req, res) {
   try {
     // const _id = req.userId
-    const id = req.body.id;
-    const { username, password } = req.body;
-    await UserService.updateUserById(id, username, password);
-
+    const id = req.userId;
+    const { username, desc } = req.body;
+    await UserService.updateUserById(id, username, desc);
     const userDocument = await UserService.getUserById(id);
 
     return res.status(config.status_code.OK).send({ user: userDocument });

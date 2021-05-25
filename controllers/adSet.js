@@ -1,6 +1,7 @@
 const adSetService = require("./../services/adSet");
 const config = require("./../config/config");
 const adSetSupport = require("./../utils/getAdSetStatus");
+
 async function insert(req, res) {
   try {
     const { name, daysOfWeek, hoursOfDay } = req.body;
@@ -79,18 +80,18 @@ async function updateById(req, res) {
         .status(config.status_code.FORBIDEN)
         .send({ message: "wrong user" });
     }
-    let { result, adOffers } = await adSetSupport.getAdSetStatus(id);
-    if (result == false) {
+    let { result, adOfferDoc } = await adSetSupport.getAdSetStatus(id);
+    if (result === false) {
       return res.status(config.status_code.FORBIDEN).send({
-        message: "adSet is using by some adOffer or playlist in adOffer",
-        adOffers: adOffers,
+        message: "Some active ads are using this setting",
+        adOffers: adOfferDoc,
       });
     }
     await adSetService.updateById(id, {
       daysOfWeek,
       hoursOfDay,
     });
-    document = adSetService.getById(id);
+    document = await adSetService.getById(id);
     return res.status(config.status_code.OK).send({ adset: document });
   } catch (error) {
     console.log(error);
@@ -106,6 +107,13 @@ async function deleteById(req, res) {
       return res
         .status(config.status_code.FORBIDEN)
         .send({ message: "wrong user" });
+    }
+    let { result, adOfferDoc } = await adSetSupport.getAdSetStatus(id);
+    if (result === false) {
+      return res.status(config.status_code.FORBIDEN).send({
+        message: "Some active ads are using this setting",
+        adOffers: adOfferDoc,
+      });
     }
     await adSetService.deleteById(id);
     return res.status(config.status_code.OK).send({ adset: true });
