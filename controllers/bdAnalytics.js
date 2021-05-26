@@ -35,7 +35,6 @@ function getByGenerator(queryCheckCb, $lookup, nameKey = "name") {
         },
         $lookup
       );
-      console.log(zonesData[0]);
       frequency = Number(frequency);
       const noDataPoints =
         Math.floor((1.0 * dateEnd.diff(dateStart, "d")) / frequency) + 1;
@@ -70,7 +69,6 @@ function checkValidQuery(options) {
       frequencies: [1, 7, 30],
       ...options,
     };
-    console.log(value, values);
     if (!values.includes(value) || !frequencies.includes(Number(frequency))) {
       throw new Error("Invalid query parameter value");
     }

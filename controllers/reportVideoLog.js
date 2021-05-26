@@ -197,7 +197,6 @@ function checkValidQuery(options) {
       frequencies: [1, 7, 30],
       ...options,
     };
-    console.log(value, values);
     if (!values.includes(value) || !frequencies.includes(Number(frequency))) {
       throw new Error("Invalid query parameter value");
     }
