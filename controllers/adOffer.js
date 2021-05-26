@@ -94,49 +94,64 @@ async function getAll(req, res) {
   }
 }
 
-async function getAllTableFormat(req, res) {
-  try {
-    const allAds = await adOfferService.findBy(
-      { adManagerId: req.userId, deletedByAdManager: false },
-      {
-        select:
-          "-deleteByAdManager -deleteByBdManager -tempBudget -zoneIds -adManagerId",
+function getAllTableFormat(type) {
+  return async (req, res) => {
+    try {
+      const findOption =
+        type === "ad"
+          ? { adManagerId: req.userId, deletedByAdManager: false }
+          : {
+              bdManagerId: req.userId,
+              deletedByBdManager: false,
+              status: { $ne: "idle" },
+            };
+      const userPopulate =
+        type === "ad"
+          ? { path: "bdManagerId", select: "_id username" }
+          : { path: "adManagerId", select: "_id username" };
+      const allAds = await adOfferService.findBy(findOption, {
+        select: "-deleteByAdManager -deleteByBdManager -tempBudget -zoneIds",
         populate: [
-          { path: "bdManagerId", select: "_id username" },
+          userPopulate,
           { path: "adSetId", select: "_id name" },
           { path: "contentId", select: "_id name" },
         ],
         sort: "-timeCreate",
+      });
+      const allAdIds = allAds.map((ad) => ad._id);
+      console.log(allAdIds, typeof allAdIds[0]);
+      const tableData = await adOfferService.getTable(allAdIds);
+      let result = [];
+      for (const ad of allAds) {
+        const tableDataRow = tableData.find(
+          (tableAd) => ad._id.toString() === tableAd._id.toString()
+        );
+        const adObject = ad.toObject();
+        if (tableDataRow) {
+          result.push({ ...tableDataRow, ...adObject });
+        } else {
+          result.push({
+            views: 0,
+            runTime: 0,
+            cost: 0,
+            avgViews: 0,
+            avgRunTime: 0,
+            ...adObject,
+          });
+        }
       }
-    );
-    const allAdIds = allAds.map((ad) => ad._id);
-    console.log(allAdIds, typeof allAdIds[0]);
-    const tableData = await adOfferService.getTable(allAdIds);
-    let result = [];
-    for (const ad of allAds) {
-      const tableDataRow = tableData.find(
-        (tableAd) => ad._id.toString() === tableAd._id.toString()
-      );
-      const adObject = ad.toObject();
-      if (tableDataRow) {
-        result.push({ ...tableDataRow, ...adObject });
-      } else {
-        result.push({
-          views: 0,
-          runTime: 0,
-          cost: 0,
-          avgViews: 0,
-          avgRunTime: 0,
-          ...adObject,
-        });
-      }
+      return res.status(config.status_code.OK).send({ adOffers: result });
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(config.status_code.SERVER_ERROR)
+        .send({ message: error });
     }
-    return res.status(config.status_code.OK).send({ adOffers: result });
-  } catch (error) {
-    console.log(error);
-    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
-  }
+  };
 }
+
+const getAllTableFormatByBd = getAllTableFormat("bd");
+const getAllTableFormatByAd = getAllTableFormat("ad");
 
 async function getById(req, res) {
   try {
@@ -293,7 +308,7 @@ async function sendOffer(req, res) {
         link: `/buildingads/${document["_id"].toString()}`,
       }
     );
-    return res.status(config.status_code.OK).send({ adOffer: document });
+    return res.status(config.status_code.OK).send({ status: "pending" });
   } catch (error) {
     console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
@@ -335,7 +350,7 @@ async function redeployOffer(req, res) {
         link: `/buildingads/${document["_id"].toString()}`,
       }
     );
-    return res.status(config.status_code.OK).send({ adOffer: document });
+    return res.status(config.status_code.OK).send({ status: "deployed" });
   } catch (error) {
     console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
@@ -370,7 +385,7 @@ async function rejectOffer(req, res) {
         link: `/ads/${document["_id"].toString()}`,
       }
     );
-    return res.status(config.status_code.OK).send({ adOffer: document });
+    return res.status(config.status_code.OK).send({ status: "idle" });
   } catch (error) {
     console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
@@ -406,7 +421,7 @@ async function deployOffer(req, res) {
         link: `/ads/${document["_id"].toString()}`,
       }
     );
-    return res.status(config.status_code.OK).send({ adOffer: document });
+    return res.status(config.status_code.OK).send({ status: "deployed" });
   } catch (error) {
     console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
@@ -656,5 +671,6 @@ module.exports = {
   getByArrayStatus,
   getBelongToAds,
   checkBudgetToRun,
-  getAllTableFormat,
+  getAllTableFormatByBd,
+  getAllTableFormatByAd,
 };

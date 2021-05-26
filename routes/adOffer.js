@@ -9,7 +9,16 @@ module.exports = () => {
     adOfferController.checkBudgetToRun
   );
   router.get("/", auth.isAuthen, adOfferController.getAll);
-  router.get("/table", auth.isAuthen, adOfferController.getAllTableFormat);
+  router.get(
+    "/table-ad",
+    auth.isAuthen,
+    adOfferController.getAllTableFormatByAd
+  );
+  router.get(
+    "/table-bd",
+    auth.isAuthen,
+    adOfferController.getAllTableFormatByBd
+  );
   router.get("/full-infor/:id", auth.isAuthen, adOfferController.getFullInfor);
   router.get("/ad-manager/", auth.isAuthen, adOfferController.getByAdManagerId);
   router.get("/bd-manager/", auth.isAuthen, adOfferController.getByBdManagerId);
