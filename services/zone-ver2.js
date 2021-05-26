@@ -3,6 +3,7 @@ const basicCRUDGenerator = require("./basicCRUD");
 const ReportVideoLog = require("./../collections/reportVideoLog");
 const zoneCRUD = basicCRUDGenerator(zone);
 const audio_module = require("./../exports/audio-io");
+
 module.exports = {
   ...zoneCRUD,
   getByIdwithAdName,
@@ -10,6 +11,7 @@ module.exports = {
   getTable,
   pullAdFromZones,
   emitToZones,
+  getAnalytics,
 };
 function emitToZones(zoneIds) {
   for (let i = 0; i < zoneIds.length; i++) {
@@ -48,6 +50,43 @@ function getTable(zoneIds) {
         cost: { $sum: "$moneyCharge" },
         avgViews: { $avg: "$views" },
         avgRunTime: { $avg: "$runTime" },
+      },
+    },
+  ]).exec();
+}
+
+function getAnalytics(zoneIds, query, $lookup) {
+  let { value, timeStart, timeEnd } = query;
+  const lookupKey = $lookup.as;
+  return ReportVideoLog.aggregate([
+    {
+      $match: {
+        zoneId: { $in: zoneIds },
+        timeStart: { $gte: timeStart, $lte: timeEnd },
+      },
+    },
+    {
+      $lookup,
+      // $lookup: {
+      //   from: "users",
+      //   localField: "adManagerId",
+      //   foreignField: "_id",
+      //   as: "adManager",
+      // },
+    },
+    {
+      $unwind: `$${lookupKey}`,
+    },
+    {
+      $group: {
+        _id: `$${lookupKey}._id`,
+        [lookupKey]: { $first: `$${lookupKey}` },
+        views: { $sum: "$views" },
+        runTime: { $sum: "$runTime" },
+        cost: { $sum: "$moneyCharge" },
+        avgViews: { $avg: "$views" },
+        avgRunTime: { $avg: "$runTime" },
+        logs: { $push: { value: `$${value}`, timeStart: `$timeStart` } },
       },
     },
   ]).exec();

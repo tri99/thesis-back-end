@@ -47,10 +47,9 @@ function getByGenerator(populate, queryCheckCb) {
   return async function (req, res) {
     try {
       const userId = req.userId;
-      let { value, frequency, timeStart, timeEnd, adOffer } = req.query;
+      let { value, frequency, timeStart, timeEnd, item } = req.query;
       if (queryCheckCb) queryCheckCb(req.query);
-      const adFindOption =
-        !adOffer || adOffer === "all" ? {} : { adOfferId: adOffer };
+      const adFindOption = !item || item === "all" ? {} : { adOfferId: item };
       let dateStart = dayjs.unix(timeStart).hour(0).minute(0).second(0);
       const logsInPeriod = await reportVideoLog
         .find({
@@ -123,10 +122,9 @@ function getByEnumGenerator(enumName, getNameCb, queryCheckCb) {
   return async function (req, res) {
     try {
       const userId = req.userId;
-      let { frequency, timeStart, timeEnd, adOffer } = req.query;
+      let { frequency, timeStart, timeEnd, item } = req.query;
       if (queryCheckCb) queryCheckCb(req.query);
-      const adFindOption =
-        !adOffer || adOffer === "all" ? {} : { adOfferId: adOffer };
+      const adFindOption = !item || item === "all" ? {} : { adOfferId: item };
       let dateStart = dayjs.unix(timeStart).hour(0).minute(0).second(0);
       const logsInPeriod = await reportVideoLog
         .find({
@@ -191,12 +189,15 @@ function getByEnumGenerator(enumName, getNameCb, queryCheckCb) {
     }
   };
 }
-function checkValidQuery({
-  values = ["views", "runTime"],
-  frequencies = [1, 7, 30],
-}) {
+function checkValidQuery(options) {
   return (query) => {
     const { value, frequency } = query;
+    const { values, frequencies } = {
+      values: ["views", "runTime", "moneyCharge"],
+      frequencies: [1, 7, 30],
+      ...options,
+    };
+    console.log(value, values);
     if (!values.includes(value) || !frequencies.includes(Number(frequency))) {
       throw new Error("Invalid query parameter value");
     }
@@ -204,14 +205,14 @@ function checkValidQuery({
 }
 const getByAdOffer = getByGenerator(
   { path: "adOfferId", select: "name" },
-  checkValidQuery
+  checkValidQuery()
 );
 const getByBdManager = getByGenerator(
   {
     path: "bdManagerId",
     select: "username",
   },
-  checkValidQuery
+  checkValidQuery()
 );
 const getByAge = getByEnumGenerator(
   "ages",
