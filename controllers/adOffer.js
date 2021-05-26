@@ -284,6 +284,47 @@ async function updateStatusById(req, res) {
   }
 }
 
+async function deviceUpdateStatusById(req, res) {
+  try {
+    console.log("aloalo");
+    const { id } = req.params;
+    const { status } = req.body;
+    console.log(id, status);
+    let timeStatus = new Date();
+    let document = await adOfferService.getById(id);
+
+    await adOfferService.updateById(id, {
+      status,
+      timeStatus,
+    });
+
+    document = await adOfferService.getById(id);
+    const isEmpty = document["status"] === "empty";
+    if (isEmpty) {
+      console.log("ads in zone");
+      for (let i = 0; i < document.zoneIds.length; i++) {
+        audio_module
+          .get_audio_io()
+          .to(document.zoneIds[i].toString())
+          .emit("update-zone", { zoneId: id });
+      }
+    }
+    await NotificationService.insertNotification(
+      `Your ad offer **${document["name"]}** has been **empty**`,
+      document["adManagerId"],
+      {
+        type: isEmpty ? "success" : "warn",
+        link: `/ads/${document["_id"].toString()}`,
+      }
+    );
+    console.log(document);
+    return res.status(config.status_code.OK).send({ adOffer: document });
+  } catch (error) {
+    console.log(error);
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
 async function sendOffer(req, res) {
   try {
     const { id } = req.params;
@@ -427,6 +468,7 @@ async function deployOffer(req, res) {
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }
 }
+
 async function cancelOffer(req, res) {
   try {
     const { id } = req.params;
@@ -671,6 +713,7 @@ module.exports = {
   getByArrayStatus,
   getBelongToAds,
   checkBudgetToRun,
+  deviceUpdateStatusById,
   getAllTableFormatByBd,
   getAllTableFormatByAd,
 };

@@ -17,6 +17,9 @@ function signToken(_id) {
       function (error, token) {
         if (error) return reject(error);
         return resolve(token);
+      },
+      {
+        expiresIn: "365d",
       }
     );
   });
