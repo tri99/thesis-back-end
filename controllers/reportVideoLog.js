@@ -83,6 +83,7 @@ function getByGenerator(populate, queryCheckCb) {
             name: eleName,
             views: 0,
             runTime: 0,
+            cost: 0,
             dataPoint: 0,
             index: 0,
             data: Array(noDataPoints).fill(0),
@@ -93,6 +94,7 @@ function getByGenerator(populate, queryCheckCb) {
         }
         curAd.views += log["views"];
         curAd.runTime += log["runTime"];
+        curAd.cost += log["moneyCharge"];
         if (isSameTotal(dateStart, dateLog, frequency)) {
           curAd.data[index] += log[value];
         } else {
@@ -242,9 +244,11 @@ async function getOverview(req, res) {
     const frequency = 1;
     let totalViews = 0;
     let totalRunTime = 0;
+    let totalCost = 0;
     const noDataPoint = getNoDataPoint(timeStart, timeEnd);
     const views = new Array(noDataPoint).fill(0);
     const runTime = new Array(noDataPoint).fill(0);
+    const cost = new Array(noDataPoint).fill(0);
     const dataMap = new Map();
     let index = 0;
     logsInPeriod.forEach((log) => {
@@ -256,16 +260,20 @@ async function getOverview(req, res) {
           name: eleName,
           views: 0,
           runTime: 0,
+          cost: 0,
         });
       const curAd = dataMap.get(eleName);
 
       curAd.views += log["views"];
       curAd.runTime += log["runTime"];
+      curAd.cost += log["moneyCharge"];
       totalViews += log["views"];
       totalRunTime += log["runTime"];
+      totalCost += log["moneyCharge"];
       if (isSameTotal(dateStart, dateLog, frequency)) {
         views[index] += log["views"];
         runTime[index] += log["runTime"];
+        cost[index] += log["moneyCharge"];
       } else {
         const dayDiff = dateLog.diff(dateStart, "d");
         for (let i = 0; i + frequency <= dayDiff; i += frequency) {
@@ -275,6 +283,7 @@ async function getOverview(req, res) {
         }
         views[index] += log["views"];
         runTime[index] += log["runTime"];
+        cost[index] += log["moneyCharge"];
       }
     });
     const topAds = [];
@@ -282,8 +291,10 @@ async function getOverview(req, res) {
     const data = {
       totalViews,
       totalRunTime,
+      totalCost,
       views,
       runTime,
+      cost,
       topAds,
     };
     return res.status(config.status_code.OK).send({ data });
@@ -323,7 +334,8 @@ async function getAllByPeriod(req, res) {
       video: log.videoId,
       zone: log.zoneId,
       device: log.deviceId,
-      cost: log.zoneId.pricePerTimePeriod * log.runTime,
+      cost: log.moneyCharge,
+      image: log.imagePath,
     }));
     // console.log("logs", logs[0]);
     return res.status(config.status_code.OK).send({ logs });
