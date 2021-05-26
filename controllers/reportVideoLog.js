@@ -456,7 +456,6 @@ async function insert(req, res) {
       deviceId: infor["deviceId"],
       timeStamp: infor["timeStamp"],
       zoneId: infor["zoneId"],
-      reportLogId: newReportVideoLogDoc["id"],
     });
 
     if (!tempCharge) {
