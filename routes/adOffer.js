@@ -21,6 +21,11 @@ module.exports = () => {
     auth.isAuthen,
     adOfferController.updateAdsetOFAdOffer
   );
+  router.put(
+    "/device-status/:id",
+    auth.deviceAuthen,
+    adOfferController.deviceUpdateStatusById
+  );
   router.put("/status/:id", auth.isAuthen, adOfferController.updateStatusById);
   router.put(
     "/status-cancel/:id",

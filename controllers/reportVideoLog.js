@@ -387,13 +387,24 @@ async function insert(req, res) {
     };
     const image = req.file;
     let urlImageGlobal = null;
-    console.log(infor["snapshots"]);
+    console.log(infor);
     // const typeImage = handle.getTypeFile(image.mimetype);
     const signatureName = handle.getSignatureName();
     const nameImageInPath = signatureName + "." + "jpg";
     const pathImageStorage = `${config.upload_folder}${config.image_folder}${nameImageInPath}`;
     await handle.moveFile(image.path, pathImageStorage);
     urlImageGlobal = `${config.host}:${config.port}/${nameImageInPath}`;
+
+    let rpLogDoc = await reportVideoLogService.findOneBy({
+      adOfferId: infor["adOfferId"],
+      deviceId: infor["deviceId"],
+      videoId: infor["videoId"],
+      zoneId: infor["zoneId"],
+      timeStart: infor["timeStamp"],
+    });
+    if (rpLogDoc) {
+      return res.status(200).send("infor sent");
+    }
 
     const totalAgeCounts = Array(9).fill(0);
     const totalGenderCounts = [0, 0];
@@ -433,6 +444,7 @@ async function insert(req, res) {
       deviceId: infor["deviceId"],
       timeStamp: infor["timeStamp"],
       zoneId: infor["zoneId"],
+      reportLogId: newReportVideoLogDoc["id"],
     });
 
     if (!tempCharge) {
