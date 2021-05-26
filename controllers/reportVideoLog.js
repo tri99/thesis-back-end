@@ -396,6 +396,7 @@ async function insert(req, res) {
       position: req.body.position,
       timeStamp: req.body.timeStamp,
       snapshots: req.body.snapshots,
+      timeEnd: req.body.timeEnd,
     };
     const image = req.file;
     let urlImageGlobal = null;
@@ -405,7 +406,7 @@ async function insert(req, res) {
     const nameImageInPath = signatureName + "." + "jpg";
     const pathImageStorage = `${config.upload_folder}${config.image_folder}${nameImageInPath}`;
     await handle.moveFile(image.path, pathImageStorage);
-    urlImageGlobal = `${config.host}:${config.port}/${nameImageInPath}`;
+    urlImageGlobal = `http://${config.host}:${config.port}/${nameImageInPath}`;
 
     let rpLogDoc = await reportVideoLogService.findOneBy({
       adOfferId: infor["adOfferId"],
@@ -451,26 +452,43 @@ async function insert(req, res) {
       moneyCharge: videoDoc["duration"] * zoneDoc["pricePerTimePeriod"],
     });
 
-    let tempCharge = tempVideoChargeService.findOneBy({
-      videoId: infor["videoId"],
-      deviceId: infor["deviceId"],
-      timeStamp: infor["timeStamp"],
-      zoneId: infor["zoneId"],
-      reportLogId: newReportVideoLogDoc["id"],
-    });
+    let tempCharge = await tempVideoChargeService.findOneBy(
+      {
+        videoId: infor["videoId"],
+        deviceId: infor["deviceId"],
+        timeStamp: Number.parseFloat(infor["timeStamp"]),
+        adOfferId: infor["adOfferId"],
+        zoneId: infor["zoneId"],
+      },
+      {}
+    );
 
     if (!tempCharge) {
       return res.status(403).send({
         message: "video didnt recognize",
       });
     }
+    let tempBudget = adOffer["tempBudget"];
+    let remainingBudget = adOffer["remainingBudget"];
+    tempBudget += videoDoc["duration"] * zoneDoc["pricePerTimePeriod"];
+    if (infor["timeEnd"] < infor["timeStamp"]) {
+      console.log("timeEnd1: ", infor["timeEnd"]);
+      remainingBudget -=
+        infor["snapshots"].length * 30 * zoneDoc["pricePerTimePeriod"];
+      tempBudget -=
+        infor["snapshots"].length * 30 * zoneDoc["pricePerTimePeriod"];
+    } else {
+      console.log("timeEnd2: ", infor["timeEnd"]);
+      let time = infor["timeEnd"] - infor["timeStamp"];
+      if (time > infor["duration"]) time = infor["duration"];
+      remainingBudget -= Number.parseInt(time) * zoneDoc["pricePerTimePeriod"];
+      tempBudget -= Number.parseInt(time) * zoneDoc["pricePerTimePeriod"];
+    }
 
-    let remainingBudget =
-      adOffer["remainingBudget"] -
-      videoDoc["duration"] * zoneDoc["pricePerTimePeriod"];
     await reportVideoLogService.insert(newReportVideoLogDoc);
     await adOfferService.updateById(adOffer["_id"], {
       remainingBudget: remainingBudget,
+      tempBudget: tempBudget,
     });
 
     let zones = await zoneService.findByPipeLine({
