@@ -1,11 +1,13 @@
 const zone = require("../collections/zone");
 const basicCRUDGenerator = require("./basicCRUD");
+const ReportVideoLog = require("./../collections/reportVideoLog");
 const zoneCRUD = basicCRUDGenerator(zone);
 const audio_module = require("./../exports/audio-io");
 module.exports = {
   ...zoneCRUD,
   getByIdwithAdName,
   pushAdInZones,
+  getTable,
   pullAdFromZones,
   emitToZones,
 };
@@ -33,4 +35,20 @@ async function pullAdFromZones(adId, zoneIds) {
     .updateMany({ _id: { $in: zoneIds } }, { $pull: { adArray: adId } })
     .exec();
   emitToZones(zoneIds);
+}
+
+function getTable(zoneIds) {
+  return ReportVideoLog.aggregate([
+    { $match: { zoneId: { $in: zoneIds } } },
+    {
+      $group: {
+        _id: "$zoneId",
+        views: { $sum: "$views" },
+        runTime: { $sum: "$runTime" },
+        cost: { $sum: "$moneyCharge" },
+        avgViews: { $avg: "$views" },
+        avgRunTime: { $avg: "$runTime" },
+      },
+    },
+  ]).exec();
 }
