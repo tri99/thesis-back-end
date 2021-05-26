@@ -12,6 +12,7 @@ module.exports = () => {
   router.post("/get-zone-for-device-2", zoneController.getZoneByDeviceId);
 
   router.get("/", auth.isAuthen, zoneController.getZoneByUserId);
+  router.get("/table", auth.isAuthen, zoneController.getAllTable);
 
   // router.post("/test", zoneController.getZoneByvideoArrayId)
   /**

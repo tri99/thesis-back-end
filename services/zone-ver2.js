@@ -1,13 +1,17 @@
 const zone = require("../collections/zone");
 const basicCRUDGenerator = require("./basicCRUD");
+const ReportVideoLog = require("./../collections/reportVideoLog");
 const zoneCRUD = basicCRUDGenerator(zone);
 const audio_module = require("./../exports/audio-io");
+
 module.exports = {
   ...zoneCRUD,
   getByIdwithAdName,
   pushAdInZones,
+  getTable,
   pullAdFromZones,
   emitToZones,
+  getAnalytics,
 };
 function emitToZones(zoneIds) {
   for (let i = 0; i < zoneIds.length; i++) {
@@ -33,4 +37,57 @@ async function pullAdFromZones(adId, zoneIds) {
     .updateMany({ _id: { $in: zoneIds } }, { $pull: { adArray: adId } })
     .exec();
   emitToZones(zoneIds);
+}
+
+function getTable(zoneIds) {
+  return ReportVideoLog.aggregate([
+    { $match: { zoneId: { $in: zoneIds } } },
+    {
+      $group: {
+        _id: "$zoneId",
+        views: { $sum: "$views" },
+        runTime: { $sum: "$runTime" },
+        cost: { $sum: "$moneyCharge" },
+        avgViews: { $avg: "$views" },
+        avgRunTime: { $avg: "$runTime" },
+      },
+    },
+  ]).exec();
+}
+
+function getAnalytics(zoneIds, query, $lookup) {
+  let { value, timeStart, timeEnd } = query;
+  const lookupKey = $lookup.as;
+  return ReportVideoLog.aggregate([
+    {
+      $match: {
+        zoneId: { $in: zoneIds },
+        timeStart: { $gte: timeStart, $lte: timeEnd },
+      },
+    },
+    {
+      $lookup,
+      // $lookup: {
+      //   from: "users",
+      //   localField: "adManagerId",
+      //   foreignField: "_id",
+      //   as: "adManager",
+      // },
+    },
+    {
+      $unwind: `$${lookupKey}`,
+    },
+    {
+      $group: {
+        _id: `$${lookupKey}._id`,
+        [lookupKey]: { $first: `$${lookupKey}` },
+        views: { $sum: "$views" },
+        runTime: { $sum: "$runTime" },
+        cost: { $sum: "$moneyCharge" },
+        avgViews: { $avg: "$views" },
+        avgRunTime: { $avg: "$runTime" },
+        logs: { $push: { value: `$${value}`, timeStart: `$timeStart` } },
+      },
+    },
+  ]).exec();
 }

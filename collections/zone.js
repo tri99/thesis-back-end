@@ -11,10 +11,12 @@ const zoneSchema = new Schema({
     type: Array,
     required: true,
   },
-  deviceArray: {
-    type: Array,
-    required: true,
-  },
+  deviceArray: [
+    {
+      type: mongoose.Types.ObjectId,
+      ref: "device",
+    },
+  ],
   name: {
     type: String,
     required: true,
