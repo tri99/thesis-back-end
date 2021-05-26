@@ -1,10 +1,12 @@
 const adOffer = require("./../collections/adOffer");
+const ReportVideoLog = require("./../collections/reportVideoLog");
 const basicCRUDGenerator = require("./basicCRUD");
 const adOfferCRUD = basicCRUDGenerator(adOffer);
 module.exports = {
   ...adOfferCRUD,
   getFullInfor,
   getManyFullInfor,
+  getTable,
 };
 
 function getFullInfor(findOption) {
@@ -42,4 +44,20 @@ function getManyFullInfor(ids) {
         return resolve(document);
       });
   });
+}
+
+function getTable(adIds) {
+  return ReportVideoLog.aggregate([
+    { $match: { adOfferId: { $in: adIds } } },
+    {
+      $group: {
+        _id: "$adOfferId",
+        views: { $sum: "$views" },
+        runTime: { $sum: "$runTime" },
+        cost: { $sum: "$moneyCharge" },
+        avgViews: { $avg: "$views" },
+        avgRunTime: { $avg: "$runTime" },
+      },
+    },
+  ]).exec();
 }

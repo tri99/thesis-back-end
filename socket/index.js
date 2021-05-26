@@ -77,6 +77,8 @@ function infor_ai_process(event_name, socket) {
           views: totalFaces,
           ages: totalAgeCounts,
           genders: totalGenderCounts,
+          imagePath: infor["imagePath"],
+          moneyCharge: infor["moneyCharge"],
           raw: infor,
         });
         await reportVideoLog.insert(newReportVideoLogDoc);

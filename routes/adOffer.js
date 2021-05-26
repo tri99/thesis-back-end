@@ -9,6 +9,16 @@ module.exports = () => {
     adOfferController.checkBudgetToRun
   );
   router.get("/", auth.isAuthen, adOfferController.getAll);
+  router.get(
+    "/table-ad",
+    auth.isAuthen,
+    adOfferController.getAllTableFormatByAd
+  );
+  router.get(
+    "/table-bd",
+    auth.isAuthen,
+    adOfferController.getAllTableFormatByBd
+  );
   router.get("/full-infor/:id", auth.isAuthen, adOfferController.getFullInfor);
   router.get("/ad-manager/", auth.isAuthen, adOfferController.getByAdManagerId);
   router.get("/bd-manager/", auth.isAuthen, adOfferController.getByBdManagerId);
@@ -27,17 +37,11 @@ module.exports = () => {
     adOfferController.deviceUpdateStatusById
   );
   router.put("/status/:id", auth.isAuthen, adOfferController.updateStatusById);
-  router.put(
-    "/status-cancel/:id",
-    auth.isAuthen,
-    adOfferController.CancelOfferById
-  );
-  router.put("/:id/send", auth.isAuthen, adOfferController.sendOfferById);
-  router.put(
-    "/:id/redeploy",
-    auth.isAuthen,
-    adOfferController.redeployOfferById
-  );
+  router.put("/:id/cancel", auth.isAuthen, adOfferController.cancelOffer);
+  router.put("/:id/send", auth.isAuthen, adOfferController.sendOffer);
+  router.put("/:id/redeploy", auth.isAuthen, adOfferController.redeployOffer);
+  router.put("/:id/deploy", auth.isAuthen, adOfferController.deployOffer);
+  router.put("/:id/reject", auth.isAuthen, adOfferController.rejectOffer);
   router.put("/:id", auth.isAuthen, adOfferController.updateById);
 
   return router;
