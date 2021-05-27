@@ -119,7 +119,6 @@ function getAllTableFormat(type) {
         sort: "-timeCreate",
       });
       const allAdIds = allAds.map((ad) => ad._id);
-      console.log(allAdIds, typeof allAdIds[0]);
       const tableData = await adOfferService.getTable(allAdIds);
       let result = [];
       for (const ad of allAds) {

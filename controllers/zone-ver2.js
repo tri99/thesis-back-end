@@ -58,6 +58,11 @@ async function deleteById(req, res) {
         .status(config.status_code.FORBIDEN)
         .send({ message: "wrong user" });
     }
+    if (zoneDocument.adArray.length >= 0) {
+      return res
+        .status(config.status_code.FORBIDEN)
+        .send({ message: "Can't delete zone with ads" });
+    }
     let deviceDocument = await deviceService.getManyByArrayId(
       zoneDocument["deviceArray"]
     );
@@ -286,7 +291,15 @@ async function updateById(req, res) {
       pricePerTimePeriod,
       formula,
     } = req.body;
-
+    const isDiffPrice = zoneDocument.pricePerTimePeriod !== pricePerTimePeriod;
+    const { lat, lng } = zoneDocument.location;
+    const isDiffLocation = lat !== location.lat || lng !== location.lng;
+    if (zoneDocument.adArray.length > 0 && (isDiffPrice || isDiffLocation)) {
+      return res.status(config.status_code.FORBIDEN).send({
+        message:
+          "Zone still has ads so you can't change price or location value",
+      });
+    }
     zoneDocument = await zoneService.updateById(id, {
       name,
       volumeVideo,
@@ -336,9 +349,47 @@ async function getLogsByZoneId(req, res) {
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }
 }
+
+async function getAllTable(req, res) {
+  try {
+    const allZones = await zoneService.findBy(
+      { userId: req.userId, name: { $ne: "General" } },
+      {
+        select:
+          "_id name location locationDesc pricePerTimePeriod adArray deviceArray",
+      }
+    );
+    const allZoneIds = allZones.map((zone) => zone._id);
+    const tableData = await zoneService.getTable(allZoneIds);
+    let result = [];
+    for (const zone of allZones) {
+      const tableDataRow = tableData.find(
+        (tableZone) => zone._id.toString() === tableZone._id.toString()
+      );
+      const zoneObject = zone.toObject();
+      if (tableDataRow) {
+        result.push({ ...tableDataRow, ...zoneObject });
+      } else {
+        result.push({
+          views: 0,
+          runTime: 0,
+          cost: 0,
+          avgViews: 0,
+          avgRunTime: 0,
+          ...zoneObject,
+        });
+      }
+    }
+    return res.status(config.status_code.OK).send({ zones: result });
+  } catch (error) {
+    console.log(error);
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
 module.exports = {
   insert,
   getAll,
+  getAllTable,
   getById,
   getByIdforDevice,
   getZoneByDeviceId,
