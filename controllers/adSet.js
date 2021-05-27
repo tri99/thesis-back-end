@@ -7,8 +7,8 @@ async function insert(req, res) {
     const { name, daysOfWeek, hoursOfDay } = req.body;
     const newDocument = adSetService.createModel({
       name,
-      ages: [],
-      genders: [],
+      ages: { value: [], strict: false },
+      genders: { value: [], strict: false },
       daysOfWeek,
       hoursOfDay,
       adManagerId: req.userId,
