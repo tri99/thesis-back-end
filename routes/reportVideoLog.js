@@ -22,5 +22,6 @@ module.exports = () => {
   router.get("/overview", auth.isAuthen, reportVideoLog.getOverview);
   router.delete("/:id", auth.isAuthen, reportVideoLog.deleteByUserId);
   router.get("/", auth.isAuthen, reportVideoLog.getAllByPeriod);
+  router.get("/summary", auth.isAuthen, reportVideoLog.getSummaryForAd);
   return router;
 };

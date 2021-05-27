@@ -322,6 +322,7 @@ async function getAllByPeriod(req, res) {
       })
       .sort("-timeStart")
       .populate({ path: "adOfferId", select: "name _id" })
+      .populate({ path: "adManagerId", select: "username _id" })
       .populate({ path: "bdManagerId", select: "username _id" })
       .populate({ path: "videoId", select: "name _id path" })
       .populate({ path: "zoneId", select: "name _id pricePerTimePeriod" })
@@ -510,6 +511,23 @@ async function insert(req, res) {
   }
 }
 
+function getSummary(matchCb) {
+  return async (req, res) => {
+    try {
+      const data = await reportVideoLogService.getSummary(matchCb(req));
+      return res.status(config.status_code.OK).send({ data });
+    } catch (error) {
+      console.log("insert", error);
+      return res
+        .status(config.status_code.SERVER_ERROR)
+        .send({ message: error });
+    }
+  };
+}
+
+const getSummaryForAd = getSummary((req) => ({ adManagerId: req.userId }));
+const getSummaryForBd = getSummary((req) => ({ bdManagerId: req.userId }));
+
 module.exports = {
   getByPeriod: getByPeriod,
   getByUserId: getByUserId,
@@ -521,4 +539,6 @@ module.exports = {
   getOverview,
   insert,
   getAllByPeriod,
+  getSummaryForAd,
+  getSummaryForBd,
 };
