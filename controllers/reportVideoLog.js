@@ -1,5 +1,6 @@
 const reportVideoLogService = require("./../services/reportVideoLog");
 const adOfferService = require("../services/adOffer");
+const userService = require("./../services/user");
 const reportVideoLog = require("./../collections/reportVideoLog");
 const tempVideoChargeService = require("./../services/tempVideoCharge");
 const zoneService = require("./../services/zone-ver2");
@@ -8,6 +9,9 @@ const config = require("./../config/config");
 const { getAgeTagName, getAgeTag } = require("../utils/ageGenders");
 const handle = require("./../services/handle");
 const dayjs = require("dayjs");
+const {
+  Types: { ObjectId },
+} = require("mongoose");
 const audio_module = require("./../exports/audio-io");
 var isSameOrAfter = require("dayjs/plugin/isSameOrAfter");
 var isSameOrBefore = require("dayjs/plugin/isSameOrBefore");
@@ -256,7 +260,7 @@ async function getOverview(req, res) {
       const eleName = log["adOfferId"]["name"];
       if (!dataMap.has(eleName))
         dataMap.set(eleName, {
-          id: log["adOfferId"]["_id"],
+          _id: log["adOfferId"]["_id"],
           name: eleName,
           views: 0,
           runTime: 0,
@@ -295,7 +299,7 @@ async function getOverview(req, res) {
       views,
       runTime,
       cost,
-      topAds,
+      top: topAds,
     };
     return res.status(config.status_code.OK).send({ data });
   } catch (error) {
@@ -310,18 +314,19 @@ async function getAllByPeriod(req, res) {
   try {
     const userId = req.userId;
     let { timeStart, timeEnd } = req.query;
-
+    const typeUser = (await userService.getUserById(userId)).typeUser;
     let dateStart = dayjs.unix(timeStart).hour(0).minute(0).second(0);
     const logsInPeriod = await reportVideoLog
       .find({
-        adManagerId: userId,
+        [typeUser === "adManager" ? "adManagerId" : "bdManagerId"]: userId,
         timeStart: {
           $gte: dateStart.unix(),
           $lte: dayjs.unix(timeEnd).hour(23).unix(),
         },
       })
-      .sort("timeStart")
+      .sort("-timeStart")
       .populate({ path: "adOfferId", select: "name _id" })
+      .populate({ path: "adManagerId", select: "username _id" })
       .populate({ path: "bdManagerId", select: "username _id" })
       .populate({ path: "videoId", select: "name _id path" })
       .populate({ path: "zoneId", select: "name _id pricePerTimePeriod" })
@@ -451,7 +456,7 @@ async function insert(req, res) {
       imagePath: urlImageGlobal,
       moneyCharge: videoDoc["duration"] * zoneDoc["pricePerTimePeriod"],
     });
-    
+
     let tempCharge = await tempVideoChargeService.findOneBy(
       {
         videoId: infor["videoId"],
@@ -510,6 +515,27 @@ async function insert(req, res) {
   }
 }
 
+function getSummary(matchCb) {
+  return async (req, res) => {
+    try {
+      const data = (await reportVideoLogService.getSummary(matchCb(req)))[0];
+      return res.status(config.status_code.OK).send({ data: data || {} });
+    } catch (error) {
+      console.log("insert", error);
+      return res
+        .status(config.status_code.SERVER_ERROR)
+        .send({ message: error });
+    }
+  };
+}
+
+const getSummaryForAd = getSummary((req) => ({
+  adManagerId: ObjectId(req.userId),
+}));
+const getSummaryForBd = getSummary((req) => ({
+  bdManagerId: ObjectId(req.userId),
+}));
+
 module.exports = {
   getByPeriod: getByPeriod,
   getByUserId: getByUserId,
@@ -521,4 +547,6 @@ module.exports = {
   getOverview,
   insert,
   getAllByPeriod,
+  getSummaryForAd,
+  getSummaryForBd,
 };

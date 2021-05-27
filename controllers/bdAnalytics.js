@@ -11,6 +11,47 @@ const reportVideoLog = require("./../collections/reportVideoLog");
 function diffFreq(dateStart, dateLog, frequency) {
   return Math.floor(dateLog.diff(dateStart, "d") / frequency);
 }
+
+async function getOverview(req, res) {
+  try {
+    let { timeStart, timeEnd } = req.query;
+    const dateStart = dayjs.unix(timeStart).hour(0).minute(0).second(0);
+    const dateEnd = dayjs.unix(timeEnd).hour(23);
+    const timeMatch = {
+      timeStart: dateStart.unix(),
+      timeEnd: dateEnd.unix(),
+    };
+    const overviewData = (
+      await zoneService.getOverview(req.userId, timeMatch)
+    )[0];
+    const top = await zoneService.getTopZones(req.userId, timeMatch);
+    const frequency = 1;
+    const noDataPoints =
+      Math.floor((1.0 * dateEnd.diff(dateStart, "d")) / frequency) + 1;
+
+    const views = Array(noDataPoints).fill(0);
+    const runTime = Array(noDataPoints).fill(0);
+    const cost = Array(noDataPoints).fill(0);
+    overviewData.logs.forEach((log) => {
+      const dateLog = dayjs.unix(log["timeStart"]).hour(0).minute(0).second(0);
+      const index = diffFreq(dateStart, dateLog, frequency);
+      views[index] += log.views;
+      runTime[index] += log.runTime;
+      cost[index] += log.cost;
+    });
+    delete overviewData.logs;
+
+    return res.status(config.status_code.OK).send({
+      data: { ...overviewData, views, runTime, cost, top },
+    });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(config.status_code.SERVER_ERROR)
+      .send({ message: error.message });
+  }
+}
+
 function getByGenerator(queryCheckCb, $lookup, nameKey = "name") {
   return async (req, res) => {
     try {
@@ -181,4 +222,10 @@ const getByGender = getByEnumGenerator(
   (index) => (index === 0 ? "Male" : "Female"),
   checkValidQuery({ values: ["views"] })
 );
-module.exports = { getByZone, getByAdManager, getByAge, getByGender };
+module.exports = {
+  getByZone,
+  getByAdManager,
+  getByAge,
+  getByGender,
+  getOverview,
+};

@@ -1,7 +1,7 @@
 const reportVideoLog = require("./../collections/reportVideoLog");
 const basicCRUDGenerator = require("./basicCRUD");
 const logCRUD = basicCRUDGenerator(reportVideoLog);
-
+const dayjs = require("dayjs");
 function getByOneParam(key) {
   return new Promise((resolve, reject) => {
     reportVideoLog
@@ -37,9 +37,32 @@ function deleteByUserId(userId) {
   });
 }
 
+function getSummary($match) {
+  const today = dayjs();
+  const yesterday = today.subtract(1, "d");
+  return reportVideoLog
+    .aggregate([
+      {
+        $match: {
+          ...$match,
+          timeStart: { $gte: yesterday.unix(), $lte: today.unix() },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          views: { $sum: "$views" },
+          runTime: { $sum: "$runTime" },
+          cost: { $sum: "$moneyCharge" },
+        },
+      },
+    ])
+    .exec();
+}
 module.exports = {
   ...logCRUD,
   deleteByUserId: deleteByUserId,
   getByOneParam: getByOneParam,
   getByPeriod: getByPeriod,
+  getSummary,
 };

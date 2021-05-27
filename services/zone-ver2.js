@@ -3,12 +3,16 @@ const basicCRUDGenerator = require("./basicCRUD");
 const ReportVideoLog = require("./../collections/reportVideoLog");
 const zoneCRUD = basicCRUDGenerator(zone);
 const audio_module = require("./../exports/audio-io");
-
+const {
+  Types: { ObjectId },
+} = require("mongoose");
 module.exports = {
   ...zoneCRUD,
   getByIdwithAdName,
+  getOverview,
   pushAdInZones,
   getTable,
+  getTopZones,
   pullAdFromZones,
   emitToZones,
   getAnalytics,
@@ -87,6 +91,66 @@ function getAnalytics(zoneIds, query, $lookup) {
         avgViews: { $avg: "$views" },
         avgRunTime: { $avg: "$runTime" },
         logs: { $push: { value: `$${value}`, timeStart: `$timeStart` } },
+      },
+    },
+  ]).exec();
+}
+
+function getOverview(bdManagerId, query) {
+  let { timeStart, timeEnd } = query;
+  return ReportVideoLog.aggregate([
+    {
+      $match: {
+        bdManagerId: ObjectId(bdManagerId),
+        timeStart: { $gte: timeStart, $lte: timeEnd },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        totalViews: { $sum: "$views" },
+        totalRunTime: { $sum: "$runTime" },
+        totalCost: { $sum: "$moneyCharge" },
+        logs: {
+          $push: {
+            views: "$views",
+            runTime: "$runTime",
+            cost: "$moneyCharge",
+            timeStart: `$timeStart`,
+          },
+        },
+      },
+    },
+  ]).exec();
+}
+
+function getTopZones(bdManagerId, query) {
+  let { timeStart, timeEnd } = query;
+  return ReportVideoLog.aggregate([
+    {
+      $match: {
+        bdManagerId: ObjectId(bdManagerId),
+        timeStart: { $gte: timeStart, $lte: timeEnd },
+      },
+    },
+    {
+      $lookup: {
+        from: "zones",
+        localField: "zoneId",
+        foreignField: "_id",
+        as: "zone",
+      },
+    },
+    {
+      $unwind: "$zone",
+    },
+    {
+      $group: {
+        _id: "$zoneId",
+        name: { $first: "$zone.name" },
+        views: { $sum: "$views" },
+        runTime: { $sum: "$runTime" },
+        cost: { $sum: "$moneyCharge" },
       },
     },
   ]).exec();

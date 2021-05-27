@@ -51,7 +51,7 @@ function emailValidate(e) {
 async function createAdminPermission(adminId, generalZoneId) {
   const adminPG = permGroupService.createModel({
     name: "admin",
-    permissions: [...Array(14).keys()],
+    permissions: [...Array(30).keys()],
     desc: "admin permissions",
     adminId,
   });
