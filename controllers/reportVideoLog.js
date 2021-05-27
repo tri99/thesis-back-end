@@ -8,6 +8,9 @@ const config = require("./../config/config");
 const { getAgeTagName, getAgeTag } = require("../utils/ageGenders");
 const handle = require("./../services/handle");
 const dayjs = require("dayjs");
+const {
+  Types: { ObjectId },
+} = require("mongoose");
 const audio_module = require("./../exports/audio-io");
 var isSameOrAfter = require("dayjs/plugin/isSameOrAfter");
 var isSameOrBefore = require("dayjs/plugin/isSameOrBefore");
@@ -256,7 +259,7 @@ async function getOverview(req, res) {
       const eleName = log["adOfferId"]["name"];
       if (!dataMap.has(eleName))
         dataMap.set(eleName, {
-          id: log["adOfferId"]["_id"],
+          _id: log["adOfferId"]["_id"],
           name: eleName,
           views: 0,
           runTime: 0,
@@ -295,7 +298,7 @@ async function getOverview(req, res) {
       views,
       runTime,
       cost,
-      topAds,
+      top: topAds,
     };
     return res.status(config.status_code.OK).send({ data });
   } catch (error) {
@@ -514,8 +517,8 @@ async function insert(req, res) {
 function getSummary(matchCb) {
   return async (req, res) => {
     try {
-      const data = await reportVideoLogService.getSummary(matchCb(req));
-      return res.status(config.status_code.OK).send({ data });
+      const data = (await reportVideoLogService.getSummary(matchCb(req)))[0];
+      return res.status(config.status_code.OK).send({ data: data || {} });
     } catch (error) {
       console.log("insert", error);
       return res
@@ -525,8 +528,12 @@ function getSummary(matchCb) {
   };
 }
 
-const getSummaryForAd = getSummary((req) => ({ adManagerId: req.userId }));
-const getSummaryForBd = getSummary((req) => ({ bdManagerId: req.userId }));
+const getSummaryForAd = getSummary((req) => ({
+  adManagerId: ObjectId(req.userId),
+}));
+const getSummaryForBd = getSummary((req) => ({
+  bdManagerId: ObjectId(req.userId),
+}));
 
 module.exports = {
   getByPeriod: getByPeriod,

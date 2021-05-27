@@ -3,7 +3,9 @@ const basicCRUDGenerator = require("./basicCRUD");
 const ReportVideoLog = require("./../collections/reportVideoLog");
 const zoneCRUD = basicCRUDGenerator(zone);
 const audio_module = require("./../exports/audio-io");
-
+const {
+  Types: { ObjectId },
+} = require("mongoose");
 module.exports = {
   ...zoneCRUD,
   getByIdwithAdName,
@@ -99,7 +101,7 @@ function getOverview(bdManagerId, query) {
   return ReportVideoLog.aggregate([
     {
       $match: {
-        bdManagerId,
+        bdManagerId: ObjectId(bdManagerId),
         timeStart: { $gte: timeStart, $lte: timeEnd },
       },
     },
@@ -108,12 +110,12 @@ function getOverview(bdManagerId, query) {
         _id: null,
         totalViews: { $sum: "$views" },
         totalRunTime: { $sum: "$runTime" },
-        totalProfit: { $sum: "$moneyCharge" },
+        totalCost: { $sum: "$moneyCharge" },
         logs: {
           $push: {
             views: "$views",
             runTime: "$runTime",
-            profit: "$moneyCharge",
+            cost: "$moneyCharge",
             timeStart: `$timeStart`,
           },
         },
@@ -127,7 +129,7 @@ function getTopZones(bdManagerId, query) {
   return ReportVideoLog.aggregate([
     {
       $match: {
-        bdManagerId,
+        bdManagerId: ObjectId(bdManagerId),
         timeStart: { $gte: timeStart, $lte: timeEnd },
       },
     },
@@ -135,7 +137,7 @@ function getTopZones(bdManagerId, query) {
       $lookup: {
         from: "zones",
         localField: "zoneId",
-        foreighField: "_id",
+        foreignField: "_id",
         as: "zone",
       },
     },
@@ -148,7 +150,7 @@ function getTopZones(bdManagerId, query) {
         name: { $first: "$zone.name" },
         views: { $sum: "$views" },
         runTime: { $sum: "$runTime" },
-        profit: { $sum: "$moneyCharge" },
+        cost: { $sum: "$moneyCharge" },
       },
     },
   ]).exec();

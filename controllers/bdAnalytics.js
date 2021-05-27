@@ -21,26 +21,28 @@ async function getOverview(req, res) {
       timeStart: dateStart.unix(),
       timeEnd: dateEnd.unix(),
     };
-    const overviewData = await zoneService.getAnalytics(req.userId, timeMatch);
-    const topZones = await zoneService.getTopZones(req.userId, timeMatch);
+    const overviewData = (
+      await zoneService.getOverview(req.userId, timeMatch)
+    )[0];
+    const top = await zoneService.getTopZones(req.userId, timeMatch);
     const frequency = 1;
     const noDataPoints =
       Math.floor((1.0 * dateEnd.diff(dateStart, "d")) / frequency) + 1;
 
     const views = Array(noDataPoints).fill(0);
     const runTime = Array(noDataPoints).fill(0);
-    const profit = Array(noDataPoints).fill(0);
+    const cost = Array(noDataPoints).fill(0);
     overviewData.logs.forEach((log) => {
       const dateLog = dayjs.unix(log["timeStart"]).hour(0).minute(0).second(0);
       const index = diffFreq(dateStart, dateLog, frequency);
       views[index] += log.views;
       runTime[index] += log.runTime;
-      profit[index] += log.profit;
+      cost[index] += log.cost;
     });
     delete overviewData.logs;
 
     return res.status(config.status_code.OK).send({
-      data: { ...overviewData, views, runTime, profit, topZones },
+      data: { ...overviewData, views, runTime, cost, top },
     });
   } catch (error) {
     console.log(error);
