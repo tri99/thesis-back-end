@@ -456,7 +456,7 @@ async function insert(req, res) {
       imagePath: urlImageGlobal,
       moneyCharge: videoDoc["duration"] * zoneDoc["pricePerTimePeriod"],
     });
-    
+
     let tempCharge = await tempVideoChargeService.findOneBy(
       {
         videoId: infor["videoId"],
