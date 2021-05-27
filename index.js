@@ -43,6 +43,7 @@ const mongo = require("./db/mongo");
 mongo.connectMongo();
 app.use(express.static("public"));
 app.use(express.static("upload/videos"));
+app.use(express.static("upload/images"));
 app.use("/api/zones", require("./routes/zone")());
 app.use("/api/videos", require("./routes/video")());
 

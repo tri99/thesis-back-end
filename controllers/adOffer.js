@@ -6,7 +6,7 @@ const NotificationService = require("./../services/notification");
 const config = require("./../config/config");
 const socketService = require("../socket");
 const tempVideoChargeService = require("./../services/tempVideoCharge");
-
+const audio_module = require("./../exports/audio-io");
 function isBelongToUserFindOption(userId) {
   return {
     $or: [
@@ -378,7 +378,9 @@ async function redeployOffer(req, res) {
     await adOfferService.updateById(id, {
       status: "deployed",
       timeStatus,
-      budget: document["budget"] + budget,
+      budget: document["budget"] + Number.parseFloat(budget),
+      remainingBudget: document["remainingBudget"] + Number.parseFloat(budget),
+      tempBudget: document["tempBudget"] + Number.parseFloat(budget),
     });
     document = await adOfferService.getById(id);
     zoneService.emitToZones(document.zoneIds);
