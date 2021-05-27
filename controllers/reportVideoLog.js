@@ -320,7 +320,7 @@ async function getAllByPeriod(req, res) {
           $lte: dayjs.unix(timeEnd).hour(23).unix(),
         },
       })
-      .sort("timeStart")
+      .sort("-timeStart")
       .populate({ path: "adOfferId", select: "name _id" })
       .populate({ path: "bdManagerId", select: "username _id" })
       .populate({ path: "videoId", select: "name _id path" })
