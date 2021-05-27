@@ -1,5 +1,6 @@
 const reportVideoLogService = require("./../services/reportVideoLog");
 const adOfferService = require("../services/adOffer");
+const userService = require("./../services/user");
 const reportVideoLog = require("./../collections/reportVideoLog");
 const tempVideoChargeService = require("./../services/tempVideoCharge");
 const zoneService = require("./../services/zone-ver2");
@@ -313,11 +314,11 @@ async function getAllByPeriod(req, res) {
   try {
     const userId = req.userId;
     let { timeStart, timeEnd } = req.query;
-
+    const typeUser = (await userService.getUserById(userId)).typeUser;
     let dateStart = dayjs.unix(timeStart).hour(0).minute(0).second(0);
     const logsInPeriod = await reportVideoLog
       .find({
-        adManagerId: userId,
+        [typeUser === "adManager" ? "adManagerId" : "bdManagerId"]: userId,
         timeStart: {
           $gte: dateStart.unix(),
           $lte: dayjs.unix(timeEnd).hour(23).unix(),
