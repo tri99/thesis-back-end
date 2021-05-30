@@ -9,6 +9,7 @@ const config = require("./../config/config");
 const { getAgeTagName, getAgeTag } = require("../utils/ageGenders");
 const handle = require("./../services/handle");
 const dayjs = require("dayjs");
+const nullTransform = require("../utils/nullTransform");
 const {
   Types: { ObjectId },
 } = require("mongoose");
@@ -328,9 +329,21 @@ async function getAllByPeriod(req, res) {
       .populate({ path: "adOfferId", select: "name _id" })
       .populate({ path: "adManagerId", select: "username _id" })
       .populate({ path: "bdManagerId", select: "username _id" })
-      .populate({ path: "videoId", select: "name _id path" })
-      .populate({ path: "zoneId", select: "name _id pricePerTimePeriod" })
-      .populate({ path: "deviceId", select: "name _id" })
+      .populate({
+        path: "videoId",
+        select: "name _id path",
+        transform: nullTransform,
+      })
+      .populate({
+        path: "zoneId",
+        select: "name _id pricePerTimePeriod",
+        transform: nullTransform,
+      })
+      .populate({
+        path: "deviceId",
+        select: "name _id",
+        transform: nullTransform,
+      })
       .select("-raw");
     const logs = logsInPeriod.map((log) => ({
       ...log.toObject(),
