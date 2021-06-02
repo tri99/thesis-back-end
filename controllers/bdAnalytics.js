@@ -21,7 +21,7 @@ async function getOverview(req, res) {
       timeStart: dateStart.unix(),
       timeEnd: dateEnd.unix(),
     };
-    const overviewData = (
+    let overviewData = (
       await zoneService.getOverview(req.userId, timeMatch)
     )[0];
     const top = await zoneService.getTopZones(req.userId, timeMatch);
@@ -32,6 +32,13 @@ async function getOverview(req, res) {
     const views = Array(noDataPoints).fill(0);
     const runTime = Array(noDataPoints).fill(0);
     const cost = Array(noDataPoints).fill(0);
+    if (!overviewData)
+      overviewData = {
+        logs: [],
+        totalViews: 0,
+        totalCost: 0,
+        totalRunTime: 0,
+      };
     overviewData.logs.forEach((log) => {
       const dateLog = dayjs.unix(log["timeStart"]).hour(0).minute(0).second(0);
       const index = diffFreq(dateStart, dateLog, frequency);
