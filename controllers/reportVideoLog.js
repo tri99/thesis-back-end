@@ -453,22 +453,6 @@ async function insert(req, res) {
     let adOffer = await adOfferService.getById(infor["adOfferId"]);
     const zoneDoc = await zoneService.getById(infor["zoneId"]);
     const videoDoc = await videoService.getById(infor["videoId"]);
-    let newReportVideoLogDoc = reportVideoLogService.createModel({
-      adOfferId: infor["adOfferId"],
-      deviceId: infor["deviceId"],
-      adManagerId: adOffer["adManagerId"],
-      bdManagerId: adOffer["bdManagerId"],
-      videoId: infor["videoId"],
-      zoneId: infor["zoneId"],
-      timeStart: infor["timeStamp"],
-      runTime: infor["snapshots"].length * 30,
-      views: totalFaces,
-      ages: totalAgeCounts,
-      genders: totalGenderCounts,
-      raw: infor,
-      imagePath: urlImageGlobal,
-      moneyCharge: videoDoc["duration"] * zoneDoc["pricePerTimePeriod"],
-    });
 
     let tempCharge = await tempVideoChargeService.findOneBy(
       {
@@ -488,23 +472,39 @@ async function insert(req, res) {
     }
     let tempBudget = adOffer["tempBudget"];
     let remainingBudget = adOffer["remainingBudget"];
+    let runTime = infor["duration"];
     tempBudget += videoDoc["duration"] * zoneDoc["pricePerTimePeriod"];
     if (infor["timeEnd"] < infor["timeStamp"]) {
-      console.log("timeEnd1: ", infor["timeEnd"]);
-      let time = infor["snapshots"].length * 30;
-      if (time > infor["duration"]) {
-        time = infor["duration"];
+      runTime = infor["snapshots"].length * 30;
+      if (runTime > infor["duration"]) {
+        runTime = infor["duration"];
       }
-      remainingBudget -= time * zoneDoc["pricePerTimePeriod"];
-      tempBudget -= time * zoneDoc["pricePerTimePeriod"];
+      remainingBudget -=
+        Number.parseInt(runTime) * zoneDoc["pricePerTimePeriod"];
+      tempBudget -= Number.parseInt(runTime) * zoneDoc["pricePerTimePeriod"];
     } else {
-      console.log("timeEnd2: ", infor["timeEnd"]);
-      let time = infor["timeEnd"] - infor["timeStamp"];
-      if (time > infor["duration"]) time = infor["duration"];
-      remainingBudget -= Number.parseInt(time) * zoneDoc["pricePerTimePeriod"];
-      tempBudget -= Number.parseInt(time) * zoneDoc["pricePerTimePeriod"];
+      runTime = infor["timeEnd"] - infor["timeStamp"];
+      if (runTime > infor["duration"]) runTime = infor["duration"];
+      remainingBudget -=
+        Number.parseInt(runTime) * zoneDoc["pricePerTimePeriod"];
+      tempBudget -= Number.parseInt(runTime) * zoneDoc["pricePerTimePeriod"];
     }
-
+    let newReportVideoLogDoc = reportVideoLogService.createModel({
+      adOfferId: infor["adOfferId"],
+      deviceId: infor["deviceId"],
+      adManagerId: adOffer["adManagerId"],
+      bdManagerId: adOffer["bdManagerId"],
+      videoId: infor["videoId"],
+      zoneId: infor["zoneId"],
+      timeStart: infor["timeStamp"],
+      runTime: runTime,
+      views: totalFaces,
+      ages: totalAgeCounts,
+      genders: totalGenderCounts,
+      raw: infor,
+      imagePath: urlImageGlobal,
+      moneyCharge: videoDoc["duration"] * zoneDoc["pricePerTimePeriod"],
+    });
     await reportVideoLogService.insert(newReportVideoLogDoc);
     await adOfferService.updateById(adOffer["_id"], {
       remainingBudget: remainingBudget,
