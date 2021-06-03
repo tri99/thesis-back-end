@@ -491,10 +491,12 @@ async function insert(req, res) {
     tempBudget += videoDoc["duration"] * zoneDoc["pricePerTimePeriod"];
     if (infor["timeEnd"] < infor["timeStamp"]) {
       console.log("timeEnd1: ", infor["timeEnd"]);
-      remainingBudget -=
-        infor["snapshots"].length * 30 * zoneDoc["pricePerTimePeriod"];
-      tempBudget -=
-        infor["snapshots"].length * 30 * zoneDoc["pricePerTimePeriod"];
+      let time = infor["snapshots"].length * 30;
+      if (time > infor["duration"]) {
+        time = infor["duration"];
+      }
+      remainingBudget -= time * zoneDoc["pricePerTimePeriod"];
+      tempBudget -= time * zoneDoc["pricePerTimePeriod"];
     } else {
       console.log("timeEnd2: ", infor["timeEnd"]);
       let time = infor["timeEnd"] - infor["timeStamp"];
