@@ -503,7 +503,7 @@ async function insert(req, res) {
       genders: totalGenderCounts,
       raw: infor,
       imagePath: urlImageGlobal,
-      moneyCharge: videoDoc["duration"] * zoneDoc["pricePerTimePeriod"],
+      moneyCharge: runTime * zoneDoc["pricePerTimePeriod"],
     });
     await reportVideoLogService.insert(newReportVideoLogDoc);
     await adOfferService.updateById(adOffer["_id"], {
