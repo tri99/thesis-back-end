@@ -517,6 +517,7 @@ async function insert(req, res) {
     for (let i = 0; i < zones.length; i++) {
       audio_module.get_audio_io().to(infor["zoneId"]).emit("update-budget", {
         zoneId: infor["zoneId"],
+        adOfferId: adOffer["_id"],
         remainingBudget: adOffer["remainingBudget"],
       });
     }
