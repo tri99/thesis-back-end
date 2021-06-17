@@ -41,6 +41,7 @@ async function addDevice(req, res) {
         .send({ message: "DEVICE_NOT_EXIST" });
     }
     deviceDocumentCheck["name"] = name;
+    deviceDocumentCheck["serialNumber"] = serialNumber;
     deviceDocumentCheck["zoneId"] = null;
     deviceDocumentCheck["userId"] = req.userId;
     await deviceService.insert(deviceDocumentCheck);
