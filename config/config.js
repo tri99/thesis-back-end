@@ -1,7 +1,7 @@
 module.exports = {
-  host: "192.168.38.78",
+  host: "192.168.38.54",
   // host: "localhost",
-  port: 3030,
+  port: 3000,
   db: {
     username: "",
     password: "",
@@ -35,6 +35,7 @@ module.exports = {
   image_folder: "images/",
   jwtKey: "NhetCaiKeyVoDay",
   jwtDeviceKey: "deviceKey",
+  jwtTypeKey: "typeKey",
   algorithm: "HS512",
   encryptKey: "key",
   encryptAlgorithm: "aes128",

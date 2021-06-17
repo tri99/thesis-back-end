@@ -20,13 +20,13 @@ async function insert(req, res) {
     const videoArray = [];
     const playlistArray = [];
     const deviceArray = [];
-    const videoVolume = 0;
+    const volumeVideo = 0;
     const newZoneDocument = zoneService.createModel({
       videoArray,
       playlistArray,
       deviceArray,
       name,
-      videoVolume,
+      volumeVideo,
       isMuteVideo: false,
       isLoopOneVideo: false,
       isLoopAllVideo: false,
@@ -41,6 +41,7 @@ async function insert(req, res) {
     const insertedZone = await zoneService.insert(newZoneDocument);
     return res.status(config.status_code.OK).send({ zone: insertedZone });
   } catch (error) {
+    console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }
 }

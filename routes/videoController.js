@@ -25,7 +25,7 @@ module.exports = () => {
    * @param {String}zoneId,
    */
   router.post("/get-infor-video", videoController.getInforVideo);
-
+  router.post("/device", videoController.controlDevice);
   router.post("/", videoController.control);
 
   return router;

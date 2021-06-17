@@ -6,6 +6,7 @@ module.exports = {
   verifyToken: verifyToken,
   signDevice: signDevice,
   verifyDevice: verifyDevice,
+  verifyTypeDevice: verifyTypeDevice,
 };
 
 function signToken(_id) {
@@ -58,6 +59,20 @@ function verifyDevice(token) {
     jwt.verify(
       token,
       config.jwtDeviceKey,
+      { algorithm: config.algorithm },
+      (error, decoded) => {
+        if (error) return reject(error);
+        return resolve(decoded);
+      }
+    );
+  });
+}
+
+function verifyTypeDevice(token) {
+  return new Promise((resolve, reject) => {
+    jwt.verify(
+      token,
+      config.jwtTypeKey,
       { algorithm: config.algorithm },
       (error, decoded) => {
         if (error) return reject(error);
