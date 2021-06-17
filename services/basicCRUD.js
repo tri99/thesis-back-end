@@ -67,7 +67,10 @@ const crudServiceGenerator = (model) => {
         });
     });
   };
-  const findBy = (findOption, { select, sort, populate, limit, isFindOne }) => {
+  const findBy = (
+    findOption,
+    { select, sort, populate, limit, isFindOne } = {}
+  ) => {
     const query = isFindOne
       ? model.findOne(findOption)
       : model.find(findOption);

@@ -20,6 +20,11 @@ module.exports = () => {
    */
   router.get("/:id", auth.isAuthen, zoneController.getById);
   router.get("/:id/logs", auth.isAuthen, zoneController.getLogsByZoneId);
+  router.get(
+    "/:id/device-table",
+    auth.isAuthen,
+    zoneController.getDeviceTableByZoneId
+  );
   // router.get("/", auth.isAuthen,zoneController.getAll);
   /**
    *  @param {String} name

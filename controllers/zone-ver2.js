@@ -177,7 +177,6 @@ async function removeDeviceFromZone(req, res) {
     );
     await deviceService.insert(deviceDocument);
     await zoneService.insert(zoneDocument);
-
     audio_module.get_audio_io().to(deviceId).emit("remove-device-in-zone", "");
     return res
       .status(config.status_code.OK)
@@ -218,7 +217,20 @@ async function addDeviceToZone(req, res) {
       .get_audio_io()
       .to(deviceId)
       .emit("add-device-into-zone", { to: deviceId, zoneId: zoneId });
-    return res.status(config.status_code.OK).send({ device: deviceDocument });
+    const deviceRow = (
+      await zoneService.getDeviceTable(zoneId, {
+        deviceId: mongoose.Types.ObjectId(deviceId),
+      })
+    )[0] || {
+      _id: deviceId,
+      name: deviceDocument["name"],
+      views: 0,
+      avgViews: 0,
+      cost: 0,
+    };
+    return res
+      .status(config.status_code.OK)
+      .send({ newDevice: deviceDocument, deviceRow });
   } catch (error) {
     console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
@@ -351,6 +363,20 @@ async function getLogsByZoneId(req, res) {
   }
 }
 
+async function getDeviceTableByZoneId(req, res) {
+  try {
+    let zone = await zoneService.getById(req.params.id);
+    console.log(zone);
+    const devices = await zoneService.getDeviceTable(req.params.id, {
+      deviceId: { $in: zone.deviceArray },
+    });
+    return res.status(config.status_code.OK).send({ devices });
+  } catch (error) {
+    console.log(error);
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
 async function getAllTable(req, res) {
   try {
     const allZones = await zoneService.findBy(
@@ -396,6 +422,7 @@ module.exports = {
   getZoneByDeviceId,
   getZoneByUserId,
   getLogsByZoneId,
+  getDeviceTableByZoneId,
   deleteById,
   removeDeviceFromZone,
   addDeviceToZone,
