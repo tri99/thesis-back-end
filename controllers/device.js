@@ -57,7 +57,15 @@ async function addDevice(req, res) {
 async function deleteDevice(req, res) {
   try {
     const deviceId = req.params.id;
-    await deviceService.deleteDevice(deviceId);
+    let deviceDoc = await deviceService.getById(deviceId);
+    if (!deviceDoc) {
+      return res.status(404).send({ message: "device not found" });
+    }
+    if (deviceDoc["zoneId"]) {
+      return res.status(403).send({ message: "device still in zone" });
+    }
+    // await deviceService.deleteDevice(deviceId);
+    await deviceService.updateById(deviceId, { zoneId: null, userId: null });
     return res.status(config.status_code.OK).send({ device: true });
   } catch (error) {
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });

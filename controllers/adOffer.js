@@ -316,7 +316,7 @@ async function deviceUpdateStatusById(req, res) {
         link: `/ads/${document["_id"].toString()}`,
       }
     );
-    console.log(document);
+    // console.log(document);
     return res.status(config.status_code.OK).send({ adOffer: document });
   } catch (error) {
     console.log(error);
