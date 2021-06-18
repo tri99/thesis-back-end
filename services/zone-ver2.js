@@ -16,6 +16,7 @@ module.exports = {
   pullAdFromZones,
   emitToZones,
   getAnalytics,
+  getDeviceTable,
 };
 function emitToZones(zoneIds) {
   for (let i = 0; i < zoneIds.length; i++) {
@@ -151,6 +152,71 @@ function getTopZones(bdManagerId, query) {
         views: { $sum: "$views" },
         runTime: { $sum: "$runTime" },
         cost: { $sum: "$moneyCharge" },
+      },
+    },
+  ]).exec();
+}
+
+function getDeviceTable(zoneId, matchOption = {}) {
+  // let { timeStart, timeEnd } = query;
+  return ReportVideoLog.aggregate([
+    {
+      $match: {
+        zoneId: ObjectId(zoneId),
+        ...matchOption,
+        //timeStart: { $gte: timeStart, $lte: timeEnd },
+      },
+    },
+    {
+      $sort: { timeStart: -1 },
+    },
+    {
+      $lookup: {
+        from: "devices",
+        localField: "deviceId",
+        foreignField: "_id",
+        as: "device",
+      },
+    },
+    {
+      $unwind: "$device",
+    },
+    {
+      $lookup: {
+        from: "videos",
+        localField: "videoId",
+        foreignField: "_id",
+        as: "video",
+      },
+    },
+    {
+      $unwind: "$video",
+    },
+    {
+      $lookup: {
+        from: "adoffers",
+        localField: "adOfferId",
+        foreignField: "_id",
+        as: "ad",
+      },
+    },
+    {
+      $unwind: "$ad",
+    },
+    {
+      $group: {
+        _id: "$device._id",
+        name: { $first: "$device.name" },
+        views: { $sum: "$views" },
+        runTime: { $sum: "$runTime" },
+        cost: { $sum: "$moneyCharge" },
+        avgViews: { $avg: "$views" },
+        numberOfTimes: { $sum: 1 },
+        timeStart: { $first: "$timeStart" },
+        media: { $first: "$video" },
+        ad: { $first: "$ad" },
+        // volumeVideo: "$device.volumeVideo",
+        // isPause: "$device.isPause",
       },
     },
   ]).exec();

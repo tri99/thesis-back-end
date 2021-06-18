@@ -35,6 +35,7 @@ const reportVideoLogSchema = new Schema({
   },
   timeStart: {
     type: Number,
+    index: true,
     required: true,
   },
   runTime: {

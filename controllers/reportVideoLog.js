@@ -6,6 +6,7 @@ const tempVideoChargeService = require("./../services/tempVideoCharge");
 const zoneService = require("./../services/zone-ver2");
 const videoService = require("./../services/video");
 const config = require("./../config/config");
+const socketService = require("../socket");
 const { getAgeTagName, getAgeTag } = require("../utils/ageGenders");
 const handle = require("./../services/handle");
 const dayjs = require("dayjs");
@@ -521,7 +522,12 @@ async function insert(req, res) {
         remainingBudget: adOffer["remainingBudget"],
       });
     }
-
+    socketService
+      .getIO()
+      .in(adOffer["bdManagerId"].toString())
+      .emit(`/receive/update/${infor["zoneId"]}/infor-video-result`, {
+        ...newReportVideoLogDoc.toObject(),
+      });
     return res.status(200).send({
       reportVideoLog: "success",
     });
