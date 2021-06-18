@@ -46,9 +46,9 @@ function getManyFullInfor(ids) {
   });
 }
 
-function getTable(adIds) {
+function getTable(adIds, matchOption = {}) {
   return ReportVideoLog.aggregate([
-    { $match: { adOfferId: { $in: adIds } } },
+    { $match: { adOfferId: { $in: adIds }, ...matchOption } },
     {
       $group: {
         _id: "$adOfferId",
