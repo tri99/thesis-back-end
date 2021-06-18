@@ -80,7 +80,10 @@ module.exports.connect = (socket) => {
         payload["zoneId"] = deviceDocument["zoneId"];
         socket.join(deviceDocument["zoneId"]);
       }
-
+      if (!deviceDocument["userId"]) {
+        socket.disconnect();
+        return;
+      }
       socket.user_id = "admin";
       socketService
         .getIO()

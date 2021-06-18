@@ -405,8 +405,8 @@ async function deleteByUserId(req, res) {
 async function insert(req, res) {
   try {
     // console.log(req.body);
-    let { infor } = req.body;
-    infor = {
+
+    let infor = {
       adOfferId: req.body.adOfferId,
       deviceId: req.body.deviceId,
       zoneId: req.body.zoneId,
@@ -417,9 +417,12 @@ async function insert(req, res) {
       snapshots: req.body.snapshots,
       timeEnd: req.body.timeEnd,
     };
+    if (!Array.isArray(req.body.snapshots)) {
+      infor["snapshots"] = [req.body.snapshots];
+    }
     const image = req.file;
     let urlImageGlobal = null;
-    console.log(infor);
+
     // const typeImage = handle.getTypeFile(image.mimetype);
     const signatureName = handle.getSignatureName();
     const nameImageInPath = signatureName + "." + "jpg";
