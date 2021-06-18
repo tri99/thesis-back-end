@@ -415,14 +415,14 @@ async function getAdOffersTableByZoneId(req, res) {
       bdManagerId: req.userId,
       zoneIds: req.params.id,
       deletedByBdManager: false,
-      status: { $ne: "idle" },
+      status: { $in: ["deployed", "empty"] },
     };
     // const userPopulate =
     //   type === "ad"
     //     ? { path: "bdManagerId", select: "_id username" }
     //     : { path: "adManagerId", select: "_id username" };
     const allAds = await adOfferService.findBy(findOption, {
-      select: "_id name",
+      select: "_id name status",
       // populate: [
       //   userPopulate,
       //   { path: "adSetId", select: "_id name" },
@@ -431,7 +431,9 @@ async function getAdOffersTableByZoneId(req, res) {
       sort: "-timeStatus",
     });
     const allAdIds = allAds.map((ad) => ad._id);
-    const tableData = await adOfferService.getTable(allAdIds);
+    const tableData = await adOfferService.getTable(allAdIds, {
+      zoneId: mongoose.Types.ObjectId(req.params.id),
+    });
     let result = [];
     for (const ad of allAds) {
       const tableDataRow = tableData.find(
