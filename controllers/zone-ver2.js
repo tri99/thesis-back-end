@@ -367,9 +367,17 @@ async function getDeviceTableByZoneId(req, res) {
   try {
     let zone = await zoneService.getById(req.params.id);
     console.log(zone);
-    const devices = await zoneService.getDeviceTable(req.params.id, {
+    let devices = await zoneService.getDeviceTable(req.params.id, {
       deviceId: { $in: zone.deviceArray },
     });
+    devices = devices.map((device) => ({
+      ...device,
+      position: 0,
+      volumeVideo: 50,
+      isPause: true,
+      isMute: false,
+      deviceId: device._id,
+    }));
     return res.status(config.status_code.OK).send({ devices });
   } catch (error) {
     console.log(error);
