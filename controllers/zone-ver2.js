@@ -438,7 +438,7 @@ async function getAdOffersTableByZoneId(req, res) {
     //     ? { path: "bdManagerId", select: "_id username" }
     //     : { path: "adManagerId", select: "_id username" };
     const allAds = await adOfferService.findBy(findOption, {
-      select: "_id name status",
+      select: "_id name status timeStatus",
       // populate: [
       //   userPopulate,
       //   { path: "adSetId", select: "_id name" },
