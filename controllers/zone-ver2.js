@@ -1,4 +1,5 @@
 const config = require("./../config/config");
+const adOfferService = require("./../services/adOffer");
 const zoneService = require("./../services/zone-ver2");
 const userService = require("./../services/user");
 // const videoService = require("./../services/video");
@@ -355,7 +356,6 @@ async function getLogsByZoneId(req, res) {
         sort: "-timeStart",
       }
     );
-    // console.log(logs);
     return res.status(config.status_code.OK).send({ logs });
   } catch (error) {
     console.log(error);
@@ -365,10 +365,15 @@ async function getLogsByZoneId(req, res) {
 
 async function getDeviceTableByZoneId(req, res) {
   try {
-    let zone = await zoneService.getById(req.params.id);
-    console.log(zone);
+    let zone = (
+      await zoneService.findBy(
+        { _id: req.params.id },
+        { populate: { path: "deviceArray", select: "_id name" } }
+      )
+    )[0];
+    const deviceIds = zone.deviceArray.map((dev) => dev._id);
     let devices = await zoneService.getDeviceTable(req.params.id, {
-      deviceId: { $in: zone.deviceArray },
+      deviceId: { $in: deviceIds },
     });
     devices = devices.map((device) => ({
       ...device,
@@ -378,7 +383,77 @@ async function getDeviceTableByZoneId(req, res) {
       isMute: false,
       deviceId: device._id,
     }));
+
+    const deviceWithDataIds = devices.map((dev) => dev._id.toString());
+    zone.deviceArray.forEach((device) => {
+      if (!deviceWithDataIds.includes(device._id.toString())) {
+        devices.push({
+          ...device,
+          position: 0,
+          volumeVideo: 50,
+          isPause: true,
+          isMute: false,
+          deviceId: device._id,
+          views: 0,
+          avgViews: 0,
+          cost: 0,
+          numberOfTimes: 0,
+          runTime: 0,
+        });
+      }
+    });
     return res.status(config.status_code.OK).send({ devices });
+  } catch (error) {
+    console.log(error);
+    return res.status(config.status_code.SERVER_ERROR).send({ message: error });
+  }
+}
+
+async function getAdOffersTableByZoneId(req, res) {
+  try {
+    const findOption = {
+      bdManagerId: req.userId,
+      zoneIds: req.params.id,
+      deletedByBdManager: false,
+      status: { $in: ["deployed", "empty"] },
+    };
+    // const userPopulate =
+    //   type === "ad"
+    //     ? { path: "bdManagerId", select: "_id username" }
+    //     : { path: "adManagerId", select: "_id username" };
+    const allAds = await adOfferService.findBy(findOption, {
+      select: "_id name status",
+      // populate: [
+      //   userPopulate,
+      //   { path: "adSetId", select: "_id name" },
+      //   { path: "contentId", select: "_id name" },
+      // ],
+      sort: "-timeStatus",
+    });
+    const allAdIds = allAds.map((ad) => ad._id);
+    const tableData = await adOfferService.getTable(allAdIds, {
+      zoneId: mongoose.Types.ObjectId(req.params.id),
+    });
+    let result = [];
+    for (const ad of allAds) {
+      const tableDataRow = tableData.find(
+        (tableAd) => ad._id.toString() === tableAd._id.toString()
+      );
+      const adObject = ad.toObject();
+      if (tableDataRow) {
+        result.push({ ...tableDataRow, ...adObject });
+      } else {
+        result.push({
+          views: 0,
+          runTime: 0,
+          cost: 0,
+          avgViews: 0,
+          avgRunTime: 0,
+          ...adObject,
+        });
+      }
+    }
+    return res.status(config.status_code.OK).send({ adOffers: result });
   } catch (error) {
     console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
@@ -431,6 +506,7 @@ module.exports = {
   getZoneByUserId,
   getLogsByZoneId,
   getDeviceTableByZoneId,
+  getAdOffersTableByZoneId,
   deleteById,
   removeDeviceFromZone,
   addDeviceToZone,

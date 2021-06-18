@@ -25,6 +25,11 @@ module.exports = () => {
     auth.isAuthen,
     zoneController.getDeviceTableByZoneId
   );
+  router.get(
+    "/:id/ad-table",
+    auth.isAuthen,
+    zoneController.getAdOffersTableByZoneId
+  );
   // router.get("/", auth.isAuthen,zoneController.getAll);
   /**
    *  @param {String} name
