@@ -50,7 +50,7 @@ const zoneSchema = new Schema({
     required: true,
   },
   priceArray: {
-    type: [{ value: Number, desc: Boolean }],
+    type: [{ value: Number, desc: String }],
     require: true,
   },
   userId: {
