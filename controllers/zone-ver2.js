@@ -438,7 +438,7 @@ async function getAdOffersTableByZoneId(req, res) {
     //     ? { path: "bdManagerId", select: "_id username" }
     //     : { path: "adManagerId", select: "_id username" };
     const allAds = await adOfferService.findBy(findOption, {
-      select: "_id name status",
+      select: "_id name status timeStatus",
       // populate: [
       //   userPopulate,
       //   { path: "adSetId", select: "_id name" },
@@ -482,7 +482,7 @@ async function getAllTable(req, res) {
       { userId: req.userId, name: { $ne: "General" } },
       {
         select:
-          "_id name location locationDesc pricePerTimePeriod adArray deviceArray",
+          "_id name location locationDesc pricePerTimePeriod adArray deviceArray priceArray",
       }
     );
     const allZoneIds = allZones.map((zone) => zone._id);

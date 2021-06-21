@@ -270,7 +270,7 @@ async function getBdManagerZoneInfo(req, res) {
     const { id } = req.params;
     const zones = await ZoneService.findBy(
       { userId: id, name: { $ne: "General" } },
-      { select: "_id name location locationDesc pricePerTimePeriod" }
+      { select: "_id name location locationDesc pricePerTimePeriod priceArray" }
     );
     res.status(config.status_code.OK).send({ zones });
   } catch (error) {
