@@ -10,9 +10,17 @@ const mongoose = require("mongoose");
 const zoneSupport = require("./../utils/convertZoneDataForDevice");
 const reportVideoLogService = require("./../services/reportVideoLog");
 const dayjs = require("dayjs");
+// const handle = require("./../utils/handle");
 async function insert(req, res) {
   try {
-    const { name, location, locationDesc, pricePerTimePeriod } = req.body;
+    const {
+      name,
+      location,
+      locationDesc,
+      pricePerTimePeriod,
+      priceArray,
+    } = req.body;
+    console.log(req.body);
     if (name.toLowerCase() === "General") {
       return res
         .status(config.status_code.FORBIDEN)
@@ -37,6 +45,7 @@ async function insert(req, res) {
       location,
       locationDesc,
       pricePerTimePeriod,
+      priceArray,
       formula: "",
     });
     const insertedZone = await zoneService.insert(newZoneDocument);
@@ -60,7 +69,8 @@ async function deleteById(req, res) {
         .status(config.status_code.FORBIDEN)
         .send({ message: "wrong user" });
     }
-    if (zoneDocument.adArray.length >= 0) {
+    console.log(zoneDocument.adArray);
+    if (zoneDocument.adArray.length > 0) {
       return res
         .status(config.status_code.FORBIDEN)
         .send({ message: "Can't delete zone with ads" });
@@ -303,8 +313,13 @@ async function updateById(req, res) {
       location,
       locationDesc,
       pricePerTimePeriod,
+      priceArray,
       formula,
     } = req.body;
+    if (!priceArray || !zoneDocument.priceArray) {
+      priceArray = [];
+      zoneDocument.priceArray = [];
+    }
     const isDiffPrice = zoneDocument.pricePerTimePeriod !== pricePerTimePeriod;
     const { lat, lng } = zoneDocument.location;
     const isDiffLocation = lat !== location.lat || lng !== location.lng;
@@ -324,6 +339,7 @@ async function updateById(req, res) {
       location,
       locationDesc,
       pricePerTimePeriod,
+      priceArray,
       formula,
     });
     zoneDocument = await zoneService.getByIdwithAdName(id);

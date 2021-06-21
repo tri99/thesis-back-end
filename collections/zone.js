@@ -49,6 +49,10 @@ const zoneSchema = new Schema({
     type: Number,
     required: true,
   },
+  priceArray: {
+    type: [{ value: Number, desc: String }],
+    require: true,
+  },
   userId: {
     type: Schema.Types.ObjectId,
     require: true,
