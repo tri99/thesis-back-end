@@ -22,7 +22,7 @@ function getFullInfor(findOption) {
       .populate({ path: "adSetId" })
       .populate({
         path: "zoneIds",
-        select: "name locationDesc location pricePerTimePeriod",
+        select: "name locationDesc location pricePerTimePeriod priceArray",
       })
       .exec((error, document) => {
         if (error) return reject(error);

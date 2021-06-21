@@ -106,6 +106,7 @@ async function signUp(req, res) {
         location: { lat: 0, lng: 0 },
         locationDesc: "Reserved general zone",
         pricePerTimePeriod: 0,
+        priceArray: [],
       });
       generalZoneId = generalZone._id;
     } else {

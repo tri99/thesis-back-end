@@ -416,10 +416,17 @@ async function insert(req, res) {
       timeStamp: req.body.timeStamp,
       snapshots: req.body.snapshots,
       timeEnd: req.body.timeEnd,
+      price: req.body.price,
     };
+    if (req.body.moneyCharge && req.body.runTime) {
+      infor["moneyCharge"] = req.body.moneyCharge;
+      infor["runTime"] = req.body.runTime;
+    }
     if (!Array.isArray(req.body.snapshots)) {
       infor["snapshots"] = [req.body.snapshots];
     }
+    console.log("==================AI+===============");
+    // console.log(infor);
     const image = req.file;
     let urlImageGlobal = null;
 
@@ -457,7 +464,7 @@ async function insert(req, res) {
     let adOffer = await adOfferService.getById(infor["adOfferId"]);
     const zoneDoc = await zoneService.getById(infor["zoneId"]);
     const videoDoc = await videoService.getById(infor["videoId"]);
-
+    console.log(videoDoc);
     let tempCharge = await tempVideoChargeService.findOneBy(
       {
         videoId: infor["videoId"],
@@ -476,22 +483,32 @@ async function insert(req, res) {
     }
     let tempBudget = adOffer["tempBudget"];
     let remainingBudget = adOffer["remainingBudget"];
-    let runTime = infor["duration"];
-    tempBudget += videoDoc["duration"] * zoneDoc["pricePerTimePeriod"];
-    if (infor["timeEnd"] < infor["timeStamp"]) {
-      runTime = infor["snapshots"].length * 30;
-      if (runTime > infor["duration"]) {
-        runTime = infor["duration"];
-      }
-      remainingBudget -=
-        Number.parseInt(runTime) * zoneDoc["pricePerTimePeriod"];
-      tempBudget -= Number.parseInt(runTime) * zoneDoc["pricePerTimePeriod"];
+    let runTime = infor["durationFull"];
+
+    // if (infor["timeEnd"] < infor["timeStamp"]) {
+    //   runTime = infor["snapshots"].length * 30;
+    //   if (runTime > infor["duration"]) {
+    //     runTime = infor["duration"];
+    //   }
+    //   remainingBudget -=
+    //     Number.parseInt(runTime) * zoneDoc["pricePerTimePeriod"];
+    //   tempBudget -= Number.parseInt(runTime) * zoneDoc["pricePerTimePeriod"];
+    // } else {
+    //   runTime = infor["timeEnd"] - infor["timeStamp"];
+    //   if (runTime > infor["duration"]) runTime = infor["duration"];
+    //   remainingBudget -=
+    //     Number.parseInt(runTime) * zoneDoc["pricePerTimePeriod"];
+    //   tempBudget -= Number.parseInt(runTime) * zoneDoc["pricePerTimePeriod"];
+    // }
+    let moneyCharge = runTime * zoneDoc["pricePerTimePeriod"];
+    if (infor["moneyCharge"] && infor["runTime"]) {
+      tempBudget += videoDoc["duration"] * infor["price"];
+      moneyCharge = infor["moneyCharge"];
+      remainingBudget -= moneyCharge;
+      tempBudget -= moneyCharge;
+      runTime = infor["runTime"];
     } else {
-      runTime = infor["timeEnd"] - infor["timeStamp"];
-      if (runTime > infor["duration"]) runTime = infor["duration"];
-      remainingBudget -=
-        Number.parseInt(runTime) * zoneDoc["pricePerTimePeriod"];
-      tempBudget -= Number.parseInt(runTime) * zoneDoc["pricePerTimePeriod"];
+      tempBudget += videoDoc["duration"] * zoneDoc["pricePerTimePeriod"];
     }
     let newReportVideoLogDoc = reportVideoLogService.createModel({
       adOfferId: infor["adOfferId"],
@@ -507,8 +524,9 @@ async function insert(req, res) {
       genders: totalGenderCounts,
       raw: infor,
       imagePath: urlImageGlobal,
-      moneyCharge: runTime * zoneDoc["pricePerTimePeriod"],
+      moneyCharge: moneyCharge,
     });
+    console.log(newReportVideoLogDoc);
     await reportVideoLogService.insert(newReportVideoLogDoc);
     await adOfferService.updateById(adOffer["_id"], {
       remainingBudget: remainingBudget,
@@ -519,7 +537,7 @@ async function insert(req, res) {
       adArray: { $in: [adOffer["_id"]] },
     });
     for (let i = 0; i < zones.length; i++) {
-      audio_module.get_audio_io().to(infor["zoneId"]).emit("update-budget", {
+      audio_module.get_audio_io().to(infor["zoneId"]).emit("update-zone", {
         zoneId: infor["zoneId"],
         adOfferId: adOffer["_id"],
         remainingBudget: adOffer["remainingBudget"],
