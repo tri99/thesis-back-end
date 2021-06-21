@@ -482,7 +482,7 @@ async function getAllTable(req, res) {
       { userId: req.userId, name: { $ne: "General" } },
       {
         select:
-          "_id name location locationDesc pricePerTimePeriod adArray deviceArray",
+          "_id name location locationDesc pricePerTimePeriod adArray deviceArray priceArray",
       }
     );
     const allZoneIds = allZones.map((zone) => zone._id);
