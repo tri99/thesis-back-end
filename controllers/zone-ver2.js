@@ -404,7 +404,7 @@ async function getDeviceTableByZoneId(req, res) {
     zone.deviceArray.forEach((device) => {
       if (!deviceWithDataIds.includes(device._id.toString())) {
         devices.push({
-          ...device,
+          ...device.toObject(),
           position: 0,
           volumeVideo: 50,
           isPause: true,
