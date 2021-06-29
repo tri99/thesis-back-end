@@ -11,16 +11,38 @@ async function convertZoneData(data) {
     let videos = await videoService.getManyByArrayIdFull(
       adOfferDoc[i]["contentId"]["mediaArray"]
     );
-    let Atags = [];
-    let Gtags = [];
+    let condition = [];
+    let AtagsX = [];
+    let GtagsX = [];
     for (let j = 0; j < videos.length; j++) {
-      Atags.push.apply(Atags, videos[j]["adSetId"]["ages"]["value"]);
-      Gtags.push.apply(Gtags, videos[j]["adSetId"]["genders"]["value"]);
+      let x = {};
+      let Atags = { strict: true, value: [] };
+      let Gtags = { strict: true, value: [] };
+      AtagsX.push.apply(AtagsX, videos[j]["adSetId"]["ages"]["value"]);
+      GtagsX.push.apply(GtagsX, videos[j]["adSetId"]["genders"]["value"]);
+      Atags["value"].push.apply(
+        Atags["value"],
+        videos[j]["adSetId"]["ages"]["value"]
+      );
+      Atags["strict"] = videos[j]["adSetId"]["ages"]["strict"];
+      Gtags["value"].push.apply(
+        Gtags["value"],
+        videos[j]["adSetId"]["genders"]["value"]
+      );
+      Gtags["strict"] = videos[j]["adSetId"]["genders"]["strict"];
+      x["daysOfWeek"] = adOfferDoc[i]["adSetId"]["daysOfWeek"];
+      x["hoursOfDay"] = adOfferDoc[i]["adSetId"]["hoursOfDay"];
+      x["ages"] = Atags;
+      x["genders"] = Gtags;
+      x["_id"] = videos[j]["_id"];
+      x["duration"] = videos[j]["duration"];
+      condition.push(x);
     }
-    Atags = [...new Set(Atags)];
-    Gtags = [...new Set(Gtags)];
-    adOfferDoc[i]["adSetId"]["ages"]["value"] = Atags;
-    adOfferDoc[i]["adSetId"]["genders"]["value"] = Gtags;
+    let AtagsV = [...new Set(AtagsX)];
+    let GtagsV = [...new Set(GtagsX)];
+    adOfferDoc[i]["adSetId"]["ages"]["value"] = AtagsV;
+    adOfferDoc[i]["adSetId"]["genders"]["value"] = GtagsV;
+    adOfferDoc[i]["adSetId"]["condition"] = condition;
     videoArray.push(adOfferDoc[i]["contentId"]["mediaArray"]);
     data["playlistArray"].push(adOfferDoc[i]["contentId"]);
   }
