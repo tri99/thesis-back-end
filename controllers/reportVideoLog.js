@@ -510,6 +510,7 @@ async function insert(req, res) {
     } else {
       tempBudget += videoDoc["duration"] * zoneDoc["pricePerTimePeriod"];
     }
+    console.log(runTime, typeof runTime);
     let newReportVideoLogDoc = reportVideoLogService.createModel({
       adOfferId: infor["adOfferId"],
       deviceId: infor["deviceId"],
@@ -518,7 +519,7 @@ async function insert(req, res) {
       videoId: infor["videoId"],
       zoneId: infor["zoneId"],
       timeStart: infor["timeStamp"],
-      runTime: runTime,
+      runTime: Number.parseFloat(runTime).toFixed(2),
       views: totalFaces,
       ages: totalAgeCounts,
       genders: totalGenderCounts,

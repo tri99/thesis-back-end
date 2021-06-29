@@ -43,22 +43,28 @@ async function convertZoneData(data) {
     adOfferDoc[i]["adSetId"]["ages"]["value"] = AtagsV;
     adOfferDoc[i]["adSetId"]["genders"]["value"] = GtagsV;
     adOfferDoc[i]["adSetId"]["condition"] = condition;
-    videoArray.push(adOfferDoc[i]["contentId"]["mediaArray"]);
+    videoArray.push.apply(videoArray, adOfferDoc[i]["contentId"]["mediaArray"]);
+    console.log("videoArray: ", videoArray);
     data["playlistArray"].push(adOfferDoc[i]["contentId"]);
   }
-
-  let videos = [...new Set(videoArray)];
-  let videoDoc = await videoService.getManyByArrayIdFull(videos[0]);
+  console.log("-======", videoArray);
+  // let videos = [...new Set(videoArray)];
+  let videos = videoArray.filter(function (elem, pos) {
+    return videoArray.indexOf(elem) == pos;
+  });
+  let videoDoc = await videoService.getManyByArrayIdFull(videos);
   videoDoc = JSON.stringify(videoDoc);
   videoDoc = JSON.parse(videoDoc);
   for (let i = 0; i < videoDoc.length; i++) {
     videoDoc[i]["point"] = 0;
     videoDoc[i]["played"] = false;
   }
+  // console.log("================", videos);
   data = JSON.stringify(data);
   data = JSON.parse(data);
   data["adArray"] = adOfferDoc;
   data["videoArray"] = videoDoc;
+  // console.log(data);
   return data;
 }
 

@@ -60,7 +60,7 @@ async function getInforVideo(req, res) {
 
 async function upload(req, res) {
   try {
-    const duration = Number.parseInt(req.body.duration);
+    const duration = Number.parseFloat(req.body.duration);
     const adset = JSON.parse(req.body.adset);
 
     const video = req.file;
