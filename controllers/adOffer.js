@@ -285,10 +285,8 @@ async function updateStatusById(req, res) {
 
 async function deviceUpdateStatusById(req, res) {
   try {
-    console.log("aloalo");
     const { id } = req.params;
     const { status } = req.body;
-    console.log(id, status);
     let timeStatus = new Date();
     let document = await adOfferService.getById(id);
 
@@ -300,7 +298,6 @@ async function deviceUpdateStatusById(req, res) {
     document = await adOfferService.getById(id);
     const isEmpty = document["status"] === "empty";
     if (isEmpty) {
-      console.log("ads in zone");
       for (let i = 0; i < document.zoneIds.length; i++) {
         audio_module
           .get_audio_io()
@@ -662,7 +659,6 @@ async function checkBudgetToRun(req, res) {
     } = req.body;
     let adOfferDoc = await adOfferService.getById(adOfferId);
     if (!adOfferDoc) {
-      console.log(1);
       return res
         .status(404)
         .send({ allow: false, message: "adOffer not found" });
@@ -670,7 +666,6 @@ async function checkBudgetToRun(req, res) {
     let tempBudget = adOfferDoc["tempBudget"];
     tempBudget -= duration * price;
     if (tempBudget <= 0) {
-      console.log(2);
       return res.status(403).send({ allow: false, message: "out of money" });
     }
 
@@ -685,7 +680,6 @@ async function checkBudgetToRun(req, res) {
     });
     await tempVideoChargeService.insert(tempChargeDoc);
     await adOfferService.updateById(adOfferId, { tempBudget: tempBudget });
-    console.log(3);
     return res.status(200).send({ allow: true, message: "you can run" });
   } catch (error) {
     console.log(error);

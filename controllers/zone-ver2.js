@@ -20,7 +20,7 @@ async function insert(req, res) {
       pricePerTimePeriod,
       priceArray,
     } = req.body;
-    console.log(req.body);
+    // console.log(req.body);
     if (name.toLowerCase() === "General") {
       return res
         .status(config.status_code.FORBIDEN)
@@ -69,7 +69,7 @@ async function deleteById(req, res) {
         .status(config.status_code.FORBIDEN)
         .send({ message: "wrong user" });
     }
-    console.log(zoneDocument.adArray);
+    // console.log(zoneDocument.adArray);
     if (zoneDocument.adArray.length > 0) {
       return res
         .status(config.status_code.FORBIDEN)

@@ -425,7 +425,7 @@ async function insert(req, res) {
     if (!Array.isArray(req.body.snapshots)) {
       infor["snapshots"] = [req.body.snapshots];
     }
-    console.log("==================AI+===============");
+    // console.log("==================AI+===============");
     // console.log(infor);
     const image = req.file;
     let urlImageGlobal = null;
@@ -464,7 +464,6 @@ async function insert(req, res) {
     let adOffer = await adOfferService.getById(infor["adOfferId"]);
     const zoneDoc = await zoneService.getById(infor["zoneId"]);
     const videoDoc = await videoService.getById(infor["videoId"]);
-    console.log(videoDoc);
     let tempCharge = await tempVideoChargeService.findOneBy(
       {
         videoId: infor["videoId"],
@@ -510,7 +509,6 @@ async function insert(req, res) {
     } else {
       tempBudget += videoDoc["duration"] * zoneDoc["pricePerTimePeriod"];
     }
-    console.log(runTime, typeof runTime);
     let newReportVideoLogDoc = reportVideoLogService.createModel({
       adOfferId: infor["adOfferId"],
       deviceId: infor["deviceId"],
@@ -527,7 +525,6 @@ async function insert(req, res) {
       imagePath: urlImageGlobal,
       moneyCharge: moneyCharge,
     });
-    console.log(newReportVideoLogDoc);
     await reportVideoLogService.insert(newReportVideoLogDoc);
     await adOfferService.updateById(adOffer["_id"], {
       remainingBudget: remainingBudget,
@@ -554,7 +551,7 @@ async function insert(req, res) {
       reportVideoLog: "success",
     });
   } catch (error) {
-    console.log("insert", error);
+    console.log(error);
     return res.status(config.status_code.SERVER_ERROR).send({ message: error });
   }
 }
@@ -565,7 +562,7 @@ function getSummary(matchCb) {
       const data = (await reportVideoLogService.getSummary(matchCb(req)))[0];
       return res.status(config.status_code.OK).send({ data: data || {} });
     } catch (error) {
-      console.log("insert", error);
+      console.log(error);
       return res
         .status(config.status_code.SERVER_ERROR)
         .send({ message: error });

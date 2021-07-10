@@ -44,10 +44,8 @@ async function convertZoneData(data) {
     adOfferDoc[i]["adSetId"]["genders"]["value"] = GtagsV;
     adOfferDoc[i]["adSetId"]["condition"] = condition;
     videoArray.push.apply(videoArray, adOfferDoc[i]["contentId"]["mediaArray"]);
-    console.log("videoArray: ", videoArray);
     data["playlistArray"].push(adOfferDoc[i]["contentId"]);
   }
-  console.log("-======", videoArray);
   // let videos = [...new Set(videoArray)];
   let videos = videoArray.filter(function (elem, pos) {
     return videoArray.indexOf(elem) == pos;
