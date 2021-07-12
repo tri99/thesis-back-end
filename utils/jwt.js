@@ -14,13 +14,10 @@ function signToken(_id) {
     jwt.sign(
       _id,
       config.jwtKey,
-      { algorithm: config.algorithm },
+      { algorithm: config.algorithm, expiresIn: "365d" },
       function (error, token) {
         if (error) return reject(error);
         return resolve(token);
-      },
-      {
-        expiresIn: "365d",
       }
     );
   });
