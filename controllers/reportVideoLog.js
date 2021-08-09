@@ -526,9 +526,12 @@ async function insert(req, res) {
       moneyCharge: moneyCharge,
     });
     await reportVideoLogService.insert(newReportVideoLogDoc);
+
     await adOfferService.updateById(adOffer["_id"], {
       remainingBudget: remainingBudget,
       tempBudget: tempBudget,
+      runCount:
+        adOffer["runCount"] !== undefined ? adOffer["runCount"] + 1 : 0 + 1,
     });
 
     let zones = await zoneService.findByPipeLine({

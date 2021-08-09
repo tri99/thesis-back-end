@@ -72,6 +72,7 @@ async function insert(req, res) {
       timeStatus: new Date().getTime(),
       deletedByAdManager: false,
       deletedByBdManager: false,
+      runCount: 0,
     });
     const newAd = await adOfferService.insert(newDocument);
 

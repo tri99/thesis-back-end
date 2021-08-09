@@ -43,6 +43,8 @@ async function convertZoneData(data) {
     adOfferDoc[i]["adSetId"]["ages"]["value"] = AtagsV;
     adOfferDoc[i]["adSetId"]["genders"]["value"] = GtagsV;
     adOfferDoc[i]["adSetId"]["condition"] = condition;
+    adOfferDoc["runCount"] =
+      adOfferDoc["runCount"] === undefined ? 0 : adOfferDoc["runCount"];
     videoArray.push.apply(videoArray, adOfferDoc[i]["contentId"]["mediaArray"]);
     data["playlistArray"].push(adOfferDoc[i]["contentId"]);
   }
