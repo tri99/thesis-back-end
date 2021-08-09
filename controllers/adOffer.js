@@ -123,12 +123,14 @@ function getAllTableFormat(type) {
       const tableData = await adOfferService.getTable(allAdIds);
       let result = [];
       for (const ad of allAds) {
-        const tableDataRow = tableData.find(
+        let tableDataRow = tableData.find(
           (tableAd) => ad._id.toString() === tableAd._id.toString()
         );
-        const adObject = ad.toObject();
+        let adObject = ad.toObject();
         if (tableDataRow) {
+          tableDataRow["runTime"] = tableDataRow["runTime"].toFixed(2);
           result.push({ ...tableDataRow, ...adObject });
+          // console.log(result);
         } else {
           result.push({
             views: 0,
