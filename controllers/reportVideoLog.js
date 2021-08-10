@@ -100,10 +100,14 @@ function getByGenerator(populate, queryCheckCb) {
         curAd.views += log["views"];
         curAd.runTime += log["runTime"];
         curAd.cost += log["moneyCharge"];
-        console.log("========= ", curAd.runTime);
-        console.log("toFixed ", Number.parseFloat(curAd.runTime).toFixed(2));
-        curAd.runTime = Number.parseFloat(curAd.runTime).toFixed(2);
-        curAd.cost = Number.parseFloat(curAd.cost).toFixed(2);
+        // console.log("========= ", curAd.runTime);
+        // console.log("toFixed ", Number.parseFloat(curAd.runTime).toFixed(2));
+        curAd.runTime = Number.parseFloat(
+          Number.parseFloat(curAd.runTime).toFixed(2)
+        );
+        curAd.cost = Number.parseFloat(
+          Number.parseFloat(curAd.cost).toFixed(2)
+        );
         if (isSameTotal(dateStart, dateLog, frequency)) {
           curAd.data[index] += log[value];
         } else {
