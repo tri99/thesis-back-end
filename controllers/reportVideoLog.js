@@ -93,13 +93,21 @@ function getByGenerator(populate, queryCheckCb) {
             index: 0,
             data: Array(noDataPoints).fill(0),
           });
-        const curAd = dataMap.get(eleName);
+        let curAd = dataMap.get(eleName);
         if (index > curAd.index) {
           curAd.index = index;
         }
         curAd.views += log["views"];
         curAd.runTime += log["runTime"];
         curAd.cost += log["moneyCharge"];
+        // console.log("========= ", curAd.runTime);
+        // console.log("toFixed ", Number.parseFloat(curAd.runTime).toFixed(2));
+        curAd.runTime = Number.parseFloat(
+          Number.parseFloat(curAd.runTime).toFixed(2)
+        );
+        curAd.cost = Number.parseFloat(
+          Number.parseFloat(curAd.cost).toFixed(2)
+        );
         if (isSameTotal(dateStart, dateLog, frequency)) {
           curAd.data[index] += log[value];
         } else {
@@ -268,7 +276,7 @@ async function getOverview(req, res) {
           runTime: 0,
           cost: 0,
         });
-      const curAd = dataMap.get(eleName);
+      let curAd = dataMap.get(eleName);
 
       curAd.views += log["views"];
       curAd.runTime += log["runTime"];
@@ -292,8 +300,16 @@ async function getOverview(req, res) {
         cost[index] += log["moneyCharge"];
       }
     });
-    const topAds = [];
+    let topAds = [];
     dataMap.forEach((data) => topAds.push(data));
+    totalRunTime = totalRunTime.toFixed(2);
+    totalCost = totalCost.toFixed(2);
+    // runTime = runTime.toFixed(2);
+    // cost = cost.toFixed(2);
+    for (let i = 0; i < runTime.length; i++) runTime[i] = runTime[i].toFixed(2);
+    for (let i = 0; i < cost.length; i++) cost[i] = cost[i].toFixed(2);
+    for (let i = 0; i < topAds.length; i++)
+      topAds[i]["runTime"] = topAds[i]["runTime"].toFixed(2);
     const data = {
       totalViews,
       totalRunTime,
@@ -526,9 +542,12 @@ async function insert(req, res) {
       moneyCharge: moneyCharge,
     });
     await reportVideoLogService.insert(newReportVideoLogDoc);
+
     await adOfferService.updateById(adOffer["_id"], {
       remainingBudget: remainingBudget,
       tempBudget: tempBudget,
+      runCount:
+        adOffer["runCount"] !== undefined ? adOffer["runCount"] + 1 : 0 + 1,
     });
 
     let zones = await zoneService.findByPipeLine({

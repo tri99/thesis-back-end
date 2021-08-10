@@ -79,6 +79,7 @@ async function getInforVideo(req, res) {
 async function control(req, res) {
   try {
     const { eventName, payload } = req.body;
+    console.log(eventName, payload);
     audio_module.get_audio_io().to(payload["zoneId"]).emit(eventName, payload);
 
     return res
@@ -93,6 +94,7 @@ async function control(req, res) {
 async function controlDevice(req, res) {
   try {
     const { eventName, payload } = req.body;
+    console.log(eventName, payload);
     audio_module
       .get_audio_io()
       .to(payload["deviceId"])

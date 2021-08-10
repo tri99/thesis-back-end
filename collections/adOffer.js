@@ -58,6 +58,9 @@ const adOfferSchema = new schema({
   tempBudget: {
     type: Number,
   },
+  runCount: {
+    type: Number,
+  },
 });
 
 const adOffer = mongoose.model("adoffer", adOfferSchema);
